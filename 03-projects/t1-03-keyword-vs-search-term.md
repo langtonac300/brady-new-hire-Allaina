@@ -43,6 +43,19 @@ reading about match types three times.
 
 ---
 
+## What to look for
+
+The interesting rows are the surprises, not the top spenders. Hunt for these:
+
+| Look for | Why it's the row that teaches |
+|---|---|
+| A **broad-match** keyword pulling a term you'd never have bid on | This is where money leaks — and the *mechanism* (how Google got there) is the lesson |
+| An **exact-match** keyword pulling something that isn't the exact phrase | Close variants: "exact" is less exact than the name promises |
+| A **phrase-match** term whose meaning drifted | Word order and intent can shift what a keyword catches |
+| Terms with **one click and real cost** | The tail hides the surprises; a page of top spenders is the boring part |
+
+---
+
 ## ⚠️ This is not a Keep/Kill exercise
 
 You're not deciding what to block. That's the daily search-terms review and T2-1 later in
@@ -54,14 +67,14 @@ urge to start building a negatives list — you'll do that properly later, with 
 
 ---
 
-## What good looks like
+## You're done when
 
-- You can point at a specific broad-match keyword pulling in something you'd never have
-  predicted, and explain the **mechanism** — how Google got from that keyword to that
-  search.
-- "Broad match is loose" is not the answer. *Why* it went where it went is.
-- Your 30 rows include at least a few one-click terms. If every row is a top spender, you
-  sampled the easy part.
+- [ ] 30 rows, all four columns, **sampled across the tail** — not the top 30 by spend
+- [ ] At least a few **one-click** terms in the set
+- [ ] The three closing lines: most surprising match, the mechanism behind it, whether you'd have predicted it
+- [ ] For your most surprising row you can explain the **mechanism** — not just "broad match is loose"
+- [ ] You did **not** start a negatives list (that's T2-1, and it asks a different question)
+- [ ] Standard wrap — prediction first, written up the same day
 
-**Common first-time trap:** assuming an exact-match keyword can only ever pull the exact
-phrase. Look for a close variant in your 30 and you'll see why that assumption costs money.
+**Common first-time trap:** assuming an exact-match keyword can only pull the exact phrase.
+Find a close variant in your 30 and you'll see why that assumption costs money.
