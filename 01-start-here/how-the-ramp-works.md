@@ -72,6 +72,9 @@ a shortfall** — full independence there is more like a six-month thing.
 | Any time | Ask questions in Google Chat |
 | End of day | Three lines in chat — **first month only.** See below |
 
+The recurring meetings that shape the week — Meta Monday, the Tuesday L10 huddle, the Search
+Deep Dive and your 1:1 — are in [`your-week.md`](./your-week.md).
+
 ### The three lines, at the end of each day
 
 For your first month, post three short lines in chat before you log off:

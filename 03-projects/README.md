@@ -130,3 +130,14 @@ Do them in order — M-1 finds what M-2, M-3 and M-4 fix.
 
 Tiers 3 and 4, the tools thread and the AI thread aren't written up yet — the table further
 up this page is the honest preview of what's in them. Ask if you want a look ahead.
+
+---
+
+### And after all of it
+
+[**after-the-ramp.md**](./after-the-ramp.md) — what year one looks like once the ladder ends:
+how work reaches you after day 90 (quarterly rocks and annual goals rather than numbered
+projects), the team's four strategic shifts, the things the ramp deliberately leaves
+unfinished, and the directions that are genuinely open.
+
+Nothing in it is assigned. Read it when you're curious, not on day one.

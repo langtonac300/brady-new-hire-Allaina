@@ -93,6 +93,10 @@ these — flag them to Alex instead:
   thread ahead of that without checking with Alex.
   - **T2-7 has no file of its own** — it's the same project as M-1, and `m-01` and the
     `03-projects/README.md` index both say so. Don't create `t2-07-*.md`.
+  - **`03-projects/after-the-ramp.md` is not a tier.** It's a horizon doc about year one —
+    rocks, goals, the four shifts, and directions that are open. Alex asked for it
+    explicitly (2026-07-31). It describes directions, deliberately not briefs, so the
+    tier-at-a-time rule above is unchanged. Don't turn it into assigned projects.
 - A guided Sheets workbook for hands-on practice doesn't exist yet.
 - The five `02-learning/` files were adapted from a separate manager-side source in
   2026-07; if that source has moved on since, this repo may lag it slightly. Cross-check
