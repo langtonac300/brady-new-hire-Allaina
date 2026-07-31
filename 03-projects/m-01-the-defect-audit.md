@@ -77,10 +77,11 @@ before you've seen the whole picture means you'll fix them in the wrong order.
 
 ---
 
-## What good looks like
+## You're done when
 
-- Every row says three things: **what's wrong, what it costs, how you'd fix it.**
-- The ranking is defensible. You can explain why row 1 beats row 2 to someone who disagrees.
-- **You found something that isn't on the known list above.** That's the best possible
-  outcome of this project, and on a half-built account it's likely.
-- You noted anything you *suspected* was wrong but couldn't confirm, marked as unconfirmed.
+- [ ] Every defect row says three things: **what's wrong, what it costs, how you'd fix it**
+- [ ] The list is **ranked by cost** (money or trust in a number), and the ranking is defensible to someone who disagrees
+- [ ] You found **at least one thing not on the known list** — likely, on a half-built account
+- [ ] Anything you suspected but couldn't confirm is marked **unconfirmed**
+- [ ] You **wrote, didn't fix** — the fixes are M-2 and M-3, in order
+- [ ] Standard wrap — prediction first, written up the same day
