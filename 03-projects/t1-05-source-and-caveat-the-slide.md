@@ -43,6 +43,20 @@ one.
 
 ---
 
+## What to look for
+
+Some numbers are far likelier to be mis-sourced than others. Give these the hardest look:
+
+| Highest-risk number on a slide | Why |
+|---|---|
+| A **revenue or ROAS** figure | First-touch (the team's model) or platform Conversions? They differ by design |
+| A **year-over-year** comparison on a conversion metric | Brady US/CA carry known tag defects — the comp may straddle a fix |
+| A **phone-call value** | A planning estimate, not measured revenue |
+| A **non-brand efficiency** number | Only meaningful on the IP view, not plain first-touch |
+| Anything in an **axis or a footnote** | The unsourced numbers hide where nobody looks |
+
+---
+
 ## ⚠️ "I can't source this one" is the right answer
 
 Do not guess, and do not reason your way to a plausible source. A confidently-wrong
@@ -56,15 +70,11 @@ didn't.
 
 ---
 
-## What good looks like
+## You're done when
 
-- Every number has all four columns attempted, and **at least one honest unknown**. If you
-  sourced all of them on your first try, you were guessing on some.
-- You can state the first-touch vs. platform-conversions distinction out loud, without
-  opening the cheat sheet.
-- You spotted at least one number where the model matters — where quoting it under the
-  other model would tell a materially different story.
-
-**Keep this one.** Come back to it in the last month, when you're the person writing the
-Deep Dive section rather than annotating it, and see how much of your own work you could
-source.
+- [ ] Every number — boxes, axes, footnotes — has all four columns attempted
+- [ ] **At least one honest "I can't source this"** row (sourced them all first try? you guessed on some)
+- [ ] You can state first-touch vs. platform-conversions out loud, without the cheat sheet
+- [ ] You flagged at least one number where the **model** changes the story
+- [ ] You **kept the file** — you'll re-source your own work in month three and see how much you can
+- [ ] Standard wrap — prediction first, written up the same day
