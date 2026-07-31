@@ -63,8 +63,8 @@ The briefs deliberately don't repeat any of that. They cover the *middle* — wh
 | 11–13 | **Week-long capstones** | End-to-end pieces of work you own and present |
 
 Alongside those, two threads run continuously: a **tools thread** (the dashboards, Power BI,
-BigQuery, the weekly huddle) and an **AI thread** (using LLMs for actual workflows rather
-than as a question box).
+BigQuery, the weekly huddle) and the [**AI thread**](./the-ai-thread.md) (using AI for actual
+workflows rather than as a question box) — the AI thread is written up and starts in week one.
 
 ---
 
@@ -171,11 +171,21 @@ Do them in order — M-1 finds what M-2 and M-3 fix.
 
 ---
 
+### The AI thread — runs alongside the whole ladder
+
+[**the-ai-thread.md**](./the-ai-thread.md) — not a tier, a habit: using AI (Gemini, the
+sanctioned tool) for real paid-search workflows instead of as a question box, with the verify
+step that keeps it safe. It starts in week one and threads through the projects above —
+bucketing search terms, drafting ad copy, un-sticking a query, structuring capture notes. Read
+it early, then come back each time a project names a move it covers.
+
+---
+
 ### Still to come
 
-Tier 4 (the week-long capstones), the tools thread and the AI thread aren't written up yet —
-the table further up this page is the honest preview of what's in them. Ask if you want a look
-ahead.
+Tier 4 (the week-long capstones) and the tools thread aren't written up yet — the table further
+up this page is the honest preview of what's in them. The [AI thread](./the-ai-thread.md) above
+is written up and runs from week one. Ask if you want a look ahead at the rest.
 
 ---
 
