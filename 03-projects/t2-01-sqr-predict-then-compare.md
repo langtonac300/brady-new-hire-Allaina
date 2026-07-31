@@ -14,6 +14,9 @@
 [`ppc-fundamentals.md`](../02-learning/ppc-fundamentals.md). You've already done
 [T1-3](./t1-03-keyword-vs-search-term.md), which is the mechanical half of this.
 
+**Also read [`who-else-is-searching.md`](../02-learning/who-else-is-searching.md)** — the
+groups the junk rows fall into, and the two kinds that look like junk and aren't.
+
 ---
 
 ## The point

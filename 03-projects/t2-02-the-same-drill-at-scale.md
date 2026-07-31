@@ -14,6 +14,10 @@
 [`seton-emedco-primer.md`](../02-learning/seton-emedco-primer.md). Ask Alex for the current
 note on where the Seton/EMEDCO negatives loop has thin coverage — it isn't in this repo.
 
+**Re-read the name-collisions section of
+[`who-else-is-searching.md`](../02-learning/who-else-is-searching.md) before you start.**
+It sets you an exercise on this exact account group, and this is the project to do it in.
+
 ---
 
 ## The point
