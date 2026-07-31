@@ -84,13 +84,14 @@ than burying it in a spreadsheet.
 
 ---
 
-## What good looks like
+## You're done when
 
-- You read the intended scheme before looking at live rows, and you can say so.
-- Your write-up leads with **scale and pattern**, not a raw dump. Someone should learn the
-  shape of the problem in thirty seconds.
-- You separated the three buckets, and you said which one you think matters most and why.
-- You resisted fixing anything.
-- If the reference and reality disagree in a way that suggests the *reference* is out of
-  date rather than the feed, you said that too. That's a real possibility and it's worth
-  more than silently trusting the document.
+- [ ] You read the **intended scheme before** looking at live rows (and can say so)
+- [ ] Findings in the QA table with the **mismatch type** per row
+- [ ] Sorted into **blank / wrong / inconsistent**, with a count and a share per bucket
+- [ ] Write-up leads with **scale and pattern** — the shape learnable in 30 seconds — full list attached as backup
+- [ ] You said which bucket matters most and why (**inconsistent = a process with no rule**)
+- [ ] You **flagged, didn't fix**, and routed to Alex — including if the *reference* looks out of date rather than the feed
+- [ ] Standard wrap
+
+*(Your "what to look for" is the **blank / wrong / inconsistent** table in step 4.)*
