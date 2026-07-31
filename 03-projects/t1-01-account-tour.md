@@ -63,6 +63,24 @@ comparison is where the actual lesson lands.
 
 ---
 
+## What to look for while you tour
+
+You're not fixing anything — just noticing. **Note it and move on;** several of these get
+their own project later.
+
+| Notice | Why it's worth a note |
+|---|---|
+| Which campaign **types** are present — and which aren't | A lead-gen account that's all Search is normal; a retail one with **no Shopping or PMax** is worth a question |
+| What each campaign **optimizes to** — a hard action (form, call, purchase) or a soft one (a click, a pageview) | A campaign chasing a **soft goal** is aimed at the wrong thing even if it's well built |
+| Whether **brand and non-brand are actually separated** | Mixed into one campaign, you can't read them apart or steer them apart |
+| Anything **capped** (limited by budget) or **not spending at all** | Both are messages — demand you can't serve, or money going nowhere |
+| Whether the **naming** tells you what a campaign is | If you have to open each one to know what it does, that's a finding about the *account*, not about you |
+
+⚠️ These are things to **note, not chase.** *"Campaign X optimizes to a pageview — is that
+intended?"* is a perfect tour finding. Fixing it is a different project.
+
+---
+
 ## ⚠️ The column people skip
 
 The third one — *what it's optimizing to*. PDC is **already fully on smart bidding**, so
@@ -74,12 +92,16 @@ making sure you noticed there's a column there.
 
 ---
 
-## What good looks like
+## You're done when
 
-- Someone who has never opened the account could read your map and know what's in it.
-- Every row has all four columns filled — including the third one.
-- You asked at least two questions during the hour. This one is paired precisely so that
-  the things you're unsure about get corrected now, before they set.
+- [ ] Your top-ten-by-cost map has **all four columns filled**, including *what it's optimizing to*
+- [ ] Every campaign is marked **brand / non-brand with the evidence** you used — not a guess
+- [ ] Two closing sentences: what the account is trying to do, and how you'd know if it stopped
+- [ ] Someone who's never opened the account could read your map and know what's in it
+- [ ] You asked **at least two questions** during the paired hour — that's what the hour is for
+- [ ] Anything you noticed but didn't chase is parked in `questions/` or flagged to Alex
+- [ ] Plus the standard wrap — prediction written first, written up the same day (see
+      [`how-to-run-a-project.md`](../02-learning/how-to-run-a-project.md))
 
 **If it runs long:** stop at an hour and say where you got to. A tour that took three hours
 was scoped wrong, and that's useful feedback rather than a failure.
