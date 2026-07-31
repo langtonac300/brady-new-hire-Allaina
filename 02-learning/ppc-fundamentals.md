@@ -167,7 +167,9 @@ Conversions column as "our revenue," you'll be wrong and it'll show.
   conversion volume, anomalies.
 - **Monthly reporting** — pull your accounts' numbers and explain what changed and *why*.
 - **A/B experiments** — every test gets a hypothesis, a fair split, an honest statistical
-  read, and a logged learning.
+  read, and a logged learning. ⚠️ A *fair split* means a real control running at the same
+  time — before-and-after is not a test. See
+  [`running-a-real-test.md`](./running-a-real-test.md).
 
 ---
 

@@ -129,7 +129,8 @@ Three things that keep IDS honest:
 - **Two-person topics get parked to a 1:1.** A thing that only concerns you and Alex should
   not spend four people's hour. The app parks it to that 1:1 for you.
 - **If the answer is "we should test that,"** it goes to the Experiment Hub's ideas backlog,
-  which is where tests actually live.
+  which is where tests actually live. See
+  [`running-a-real-test.md`](./running-a-real-test.md).
 
 **You get three votes from your first meeting.** Not after you've earned them. If you don't
 yet know what matters most, vote for the thing you understood least — that's genuinely useful

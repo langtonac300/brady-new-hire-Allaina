@@ -24,6 +24,7 @@ Reference you'll come back to.
 | `what-a-deliverable-looks-like.md` | A finished project write-up, annotated — plus the weak version of the same thing for contrast | Day 5, before you write up T1-1 |
 | `who-else-is-searching.md` | The groups that bad search terms fall into — and the ones that look bad and aren't | Week 4, before your first search-terms round |
 | `before-it-ships.md` | The checklist to run on your own work before you post a change for review | Week 4 onward — every time you change something |
+| `running-a-real-test.md` | Control vs treatment, the three test modes and what they're worth, and the rules that void a result | Before you propose your first experiment (Phase 2) |
 
 ---
 

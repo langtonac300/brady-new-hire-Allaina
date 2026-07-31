@@ -111,9 +111,12 @@ account that doesn't have it is one of the highest-leverage things a second-year
 downstream when the labels are wrong or missing. Shift 4, and it connects paid search to a
 lot of other teams.
 
-**Experiments as a program.** Running your first test is a ramp project. Owning a testing
+**Experiments as a program.** Running your first test is a ramp project — see
+[`running-a-real-test.md`](../02-learning/running-a-real-test.md). Owning a testing
 roadmap — a backlog, a prioritization, a rhythm of reading results out and killing what
-lost — is a year-one thing.
+lost — is a year-one thing. So is **incrementality**: proving the spend caused the sales at
+all, usually with a geo holdout. That's Shift 2, and it's the deep end of everything in that
+file.
 
 ---
 
