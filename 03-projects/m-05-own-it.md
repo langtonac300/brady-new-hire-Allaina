@@ -9,7 +9,7 @@
 | **Deliverable** | A standing weekly line you own → a running note in `04-my-work/` |
 | **Builds toward** | [E · Judgment](../05-self-assessment/baseline.md#e--judgment) |
 
-**Do [M-1](./m-01-the-defect-audit.md) through [M-4](./m-04-diagnose-the-clarity-gap.md)
+**Do [M-1](./m-01-the-defect-audit.md) through [M-3](./m-03-attach-and-build-the-negatives.md)
 first.** By then you'll know this account better than anyone except Alex.
 
 ---

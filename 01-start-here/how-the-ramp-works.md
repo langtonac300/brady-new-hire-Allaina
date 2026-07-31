@@ -23,6 +23,14 @@ reading, watching, and sitting in on meetings. **You won't make live changes**, 
 by design — the capacity to break something should arrive after the knowledge to know
 you're breaking it.
 
+> **Worth being straight with you about this:** your account access is **standard from day
+> one, not read-only.** Technically nothing stops you changing something in week two.
+>
+> The read-only phase is a rule, not a lock — and that's deliberate. Being trusted with the
+> keys on day one is the point. What it means in practice is that when a brief says *"do not
+> change this,"* that sentence is the entire safeguard, so it's worth reading those lines
+> properly rather than skimming past them.
+
 **What "done" looks like:** you can open one of your accounts and talk through what it's
 doing — campaign types, bidding, what it's optimizing for — and you can correctly say where
 any given number came from.

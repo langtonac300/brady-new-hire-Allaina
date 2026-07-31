@@ -55,8 +55,8 @@ name. Reading is free; enabling is not.
 
 - Three differences, each with a **reason**. "It's bigger" is an observation, not a reason.
 - One of your reasons should account for most of that gap in step 3. You'll get there
-  yourself if you sort the non-spending campaigns by when they were created and look at how
-  far back they go.
+  yourself if you add the **start date** column, sort the non-spending campaigns by it, and
+  look at how far back they go.
 - You can say what a newer account would have to do differently to avoid ending up the same
   way — and whether that's even possible.
 

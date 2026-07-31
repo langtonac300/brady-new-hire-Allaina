@@ -10,7 +10,7 @@
 | **Builds toward** | [A · Foundational paid-search skills](../05-self-assessment/baseline.md#a--foundational-paid-search-skills) · [E · Judgment](../05-self-assessment/baseline.md#e--judgment) |
 
 > **This is the same project as T2-7 in the Tier 2 ladder.** It's listed under Mecco because
-> it's the start of an arc rather than a one-off — M-2, M-3 and M-4 are the fixes for what
+> it's the start of an arc rather than a one-off — M-2 and M-3 are the fixes for what
 > you find here.
 
 ---
@@ -36,13 +36,12 @@ screen before you write anything down.
 
 Go through the account and write down everything that's wrong. **Rank the list by cost.**
 
-Three things are already known, so start there and then keep going:
+Two things are already known, so start there and then keep going:
 
 | Known defect | Why it matters |
 |---|---|
 | Conversion actions carry **$1 placeholder values** | Every ROAS and value number on the account is meaningless. Fixed in [M-2](./m-02-fix-the-conversion-values.md) |
 | A shared negative list **exists but isn't attached** to anything | It's doing nothing at all. Fixed in [M-3](./m-03-attach-and-build-the-negatives.md) |
-| The marking ad groups' custom URL parameters **don't pass through to Clarity** properly | Behavioural data on those visits is unusable. Diagnosed in [M-4](./m-04-diagnose-the-clarity-gap.md) |
 
 **Then look for what isn't on that list.** Suggestions for where to point:
 

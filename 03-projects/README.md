@@ -135,10 +135,9 @@ time to go without having been trusted with anything.
 | [M-1](./m-01-the-defect-audit.md) | **The defect audit** | Half a day | A defect list, ranked by cost |
 | [M-2](./m-02-fix-the-conversion-values.md) | **Fix the $1 conversion values** | Half a day | A value model — **and your first live change** |
 | [M-3](./m-03-attach-and-build-the-negatives.md) | **Attach and build the negatives** | Half a day | The list attached + a first build |
-| [M-4](./m-04-diagnose-the-clarity-gap.md) | **Diagnose the Clarity gap** | 1–2 days | A trace, routed to Alex |
 | [M-5](./m-05-own-it.md) | **Own it** | Ongoing from ~day 45 | A standing weekly line that's yours |
 
-Do them in order — M-1 finds what M-2, M-3 and M-4 fix.
+Do them in order — M-1 finds what M-2 and M-3 fix.
 
 ⚠️ **MECCO ≠ EMEDCO.** Different account, different account group, very easy to typo.
 
