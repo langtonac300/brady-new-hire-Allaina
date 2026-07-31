@@ -47,6 +47,17 @@ machinery that keeps the two apart**, which is not obvious and is easy to break.
 
 ---
 
+## What to look for
+
+| Look for | Why it matters |
+|---|---|
+| Campaigns that **don't fit the naming convention** | They're the third pile — its share of spend is often the most interesting number, and forcing it into a bucket hides the real answer |
+| Shared "negative" lists whose terms are **things Seton actually sells** | That's a **routing** list — pushing traffic between campaigns — not hygiene. Cleaning it up would redirect traffic silently |
+| Shared lists full of **things nobody would ever pay for** | That's genuine hygiene |
+| Brand and non-brand campaigns that could **bid on the same searches** | If nothing separates them, they compete with each other in the same auction |
+
+---
+
 ## ⚠️ Read the list before you decide what it's for
 
 You'll find shared lists labeled as negative keywords. **On this account group, roughly
@@ -63,11 +74,11 @@ This distinction matters far beyond this project: treating a routing list as jun
 
 ---
 
-## What good looks like
+## You're done when
 
-- Both numbers, the ratio, and the window you measured over.
-- You can name **which lists** do the separating and describe the mechanism in a sentence a
-  non-marketer would follow.
-- Your answer to step 4 is about **incrementality** — what the spend actually bought — not
-  about brand traffic being cheaper. Cheaper is a symptom.
-- Bonus: you noticed at least one list that turned out to be routing rather than hygiene.
+- [ ] Both numbers, the ratio, and the window you measured over
+- [ ] The **third pile** reported as a share of spend — not forced into brand or non-brand
+- [ ] You named **which lists** do the separating, mechanism described in one plain sentence
+- [ ] Your step-4 answer is about **incrementality** — what the spend bought — not "brand is cheaper" (cheaper is a symptom)
+- [ ] Bonus: you spotted at least one list that's routing, not hygiene
+- [ ] Standard wrap — prediction first, written up the same day
