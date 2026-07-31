@@ -82,13 +82,16 @@ project where being wrong has consequences outside the account.
 
 ---
 
-## What good looks like
+## You're done when
 
-- You judged asset *distinctness* yourself instead of reporting Google's strength rating as
-  the finding.
-- For every pin, you can say whether it's deliberate or inherited — or that you asked.
-- Your five rewrites are within character limits, and you counted rather than estimated.
-- Every claim in your rewrites is one you can source.
-- You noticed at least one pair of headlines that would read badly **together**. That's the
-  RSA-specific failure mode, and spotting it means you've understood the format rather than
-  just proofreading it.
+- [ ] You judged asset **distinctness** yourself — not just reported Google's strength rating
+- [ ] Every **pin** classified deliberate vs inherited (or you asked)
+- [ ] Brand check done: **AP style, no Oxford comma, no emoji, no slang**
+- [ ] Five rewrites of genuinely-weak headlines, **≤30 chars (counted, not estimated)**, each with what was wrong and what yours does better
+- [ ] Every claim in your rewrites is one you can **source** — nothing invented
+- [ ] At least one pair of headlines that would read badly **together** flagged (the RSA-specific failure)
+- [ ] Standard wrap
+
+> **Rewrite, good vs weak:** 🟢 a vague headline sharpened to a specific, on-brand benefit that
+> fits 30 characters. 🔴 a sharper line that runs *32 characters* (won't serve), or asserts a
+> certification we don't hold. Better-but-too-long and better-but-unverifiable both fail.
