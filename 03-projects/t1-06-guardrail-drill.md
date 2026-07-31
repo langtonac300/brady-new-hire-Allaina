@@ -48,6 +48,19 @@ Ten reps in an hour is enough to make the shape stick.
 
 ---
 
+## What to look for
+
+The four ways a guardrail call goes wrong. Spot them before you commit to a verdict:
+
+| Trap | What it looks like |
+|---|---|
+| Wrong **view** on non-brand | Non-brand's ceiling is only meaningful on the **IP view** — read it on first-touch and the verdict flips |
+| Wrong **ceiling** | Comparing Seton/EMEDCO against Brady's tighter ceiling — different groups, different targets, never the same number |
+| A **bad input** | A figure that doesn't fit its neighbours or looks attached to the wrong account — perfect arithmetic on a swapped number is still wrong |
+| Room read as a **buffer** | Space under the ceiling is unspent opportunity — the instinct here is push, not cut |
+
+---
+
 ## ⚠️ Step 4 is not padding
 
 Brady's budget and spend sheets have, at least once, had **two accounts' figures
@@ -74,10 +87,10 @@ wants accounts managed, and it's hard to unlearn once it sets.
 
 ---
 
-## What good looks like
+## You're done when
 
-- Ten calls, each showing the number you used and the guardrail you compared it to.
-- For each one, you say **which view** it needs — and you flagged the non-brand rows as
-  needing IP rather than first-touch.
-- You raised at least one "that looks odd to me" — or you can explain why you're confident
-  nothing was.
+- [ ] Ten calls, each showing the number used and the guardrail compared against
+- [ ] Each call names **which attribution view** it needs — non-brand rows flagged as IP, not first-touch
+- [ ] You got the current guardrails **from Alex, not this repo**, and noted what and when
+- [ ] At least one "that input looks odd" — or a confident reason nothing was
+- [ ] Standard wrap — prediction first, written up the same day
