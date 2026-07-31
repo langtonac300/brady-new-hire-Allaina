@@ -81,6 +81,32 @@ close to invisible afterward — traffic simply stops arriving, and nothing in t
 announces why. **Default to phrase or exact for anything ambiguous.** Reserve broad
 negatives for words that could not possibly appear in a good search.
 
+## ⚠️ Go back and look at it the next day
+
+This brief warns you that over-blocking is close to invisible — traffic stops arriving and
+nothing announces why. **So don't rely on noticing. Go and check.**
+
+The day after you apply it:
+
+| Check | What you're looking for |
+|---|---|
+| The list is attached to what you think it is | Open the campaigns, not the list. Attachment is the step that silently doesn't happen |
+| Impressions and clicks on the affected campaigns | A dip roughly the size you predicted is the change working. A dip much bigger than you predicted is a broad negative catching more than you meant |
+| The search terms report | Are the terms you blocked actually gone — and is anything *good* gone with them? |
+
+If something looks wrong, **say so before you investigate.** Flagging early costs nothing;
+a week of quietly missing traffic costs real money and is much harder to explain.
+
+## ⚠️ If you've never built a shared list before, ask first
+
+This brief is about the judgment — what belongs where, and which match type. It deliberately
+doesn't cover the clicks: creating a shared list, attaching it to the right campaigns, and
+choosing the level.
+
+**Those mechanics are where first-time accidents actually happen**, so have Alex walk you
+through them once before you apply anything. Five minutes, and it isn't a gap in your
+knowledge — it's the part nobody can learn from a document.
+
 ## ⚠️ Write down what you changed, when
 
 You're about to be the reason a number moves. In two weeks someone will ask why Wristbands

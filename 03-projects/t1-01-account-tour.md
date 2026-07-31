@@ -9,8 +9,11 @@
 | **Deliverable** | A one-page structure map → `04-my-work/projects/` |
 | **Builds toward** | [A · Foundational paid-search skills](../05-self-assessment/baseline.md#a--foundational-paid-search-skills) |
 
-**Read first:** [`pdc-primer.md`](../02-learning/pdc-primer.md) and the structure section of
-[`cheat-sheet.md`](../02-learning/cheat-sheet.md).
+**Read first:** the structure section of
+[`cheat-sheet.md`](../02-learning/cheat-sheet.md), and **skim the opening of**
+[`pdc-primer.md`](../02-learning/pdc-primer.md) — just enough to know what the accounts are
+called. You read the primer properly in weeks 2–3, after this tour, not before it. Touring
+the account first is deliberate: it gives the primer something to attach to.
 
 **This is your first write-up, so look at
 [`what-a-deliverable-looks-like.md`](../02-learning/what-a-deliverable-looks-like.md)** — it
@@ -32,11 +35,19 @@ comparison is where the actual lesson lands.
 
 ## What to do
 
+0. **Before you open anything, write down what you expect to find.** Three lines. How many
+   campaigns, what types, whether brand is a big or small share. **"I have no idea" is a
+   fine answer** — it makes the gap visible afterwards, which is the point. See
+   [`how-to-run-a-project.md`](../02-learning/how-to-run-a-project.md).
 1. **Open PDC Healthcare.** It's in the **Brady Global MCC** — not the one called
    "Brady US - MCC (Seton/Emed)", which doesn't contain Brady US either. That naming trap
    is in the [cheat sheet](../02-learning/cheat-sheet.md); it catches everyone once.
-2. **List every campaign that's actually spending.** Filter to the last 30 days and sort by
+2. **List the campaigns that are actually spending.** Filter to the last 30 days and sort by
    cost. Ignore the paused archaeology for now.
+
+   **Cap it at the top ten by cost.** If there are fewer, do all of them. If there are
+   forty, the top ten will be most of the spend and the rest is a long tail you can come
+   back to — trying to do all forty is how this becomes a three-hour project.
 3. **For each one, write down four things:**
 
    | Column | What goes in it |

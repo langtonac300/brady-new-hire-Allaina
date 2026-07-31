@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Time box** | Half a day |
+| **Time box** | Half a day of your time — but **spread across two or three days**, see below |
 | **Account** | PDC Healthcare |
 | **Safety** | Read-only — your calls stay on paper this round |
 | **Paired or solo** | Solo first, then compared with Alex |
@@ -42,8 +42,10 @@ debatable — and those eight are the whole lesson.
 
 1. Pull **50 search terms** from PDC Healthcare. Use a recent window — the last seven days
    is fine. As in T1-3, don't take the top 50 by spend; mix in the tail.
-2. **Hide the cost and conversion columns before you start.** Copy the terms into a fresh
-   sheet with nothing but the term itself if that's what it takes.
+2. **Now hide the cost and conversion columns.** Yes — you needed to see cost in step 1 to
+   sample properly, and you must not see it in step 3. So sample first, then **copy the
+   terms alone into a fresh sheet** and work from that. Do it in that order and the problem
+   disappears.
 3. Call every row **Keep** or **Kill**, with a one-line reason:
 
    | Search term | Keep / Kill | Why (one line) |
@@ -57,6 +59,19 @@ debatable — and those eight are the whole lesson.
    conversation — what rule you'd apply next time.
 
 ---
+
+## ⚠️ This one doesn't finish in a single sitting
+
+**Don't block half a day and expect to be done.** Steps 1–4 are about ninety minutes of your
+time. Then it stops, because step 5 is Alex making his own fifty calls, and step 6 needs you
+both in a room.
+
+So: do your half, send it, and **pick up something else while you wait.** Chase it if it goes
+quiet more than a couple of days — a comparison against calls made a fortnight later isn't
+the same exercise.
+
+If his fifty aren't going to happen in a reasonable window, **say so and do twenty-five
+instead.** Half a comparison is worth far more than a delayed whole one.
 
 ## ⚠️ Don't look at cost until after your calls are locked
 
