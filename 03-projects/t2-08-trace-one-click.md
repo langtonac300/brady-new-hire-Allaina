@@ -95,11 +95,13 @@ preview tools and tag-assistant modes that don't involve a real auction.
 
 ---
 
-## What good looks like
+## You're done when
 
-- Your diagram covers **both** accounts and makes the divergence obvious at a glance.
-- You can explain, in one sentence each, what every parameter in the PDC URL is for. If one
-  is a mystery, you said so rather than skipping it — an unexplained parameter is a finding.
-- Your break-point list includes at least two failures that would be **invisible** for weeks.
-- The same click can be a conversion in one reporting model and not in another — you already
-  knew that. Now you can point at **where** in the chain the divergence happens.
+- [ ] One diagram covering **both** accounts, divergence obvious at a glance
+- [ ] Every parameter in the PDC URL explained in one sentence — an **unexplained parameter is a finding**, not a skip
+- [ ] A break-point list with **at least two failures that would be invisible for weeks**
+- [ ] Break points **ranked by time-to-notice**, not by severity
+- [ ] You can point at **where** in the chain a click is a conversion in one model and not another
+- [ ] Standard wrap
+
+*(Your "what to look for" is the **if-this-breaks / symptom** table above.)*
