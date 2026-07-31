@@ -43,6 +43,17 @@ live account. **That's the entire reason this project exists.**
 
 ---
 
+## What to look for
+
+| Look for | Why it matters |
+|---|---|
+| An **account-level tracking template** routing clicks through a third-party platform | Looks like legacy junk; often load-bearing, and it fails silently |
+| **`{_ds...}` parameters** scattered across URLs on EMEDCO and Seton US | Trace what reads them before assuming they're safe to remove |
+| What sits on the **other end of the redirect** — what actually consumes the parameter | If nobody on the team can tell you, that *is* the finding — not a gap to guess past |
+| Anything that just "**looks like leftover junk**" | The urge to tidy it is exactly the failure mode — better to meet it here on a reading exercise |
+
+---
+
 ## ⚠️ Read-only, and this one is not a formality
 
 **Do not remove or edit a tracking template on any account, ever, without Alex.** A wrong
@@ -62,12 +73,10 @@ project is about, one level up.
 
 ---
 
-## What good looks like
+## You're done when
 
-- You name what consumes the parameter, or you say clearly that you couldn't and where you
-  stopped.
-- You describe the failure mode **specifically**: what keeps working, what stops working,
-  and how long it would take anyone to notice.
-- You come out with a **rule for next time** — something you'd actually apply the next time
-  you find something on an account that looks like leftover junk. That rule is the real
-  deliverable; the half page is where you show your working.
+- [ ] You named **what consumes** the parameters, or said clearly you couldn't and where you stopped
+- [ ] The failure mode described **specifically**: what keeps working, what breaks, how long anyone would take to notice
+- [ ] A **rule for next time** you'd actually apply to leftover-looking junk — that rule is the real deliverable
+- [ ] You did **not** edit or remove any tracking template
+- [ ] Standard wrap — prediction first, written up the same day

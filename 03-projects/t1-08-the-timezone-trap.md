@@ -55,11 +55,13 @@ Not usually in a monthly number — over a month the edges wash out. It bites on
 
 ---
 
-## What good looks like
+## You're done when
 
-- You can say, without checking, which of your three accounts rolls over first and which
-  last.
-- Your explanation in step 4 was written **before** you looked it up, and you noted where it
-  was wrong.
-- Your rule in step 5 is concrete. "Be careful about timezones" isn't a rule. "When I
-  compare across accounts I use whole weeks, or I state the timezone next to the number" is.
+- [ ] One calendar day's spend from all three accounts, written down
+- [ ] Your step-4 explanation written **before** you looked it up, with where it was wrong noted
+- [ ] You can say **which account rolls over first and which last** without checking
+- [ ] A **concrete rule** you'd actually follow — "state the timezone next to the number," or "compare whole weeks" — not "be careful about timezones"
+- [ ] Standard wrap — prediction first, written up the same day
+
+*(Your "what to look for" is the **Where this actually bites** list above — those are the four
+places the trap shows up.)*

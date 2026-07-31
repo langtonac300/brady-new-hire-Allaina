@@ -85,12 +85,11 @@ revenue.** For real revenue, go through the first-touch path like everywhere els
 
 ---
 
-## What good looks like
+## You're done when
 
-- Your hypothesis is written down, dated, and demonstrably from before step 3.
-- Your answer names **at least one specific conversion action** that inflates one side.
-  "The conversion basket is messy" is the observation; naming the action is the finding.
-- You can state what you would need in order to compare these two accounts *fairly* — and
-  whether platform data alone can get you there.
-- You noticed how easy it would have been to quote the higher number in a meeting as
-  straightforward evidence that one account is better run than the other.
+- [ ] Both platform ROAS numbers, with the shared window
+- [ ] Your channel-mix hypothesis **written and dated before step 3** (say so if you read ahead)
+- [ ] Your answer names **at least one specific conversion action** that inflates one side — naming it, not "the basket is messy"
+- [ ] You can state what you'd need to compare the two accounts **fairly**, and whether platform data alone gets you there
+- [ ] You can articulate how easy it'd have been to quote the higher number as "better run"
+- [ ] Standard wrap — prediction first, written up the same day

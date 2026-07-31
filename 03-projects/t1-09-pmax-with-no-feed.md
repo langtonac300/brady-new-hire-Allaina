@@ -44,6 +44,17 @@ Healthcare runs lead-gen PMax with no feed — is the fastest way to stop confla
 
 ---
 
+## What to look for
+
+| Look for | Why it matters |
+|---|---|
+| Whether a PMax campaign has a **product feed / listing group** at all | Feed present = retail PMax; no feed = lead-gen PMax — two different machines under one label |
+| On the **no-feed** campaigns, which **asset types and audience signals** are attached | With no feed, these *are* the targeting — name them, not "the algorithm" |
+| Which **URLs** a no-feed campaign is allowed to send traffic to (final URL expansion) | On lead-gen PMax this is a main lever and easy to miss |
+| Anything pulling you into the **Wristbands stack** (Shopify / Analyzify) | That's the rathole — note the question and step back out |
+
+---
+
 ## ⚠️ This account is the steepest part of your curve
 
 Wristbands runs on a different technology stack from everything else at Brady — Shopify,
@@ -59,12 +70,11 @@ and come back to the hour you were given.
 
 ---
 
-## What good looks like
+## You're done when
 
-- You can explain retail PMax vs. lead-gen PMax without opening the cheat sheet.
-- For the no-feed campaigns, you name the specific things doing the targeting work — not
-  "Google's algorithm."
-- You can say what you'd look at first if a no-feed PMax campaign suddenly changed
-  behavior, given that you can't inspect its inner workings directly.
-- You wrote down at least two questions you couldn't answer in the hour. That's a good
-  outcome on this account, not a bad one.
+- [ ] You can explain retail vs lead-gen PMax without the cheat sheet
+- [ ] For the no-feed campaigns you named the **specific** targeting elements — assets, signals, URLs — not "Google's algorithm"
+- [ ] You can say what you'd check first if a no-feed PMax suddenly changed behaviour
+- [ ] **At least two questions** you couldn't answer parked in `questions/` — a good outcome on this account
+- [ ] You did **not** rathole into the Analyzify / Shopify internals
+- [ ] Standard wrap — prediction first, written up the same day

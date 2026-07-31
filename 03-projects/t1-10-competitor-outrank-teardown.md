@@ -49,6 +49,17 @@ That's a step up, and it's meant to be.
 
 ---
 
+## What to look for
+
+| Look for | Why it matters |
+|---|---|
+| **How the outranking is actually implemented** | Google retired the "target outranking share" strategy — it's being done some other way (a bid strategy plus monitoring, structure, Auction Insights). Finding the mechanism is half the project |
+| The **CPC premium** against a fair baseline — the same campaigns before, or a comparable one without it | "It's expensive" means nothing without a number and a named comparison |
+| What the premium **bought on volume** — impression share, clicks, conversions against the two named competitors | A premium is only bad if it didn't buy anything |
+| Signs it's a **deliberate strategic choice** vs leftover | Form the view from the numbers first, *then* ask — asking first just gets you someone else's answer |
+
+---
+
 ## ⚠️ Two traps
 
 **"It's expensive" is not a recommendation.** Every bidding decision is a trade. The
@@ -71,10 +82,11 @@ exercise on a live account that spends real money.
 
 ---
 
-## What good looks like
+## You're done when
 
-- A recommendation with a number attached, and a named comparison behind that number.
-- You can explain what an outrank-share strategy is actually competing on — and why that's
-  different from an efficiency target.
-- You have a view on what you'd want to *measure* to settle the question properly, even if
-  you couldn't measure it in an hour. Naming the experiment you'd want is a real answer.
+- [ ] You established **how** the outranking is implemented (or asked, after forming a theory)
+- [ ] A recommendation — keep / change / drop — **with a number and the comparison behind it**
+- [ ] The recommendation states the **trade**: what you'd give up and what you'd get
+- [ ] You named the **measurement or experiment** you'd want to settle it properly
+- [ ] You did **not** change the strategy, targets, or named competitors
+- [ ] Standard wrap — prediction first, written up the same day
