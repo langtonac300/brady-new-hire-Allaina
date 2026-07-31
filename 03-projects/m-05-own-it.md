@@ -74,11 +74,13 @@ and saying so, is part of the job.
 
 ---
 
-## What good looks like
+## You're owning it when
 
-- **By around day 60, Alex hears about Mecco from you rather than from a dashboard.**
-- There's a written record — a running note in `04-my-work/` is fine. It doesn't need to be
-  formal; it needs to exist.
-- Your weekly line has a number in it and a reason next to the number.
-- You've brought at least one recommendation rather than a question. That's the transition
-  the whole ramp is aimed at, and this is the account where it's cheapest to practice.
+*(No end state — this is the bar to hold, week to week, not a project to finish.)*
+
+- [ ] By around **day 60, Alex hears about Mecco from you** rather than from a dashboard
+- [ ] There's a **running note** in `04-my-work/` — informal is fine, it just has to exist
+- [ ] Your weekly line has **a number in it and a reason next to the number**, per business day
+- [ ] The update **arrives before the question does** — a quiet week, said out loud, counts
+- [ ] You've brought at least **one recommendation rather than a question**
+- [ ] Live changes still proposed in the thread while you're in the Assist phase
