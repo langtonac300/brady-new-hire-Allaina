@@ -94,14 +94,12 @@ generates it. Don't present a platform-conversion test win as a first-touch reve
 
 ---
 
-## What good looks like
+## You're done when
 
-- You can say **which arm is the control and why it's genuinely comparable** — same time, same
-  everything except your one change.
-- You chose the primary metric and the guardrail **before** launch and didn't move them after
-  you peeked.
-- You can name what would make the result **invalid**, and you checked those things.
-- When it finished you wrote the learning **whether it won or lost**, with the numbers and the
-  model they're in.
-- If it turned out underpowered, you said so early — not after three weeks of watching a number
-  that could never reach significance.
+- [ ] You checked the **Learnings archive** before committing to an idea
+- [ ] The question is **splittable** (default SPLIT) and the campaign has the traffic — the power calculator didn't say 180 days
+- [ ] The five decisions made **before launch**: mode, primary metric, conversion filter (the specific action where Conversions overcounts), guardrail metric, size/duration
+- [ ] Hypothesis in the house shape — *"changing X to Y will move [metric] by ~Z%, because [reason]"*
+- [ ] Launched with Alex's approval; base campaign left **untouched** while it ran
+- [ ] Readout written **whether it won or lost**, with the numbers and **which model** they're in — "underpowered" said early if it was
+- [ ] Standard wrap

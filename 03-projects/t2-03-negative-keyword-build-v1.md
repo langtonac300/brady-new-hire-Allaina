@@ -128,11 +128,17 @@ the job. An undocumented one that coincides with a drop is a bad afternoon.
 
 ---
 
-## What good looks like
+## You're done when
 
-- Someone who has never seen your list can tell **where a new negative should go** just by
-  reading your structure.
-- Every broad-match negative you used, you can justify. If you can't, it should be phrase.
-- Your impact estimate is **caveated honestly** — what it measures, what it assumes, and
-  what would make it wrong.
-- You applied it yourself, and you can say exactly when.
+- [ ] A **named list structure** on paper — someone else can tell where a new negative goes just by reading it
+- [ ] List v1 built, **match types chosen deliberately** (phrase/exact for anything ambiguous)
+- [ ] Every **broad** negative justified — if you can't, it's phrase
+- [ ] Checked against the account's **own keywords** — no negative blocks a keyword you bid on
+- [ ] Impact estimate **caveated honestly**: what it measures (cost of blocked terms), what it assumes, what would make it wrong
+- [ ] Reviewed by Alex, applied by you, with the **date and time written down**
+- [ ] **Next-day check** done: attachment verified on the campaigns, impressions vs your prediction, nothing good vanished
+- [ ] Standard wrap
+
+> **Good vs over-broad, one example:** blocking `free template` (phrase) kills DIY-download
+> searches. Blocking `free` (broad) *also* kills `free shipping wristbands` — a buyer. When in
+> doubt, narrower.

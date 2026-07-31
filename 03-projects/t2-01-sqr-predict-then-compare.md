@@ -60,6 +60,24 @@ debatable — and those eight are the whole lesson.
 
 ---
 
+## What to look for
+
+The Kill rows fall into a few repeating shapes (more in
+[`who-else-is-searching.md`](../02-learning/who-else-is-searching.md)):
+
+| Shape | Reads like | Call |
+|---|---|---|
+| Wrong product entirely | someone wants a thing you don't sell | Kill |
+| Research / DIY intent | "how to make a wristband," "free template" | usually Kill — but check the funnel |
+| Name-collision | matches your keyword, means something else | Kill |
+| **Looks like junk, isn't** | competitor names (sometimes deliberate), broad category terms in a long B2B cycle | **don't reflex-Kill — check** |
+
+**One row, good reason vs weak:**
+- 🟢 *"free wristband template" → Kill — wants a free DIY download, not to buy printed bands.* Intent.
+- 🔴 *"free wristband template" → Kill — one click, no conversions.* Same call, wrong reason — you judged performance, not intent, and next week you'll kill a good term for having a slow week.
+
+---
+
 ## ⚠️ This one doesn't finish in a single sitting
 
 **Don't block half a day and expect to be done.** Steps 1–4 are about ninety minutes of your
@@ -94,18 +112,14 @@ be right; and if you're not, the correction lands far harder when you argued for
 
 ---
 
-## What good looks like
+## You're done when
 
-- Your reasons are about **intent**, not performance. "Wants a free template, not a
-  purchase" is a reason. "Only one click, no conversions" is not.
-- You can name the **rule** behind a disagreement, not just the row — something that would
-  generalize to the next fifty terms.
-- At least a few of your calls are genuinely uncertain, and you flagged them as uncertain
-  rather than guessing confidently. Marking a row "unsure, leaning Kill" is a legitimate
-  answer.
-- You spotted at least one term where the right call depends on something you don't know
-  yet about the business. Ask about those — they're usually the interesting ones.
+- [ ] 50 terms, sampled across the tail (not top-50 by spend), judged with **cost and conversions hidden**
+- [ ] Every row Keep/Kill with a **one-line intent reason** — not a performance reason
+- [ ] Your list locked and timestamped **before** Alex sees it; his 50 made independently
+- [ ] Every **disagreement** written up: your call, Alex's, and the rule you'd apply next time
+- [ ] At least a few calls flagged **uncertain**, and at least one that depends on something about the business you don't know yet
+- [ ] Standard wrap — your calls (the prediction) locked first, written up the same day
 
-**Common first-time trap:** killing competitor brand names on reflex. Sometimes that's
-right. Sometimes bidding on a competitor's name is deliberate and someone chose it — check
-before you propose removing it.
+**Common first-time trap:** killing competitor brand names on reflex. Sometimes right,
+sometimes deliberate and chosen — check before you propose removing one.

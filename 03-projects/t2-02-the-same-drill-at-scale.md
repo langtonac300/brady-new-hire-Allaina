@@ -61,6 +61,19 @@ on a young process than to reverse-engineer on a mature one.
 
 ---
 
+## What to look for
+
+The judgment here is **gap vs choice** — is a term getting through because nobody built the
+list yet, or because someone decided to let it through?
+
+| Signal | Leans |
+|---|---|
+| A whole *category* of similar terms getting through, none blocked | **Gap** — no list covers it yet (the loop is young) |
+| A converting term, or a competitor/conquesting term, left live | **Choice** — likely deliberate; ask before proposing |
+| A rule that worked on PDC producing lots of "wrong" calls here | **Neither** — your rule didn't transfer; the broader catalog broke it |
+
+---
+
 ## ⚠️ You're a contributor here, not the owner
 
 Seton and EMEDCO are not your accounts. Someone else owns them, and they're going through
@@ -83,13 +96,11 @@ worth learning — they matter regardless of what happens to the structure aroun
 
 ---
 
-## What good looks like
+## You're done when
 
-- You can point at a **rule from T2-1 that didn't transfer**, and explain what about this
-  account group broke it.
-- Your loop observation is about a **pattern**, not a row. "Terms about installation and
-  repair services keep coming through, and there's no list covering them" is an observation.
-  "This one term should be killed" is just a row.
-- You separated "this is a gap" from "this is a choice" — or, where you couldn't tell,
-  you asked instead of assuming.
-- Nothing in your write-up reads as a criticism of a person.
+- [ ] 50 terms on the confirmed account, judged with cost/conversions hidden (same method as T2-1)
+- [ ] A **rule from T2-1 that didn't transfer**, with what about this account group broke it
+- [ ] One **loop observation about a pattern**, not a row ("installation/repair terms keep coming through, no list covers them")
+- [ ] "Gap" separated from "choice" — or, where you couldn't tell, **asked** rather than assumed
+- [ ] Findings routed to Alex; nothing in the write-up reads as criticism of a person
+- [ ] Standard wrap — your calls locked first, written up the same day

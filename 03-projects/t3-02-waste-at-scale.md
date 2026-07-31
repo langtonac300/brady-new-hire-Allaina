@@ -87,13 +87,11 @@ next to it.* Say which one each row is.
 
 ---
 
-## What good looks like
+## You're done when
 
-- The deliverable leads with a **concentration**, not a list — where the waste clusters and
-  how much of the total it is.
-- Your one recommendation is **structural** — it changes a setting or an architecture, so it
-  fixes a category rather than today's forty terms.
-- The number behind it is a **cost** figure with its window stated, not a revenue figure
-  dressed up as certainty.
-- You flagged at least one term that *looks* like waste but isn't, and said why — that's the
-  judgment the daily loop doesn't train.
+- [ ] A waste map built on **cost** (the reliable column), window stated, revenue side treated as directional
+- [ ] It leads with a **concentration** — where the waste clusters and what share of the total it is — not a flat list
+- [ ] **One structural recommendation** that fixes a category (match-type, theme-negative, re-pointed ad group, budget), with the cost it would have saved as the number
+- [ ] At least one term that **looks** like waste but isn't, with why (brand-defense / named-competitor / quiet converter)
+- [ ] Framed as a **proposal** — the change goes through Alex, and probably a test, before it's account-wide
+- [ ] Standard wrap

@@ -78,13 +78,11 @@ you can see how to do it.
 
 ---
 
-## What good looks like
+## You're done when
 
-- The coverage map distinguishes **doesn't run**, **runs but doesn't reach**, and **runs but
-  doesn't cover new campaigns** — three different gaps with three different fixes.
-- The gap you chose is the one with the **most spend behind it**, and you can prove it's real
-  with specific terms, not a hunch.
-- The spec is sized honestly — a manager could read it and decide go / no-go without asking
-  you three follow-up questions.
-- Where your evidence ran into the edge of your access, you said so and turned it into a
-  question rather than guessing past it.
+- [ ] A coverage grid distinguishing **doesn't run / runs but doesn't reach / runs but doesn't cover new campaigns** — three gaps, three fixes
+- [ ] The gap you specced is the one with the **most spend behind it**, proven with specific recent terms — not a hunch
+- [ ] A one-page spec: the hole, its size (with evidence), and roughly the work — a manager could decide go/no-go without three follow-ups
+- [ ] Confidence graded on any absence ("no coverage I can find, checked A/B/C") — unsure findings raised as **questions**, not conclusions
+- [ ] You **specced, didn't build** — nothing attached or wired live
+- [ ] Standard wrap

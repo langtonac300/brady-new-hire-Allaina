@@ -101,9 +101,10 @@ revised once there's real data behind it. Perfect is not on the table here; defe
 
 ---
 
-## What good looks like
+## You're done when
 
-- Every proposed value has a one-line reason a non-marketer could follow.
-- You can say what you expect to change on the account afterwards — **and what won't.**
-- The date is written down.
-- You applied it yourself. This one's yours.
+- [ ] Every conversion action: current value, proposed value, and **one line of reasoning a non-marketer could follow**
+- [ ] Values follow the **house convention** (how PDC/Seton value lead types), adjusted for what a Mecco lead is actually worth — not invented
+- [ ] You said what will change on the account afterwards **and what won't** (depends on manual vs value-based bidding — you checked which)
+- [ ] Reviewed by Alex, **applied by you**, with the **date written down** (values aren't retroactive)
+- [ ] Standard wrap — prediction first, written up the same day

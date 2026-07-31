@@ -78,13 +78,16 @@ which one you used, the first question you get will be "where's that from?"
 
 ---
 
-## What good looks like
+## You're done when
 
-- Someone who doesn't work in paid search reads it once and knows the situation.
-- No jargon survives. Not *tROAS*, not *IS*, not *NB*. If a term is load-bearing, spell it
-  out in plain words.
-- Line 3 names a **mechanism**, not a mood. "Shopping spend is up because a competitor
-  stopped bidding and our impression share rose" is a driver. "Performance improved" is not.
-- The note is honest about what you don't know. "I can't yet explain the drop on the 9th —
-  looking into it" is a perfectly good line 5, and much better than a confident guess.
-- Five lines. If it's nine, it isn't done yet.
+- [ ] MTD spend and the **current** target, both converted to **per business day** (holidays checked by hand)
+- [ ] Every number carries **its source and model**
+- [ ] Line 3 names a **mechanism, not a mood** (see the example below)
+- [ ] Five lines, and **no jargon survives** — not *tROAS*, not *IS*, not *NB*
+- [ ] Honest about what you don't know ("can't yet explain the drop on the 9th — looking into it" is a fine line 5)
+- [ ] Shown to Alex before it goes anywhere else
+- [ ] Standard wrap
+
+> **Driver line, good vs weak:** 🟢 *"Shopping spend is up because a competitor stopped bidding
+> and our impression share rose."* 🔴 *"Performance improved."* The first names the mechanism;
+> the second is a mood.

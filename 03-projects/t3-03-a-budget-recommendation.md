@@ -87,13 +87,12 @@ that in [`running-a-real-test.md`](../02-learning/running-a-real-test.md).
 
 ---
 
-## What good looks like
+## You're done when
 
-- Every number carries **its source and its model**, and the efficiency figure is in the view
-  its guardrail is actually measured against.
-- The recommendation is a **single, specific move with a dollar figure**, not a menu of
-  options for Alex to choose from.
-- If the honest answer is "push spend," you said so — and didn't hedge back toward cutting to
-  feel safe.
-- You can defend the move against the obvious challenge: *"what if efficiency slips?"* — and
-  your answer references the guardrail room, not a hope.
+- [ ] Per campaign: MTD spend, the **current** target (from Alex/the plan, not this repo), and efficiency in the **right view** (non-brand on IP)
+- [ ] A **give-to** list (inside guardrail + capped or losing impression share to budget) and a **take-from** list (over guardrail, or funding waste)
+- [ ] **One specific move with a dollar figure** and the guardrail math behind it — not a menu of options
+- [ ] If the honest answer is "push spend," you said so and didn't hedge back to cutting
+- [ ] Anything that depends on how a campaign *responds* is flagged **to be tested**, not promised
+- [ ] You can answer *"what if efficiency slips?"* with the **guardrail room**, not a hope
+- [ ] Standard wrap

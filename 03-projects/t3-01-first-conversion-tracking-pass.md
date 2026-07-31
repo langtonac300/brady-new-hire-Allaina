@@ -94,13 +94,12 @@ would do, that's a sentence in your write-up for Alex, not a click.
 
 ---
 
-## What good looks like
+## You're done when
 
-- Every finding names a **symptom, the evidence, a suspected cause, and the check to confirm
-  it** — and keeps the last two clearly separate from the first two.
-- You produced a **"working as intended" list** as well as a defect list. Knowing what you
-  ruled out is half the value.
-- The ranking is by cost — money or trust in a number — not by how obvious each one was to
-  spot.
-- At least one finding is something you'd never have looked for before walking the chain in
-  T2-8. If the trace project didn't change what you can see here, one of the two was rushed.
+- [ ] Every counting conversion action inventoried with all five columns (primary/secondary, count, value, model+window, where it fires)
+- [ ] Each finding names **symptom → evidence → suspected cause → the exact check** — cause/check kept separate from symptom/evidence
+- [ ] A **"working as intended" list** as well as a defect list (FT-vs-platform gap, call-value estimates ruled out)
+- [ ] Findings **ranked by cost** — money or trust in a number — not by how obvious they were to spot
+- [ ] Everything phrased as an **unconfirmed diagnosis** (you can't see the tags) — no "tag Y is firing twice" stated as fact
+- [ ] Nothing changed on any conversion action; the fix is written up for Alex
+- [ ] Standard wrap — prediction first, written up the same day
