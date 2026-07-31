@@ -10,9 +10,6 @@ Reference you'll come back to. Read in this order.
 | `seton-emedco-primer.md` | The second account group you'll work on | Week 3–4 |
 | `how-brady-measures.md` | Attribution, guardrails, and which numbers to trust | Week 2 — **the important one** |
 
-> **These are being ported over and will land before your start date.** If one you need
-> isn't here yet, ask Alex.
-
 ---
 
 ## If you read only one thing carefully
