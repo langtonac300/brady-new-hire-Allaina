@@ -32,6 +32,9 @@ any given number came from.
 You start doing the work with a safety net. Every change gets proposed in a chat thread
 before it ships, until there's a track record on that kind of change.
 
+Run [`before-it-ships.md`](../02-learning/before-it-ships.md) against your own work first —
+it's the checklist that catches the errors experience doesn't.
+
 **What "done" looks like:** you're running the daily search-terms review on your own,
 you've shipped a few real approved changes without incident, and you've delivered a section
 of a monthly report with a credible explanation of *why* the numbers moved.
@@ -67,6 +70,22 @@ a shortfall** — full independence there is more like a six-month thing.
 | Morning | The daily search-terms Keep/Kill review — about 10 minutes. This is the one daily habit |
 | Midday | Whatever's active — a project, a report, a question thread |
 | Any time | Ask questions in Google Chat |
+| End of day | Three lines in chat — **first month only.** See below |
+
+### The three lines, at the end of each day
+
+For your first month, post three short lines in chat before you log off:
+
+1. What you worked on
+2. One thing you learned
+3. One thing that surprised you
+
+**It takes two minutes and it isn't a status report.** Writing down what you learned is what
+makes it stick — the day otherwise blurs. And the third line is the useful one for Alex: if
+something surprised you, either the material is wrong or it's incomplete, and both are worth
+knowing early.
+
+Nobody is grading these. Stop after the first month, or keep going if you find it useful.
 
 ## Who to ask what
 

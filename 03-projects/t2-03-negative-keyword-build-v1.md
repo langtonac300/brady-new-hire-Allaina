@@ -14,6 +14,9 @@
 mechanics are the same, the stakes here are higher. Also
 [T1-7](./t1-07-brand-vs-nonbrand.md) on how brand exclusions work.
 
+**Run [`before-it-ships.md`](../02-learning/before-it-ships.md) before you post this for
+review** — the negatives section, and the warning about sculpting lists in particular.
+
 ---
 
 ## The point

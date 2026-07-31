@@ -13,6 +13,9 @@
 [`cheat-sheet.md`](../02-learning/cheat-sheet.md) is the Keep/Kill question you'll be
 applying.
 
+**Run [`before-it-ships.md`](../02-learning/before-it-ships.md) before you post this for
+review** — the negatives section, and the warning about sculpting lists in particular.
+
 ---
 
 ## The point

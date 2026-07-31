@@ -11,6 +11,10 @@
 
 **Do [M-1](./m-01-the-defect-audit.md) first.**
 
+**Run [`before-it-ships.md`](../02-learning/before-it-ships.md) before you post this for
+review** — read the conversion-values section twice. This is the widest-blast-radius change
+type there is.
+
 ---
 
 ## This one is your first real live change
