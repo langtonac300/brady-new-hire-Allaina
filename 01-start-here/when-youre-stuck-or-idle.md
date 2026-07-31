@@ -88,6 +88,10 @@ BigQuery usually takes longest because it goes through a different team — **if
 been requested by the end of week one, ask Alex about it specifically.** It's needed later
 than the others but it has the longest lead time, so it's the one that quietly bites.
 
+> **What each of these tools is *for*** — which one owns which number, and why two disagree — is
+> [the tools thread](../03-projects/the-tools-thread.md). This list gets you the logins; that
+> file tells you what to do once you're in.
+
 **If something on that list doesn't work: say so the same day, not at your next 1:1.** Nobody
 will think you're complaining. Waiting a week to mention it is the only version of this that
 causes a problem.
