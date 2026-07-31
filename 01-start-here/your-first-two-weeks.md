@@ -26,7 +26,7 @@ feels like.
 
 | Day | Morning | Afternoon |
 |-----|---------|-----------|
-| **1 · Getting in** | Check every login works — Google Ads, the spend dashboard, chat, calendar. **Say something today if one doesn't**; access takes far longer to fix than to request. Meet the team | Fill in your [Day-1 baseline](../05-self-assessment/baseline.md) — **before any training**, that's the whole point. Read [`how-the-ramp-works.md`](./how-the-ramp-works.md) |
+| **1 · Getting in** | Check every login works — Google Ads, the spend dashboard, chat, calendar. **Say something today if one doesn't**; access takes far longer to fix than to request. Meet the team — [`who-everyone-is.md`](./who-everyone-is.md) is the map | Fill in your [Day-1 baseline](../05-self-assessment/baseline.md) — **before any training**, that's the whole point. Read [`how-the-ramp-works.md`](./how-the-ramp-works.md) |
 | **2 · What paid search is** | [`ppc-fundamentals.md`](../02-learning/ppc-fundamentals.md), first half | Shadow Alex or Courtney through a normal day. You're watching for the *shape* of it — what gets opened, in what order, what gets ignored. Don't try to take notes on everything |
 | **3 · The rest of it** | [`ppc-fundamentals.md`](../02-learning/ppc-fundamentals.md), second half | Start your questions-and-unknowns doc in `04-my-work/`. Sit in on whichever standing team meetings fall today — silent, just listening to how people talk about the numbers |
 | **4 · Your first account tour** | Skim the opening section of [`pdc-primer.md`](../02-learning/pdc-primer.md) — just enough to know what the accounts are called. You're not learning it yet | [**T1-1 · Account tour, narrated**](../03-projects/t1-01-account-tour.md), paired with Alex. Your first time inside a real account |
