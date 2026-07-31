@@ -374,7 +374,8 @@ Conversions"** (an action can be one without the other).
   expected**, not a sign you're behind.
 - **⚠️ Gemini is the sanctioned AI**, not other tools. **Never reference AI tooling, this repo,
   or non-sanctioned tools in corporate systems** — Google Ads scripts, GTM, shared docs,
-  BigQuery SQL comments included.
+  BigQuery SQL comments included. Using it *for real workflows* rather than as a question box is
+  its own thread — see [the AI thread](../03-projects/the-ai-thread.md).
 - **Jira exists** and the department uses it — but day-to-day work with Alex runs through Google
   Chat and 1:1s, not a ticket queue. **1:1s are analyst-led:** you bring the agenda.
 - **Brand standards** are binding for anything customer-facing: Brady Blue `#002D72`,
