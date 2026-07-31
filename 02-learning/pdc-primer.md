@@ -60,9 +60,12 @@ Quirks that will trip you up:
 - **PDC uses HubSpot** for marketing automation — the rest of Brady uses different systems.
   If you see `hsa_*` in a URL template, that's PDC.
 - **Named-competitor bidding (Wristbands only):** the account explicitly bids to outrank
-  two specific competitors by name. You won't see this tactic anywhere else on the team.
+  two specific competitors by name. You won't see this tactic anywhere else on the team —
+  and *how* it's implemented isn't obvious (you'll work that out in
+  [T1-10](../03-projects/t1-10-competitor-outrank-teardown.md)).
 - **Negatives are thin** on PDC — light shared-list coverage compared to Brady US/UK.
-  Building them out is a good, safe early project.
+  Building them out is a good, safe early project —
+  [T2-3](../03-projects/t2-03-negative-keyword-build-v1.md) is that build.
 
 ---
 
@@ -82,6 +85,13 @@ already fully on smart bidding (tROAS/PMax).** There's no manual-bidding legacy 
 ---
 
 ## ⚠️ Tracking & conversion landmines (do not trust platform "Conversions" until you check these)
+
+> **If you're about to do [T1-4](../03-projects/t1-04-conversion-action-inventory.md), stop
+> here.** That project asks you to form your *own* read of PDC's conversion setup before you
+> see the answer — and this section **is** the answer. Do T1-4's steps first, then come back
+> and compare. The gap between your read and this list is the most useful thing you'll produce
+> that week. (Same for [T3-1](../03-projects/t3-01-first-conversion-tracking-pass.md), the
+> deeper pass.)
 
 The reported team numbers are **First-Touch, 180-day — not Google Ads platform
 Conversions** (full explanation in [`how-brady-measures.md`](./how-brady-measures.md)). On
@@ -103,6 +113,15 @@ only the first paid touch, and PDC (especially Wristbands, a lead-gen storefront
 multi-touch journeys. Wristbands' first-touch ROAS running well below platform ROAS is
 *expected*, not a fire — it's lead-gen, not direct-response. Don't panic-cut it on that
 number alone.
+
+> **Worked judgment — "Wristbands ROAS looks terrible, should we cut?"** Walk it in order:
+> **(1) Which number?** First-touch or platform — they differ a lot here, so pin down which
+> one raised the alarm. **(2) Which profile?** Wristbands is lead-gen by design; a low direct
+> ROAS is its expected shape, not a failure. **(3) Inside its guardrail?** If efficiency is
+> within guardrail and pacing is behind, the instinct at Brady is **push, not cut** (see
+> [`how-brady-measures.md`](./how-brady-measures.md)). Only after all three does "cut" get on
+> the table at all. Reflex-cutting a scary-looking ROAS is the most common wrong move on this
+> account.
 
 ---
 
@@ -148,6 +167,19 @@ job in those is to transcribe and organize what you hear.
   Healthcare is high-CVR brand. Judge each by its own profile, not Brady's.
 - **Under a strategic cloud** — the whole assignment's FY27 scope is being decided above
   the team.
+
+---
+
+## Check yourself — you're ready to open PDC when you can
+
+- Say which MCC holds PDC, and which **similarly-named** one does *not*.
+- Name the **three things** about PDC that exist nowhere else on the team.
+- Explain your main **bidding lever** on PDC, given it's already fully smart-bidding.
+- Read a scary-looking **Wristbands ROAS** without reaching for the cut button — and name the
+  three checks you run first.
+- Say why the tracking landmines above are **gated behind T1-4** rather than handed to you.
+
+If any of those is fuzzy, that's the section to re-read — and a good thing to raise in a 1:1.
 
 Read this alongside [`ppc-fundamentals.md`](./ppc-fundamentals.md) (the general skills) —
 this primer is the PDC-specific layer on top of it.
