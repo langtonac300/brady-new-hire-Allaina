@@ -75,6 +75,11 @@ other except what's written down here — so a few habits matter more than usual
 6. **When in doubt, don't add it.** If you're not sure content belongs in this repo —
    because it's not clearly about her ramp, or you can't tell which side of the boundary
    it came from — say so and leave it out, rather than guessing.
+7. **Never `git push --force` or delete `main`.** This repo is private, and GitHub's
+   branch-protection enforcement for private repos needs a paid plan this repo doesn't
+   have — so nothing technically stops a force-push or branch deletion from landing. Don't
+   run either, even to "clean up" history. If you think you need to, stop and ask Alex
+   first.
 
 ## Known gaps (not bugs)
 
