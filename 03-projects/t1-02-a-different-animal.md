@@ -43,6 +43,20 @@ project number two rather than project number twenty.
 
 ---
 
+## What to look for
+
+Symptoms of an account that grew messy over time. **Note them — the pattern across them is
+your third difference.**
+
+| Notice | Why it matters |
+|---|---|
+| Campaigns that **exist but haven't served** in 30 days (your step-3 gap) | A big dormant pile is the loudest sign of an account that accreted rather than got designed |
+| **More than one campaign doing the same job** | Duplication is what happens when nobody deletes — only adds |
+| **Naming that doesn't follow one convention** | Different naming = different hands, no single standard being enforced |
+| **Structure that varies campaign to campaign** | A tidy account has a template; a grown one has layers that don't match |
+
+---
+
 ## ⚠️ Don't switch anything on
 
 There is a lot of paused structure in here. **Never bulk-enable anything paused** — some of
@@ -51,14 +65,15 @@ name. Reading is free; enabling is not.
 
 ---
 
-## What good looks like
+## You're done when
 
-- Three differences, each with a **reason**. "It's bigger" is an observation, not a reason.
-- One of your reasons should account for most of that gap in step 3. You'll get there
-  yourself if you add the **start date** column, sort the non-spending campaigns by it, and
-  look at how far back they go.
-- You can say what a newer account would have to do differently to avoid ending up the same
-  way — and whether that's even possible.
+- [ ] The T1-1 four-column tour is done on Seton US as well
+- [ ] Both step-3 counts recorded — campaigns serving vs campaigns not removed — and the gap named
+- [ ] **Three structural differences from PDC, each with a reason.** "It's bigger" is an observation, not a reason
+- [ ] One of those reasons accounts for most of that step-3 gap
+- [ ] A line on whether a newer account could avoid ending up this way — and whether that's even possible
+- [ ] You brought your answer to the readout **before** asking Alex what it is. Being wrong here and finding out why beats being told first
+- [ ] Standard wrap — prediction first, written up the same day
 
-Bring your answer to the readout **before** asking Alex what the answer is. Being wrong here
-and finding out why is worth more than being told first.
+> **Stuck on the third difference?** Add a **start date** column, sort the non-spending
+> campaigns by it, and see how far back they go. The answer's usually in the dates.
