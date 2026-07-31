@@ -27,6 +27,24 @@ That order matters. Watching someone else be right teaches almost nothing; being
 then finding out why is what actually sticks. Expect to be wrong a lot early on — the
 "explain the difference" step is where the learning is, not the score.
 
+> ⚠️ **A prediction written after you've looked isn't a prediction.** You'll adjust it
+> without noticing and decide you basically knew — everyone does, it's how memory works. So
+> the prediction has to be written down *before you open anything*, and it's the first step
+> of the routine below.
+
+## Before you start your first one
+
+Two files worth ten minutes each, and they apply to every project on this page:
+
+- [**`how-to-run-a-project.md`**](../02-learning/how-to-run-a-project.md) — the wrapper
+  around every brief. What to sort out before you start, what a paired session is actually
+  like, and what happens after the deliverable exists: the three-part readout, where the
+  loose ends go, and the running log of what you got wrong.
+- [**`what-a-deliverable-looks-like.md`**](../02-learning/what-a-deliverable-looks-like.md) —
+  a finished write-up worked through, plus the weak version of it for contrast.
+
+The briefs deliberately don't repeat any of that. They cover the *middle* — what to do.
+
 ---
 
 ## Roughly what's coming

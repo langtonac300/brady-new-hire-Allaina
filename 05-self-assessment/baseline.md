@@ -94,6 +94,12 @@ you've been burned by it once.
 
 ---
 
+> **At Day 90, read `04-my-work/what-i-got-wrong/` before you re-score.** That file is the
+> evidence — it's the difference between "I think I improved" and knowing exactly where and
+> why. It also answers the second question below almost by itself.
+
+---
+
 ## Two questions to answer in your own words
 
 **Day 1 — what are you most worried about?**

@@ -10,6 +10,7 @@ The folders already exist — just drop things in:
 | `notes/` | Meeting notes, capture sessions, things people told you |
 | `projects/` | Deliverables from the project ladder, one file per project |
 | `drafts/` | Anything you want a second pair of eyes on before it goes anywhere |
+| `what-i-got-wrong/` | One running file, one line per surprise, all 90 days. **Nobody reads it but you** — and it's the evidence behind your Day-90 re-score |
 
 Not sure what a finished deliverable should look like?
 [`what-a-deliverable-looks-like.md`](../02-learning/what-a-deliverable-looks-like.md) is a
