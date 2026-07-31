@@ -46,6 +46,19 @@ two other accounts, and it's the single highest-value thing you'll learn to chec
 
 ---
 
+## What to look for
+
+Red flags in a conversion-action list. **Note them, don't fix them** (see below):
+
+| Red flag | Why it steers wrong |
+|---|---|
+| **More than one primary** purchase- or lead-type action | Bidding chases every primary — two "purchase" primaries can double-count and distort |
+| A **soft action** (pageview, click, "engaged session") marked primary or included in Conversions | Bidding optimizes toward something that isn't a real outcome |
+| A **high-count, low-value** action set primary | It can dominate bidding by sheer volume |
+| Actions on **different attribution windows** | Numbers counted on different windows aren't comparable |
+
+---
+
 ## ⚠️ The account list isn't the whole answer
 
 Everything above is the **account-level** inventory. But a campaign can be pointed at a
@@ -79,12 +92,12 @@ which is genuinely the harder half.
 
 ---
 
-## What good looks like
+## You're done when
 
-- Your one-sentence conclusion names **the specific action or actions** being optimized to.
-  "It's optimizing to the wrong thing" is not a finding; naming which one is.
-- You can explain the difference between an action being *secondary* and an action being
-  excluded from Conversions entirely — they are not the same, and one of them still feeds
-  bidding.
-- You asked what happens to bidding in the days after a primary action changes. (The answer
-  is worth knowing before you're ever the one proposing it.)
+- [ ] Every conversion action listed with all six columns
+- [ ] You opened **2-3 individual campaigns** to check account-default vs their own goals
+- [ ] Your one-sentence conclusion names **the specific action(s)** bidding optimizes to — not "the wrong thing"
+- [ ] You wrote your own read **before** opening the primer, then compared
+- [ ] You can say which one still feeds bidding: an action set *secondary*, or one *excluded from Conversions*
+- [ ] Anything mis-set is **noted, not changed**
+- [ ] Standard wrap — prediction first, written up the same day
