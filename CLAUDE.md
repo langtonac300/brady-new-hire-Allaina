@@ -87,10 +87,13 @@ Some things here are deliberately incomplete. Don't "helpfully" invent content t
 these — flag them to Alex instead:
 
 - `03-projects/` holds the ladder overview plus the **Tier 1 (T1-1…T1-12)**, **Tier 2
-  (T2-1…T2-8)** and **Tier M (Mecco, M-1…M-5)** briefs. Each tier ships as a block once
-  Alex calls for it. **Everything past Tier 2 gets added a tier at a time as she reaches
-  it** — not all at once, on purpose. Don't write Tier 3/4, the tools thread or the AI
-  thread ahead of that without checking with Alex.
+  (T2-1…T2-8)**, **Tier 3 (T3-1…T3-5)** and **Tier M (Mecco, M-1…M-5)** briefs. Each tier
+  ships as a block once Alex calls for it. **Everything past Tier 3 gets added a tier at a
+  time as she reaches it** — not all at once, on purpose. Don't write Tier 4, the tools
+  thread or the AI thread ahead of that without checking with Alex.
+  - **T3-5 is the first-experiment brief** — it's the ramp project `running-a-real-test.md`
+    and `after-the-ramp.md` both point forward to, and it's the only Tier 3 project that
+    goes live. Don't duplicate the experiment method into it; it points at that learning file.
   - **T2-7 has no file of its own** — it's the same project as M-1, and `m-01` and the
     `03-projects/README.md` index both say so. Don't create `t2-07-*.md`.
   - **There is no `m-04-*.md`, on purpose.** M-4 (the Clarity trace) was removed by Alex on

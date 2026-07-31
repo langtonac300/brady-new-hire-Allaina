@@ -65,8 +65,8 @@ than as a question box).
 ## The individual projects
 
 Each project is its own file with the brief, what you'll need, and what "good" looks like.
-**Tier 1, Tier 2 and the Mecco track are here now.** The later tiers get added as you reach
-them, so you're not looking at 40 projects on day one — if you want to see further ahead
+**Tier 1, Tier 2, Tier 3 and the Mecco track are here now.** The later tiers get added as you
+reach them, so you're not looking at 40 projects on day one — if you want to see further ahead
 than you've been given, just ask.
 
 ---
@@ -121,6 +121,28 @@ goes live.
 
 ---
 
+### Tier 3 · One-to-two-day projects · days 43–70 · real diagnosis work
+
+The step up here isn't length so much as **open-endedness.** Tier 1 and 2 had a right answer
+you were predicting toward. These start with a messy account or a real process and ask *what's
+wrong, what's it worth, and what would you do* — no answer key. This is where the ramp crosses
+from *assist* into *own*: the last project goes live.
+
+| # | Project | Account | What you produce |
+|---|---------|---------|------------------|
+| [T3-1](./t3-01-first-conversion-tracking-pass.md) | **The first conversion-tracking pass** | PDC Healthcare | A documented diagnosis + the checks to run |
+| [T3-2](./t3-02-waste-at-scale.md) | **Waste at scale** | Seton / EMEDCO | A quantified waste map + one structural fix |
+| [T3-3](./t3-03-a-budget-recommendation.md) | **A budget recommendation** | PDC | A one-page rec with the guardrail math |
+| [T3-4](./t3-04-a-process-gap-found-and-specced.md) | **A process gap, found and specced** | The negatives loop | A coverage map + a one-page spec |
+| [T3-5](./t3-05-your-first-experiment.md) | **Your first experiment** *(goes live)* | A higher-traffic campaign | The design, then the honest readout |
+
+> **T3-1 through T3-4 are analysis and recommendation** — you diagnose, quantify and propose;
+> someone else decides and executes. **T3-5 is the one that goes live**, and it's guarded on
+> every side: Alex approves the launch and the roll-out, and the Experiment Hub enforces the
+> rest. That's the deliberate shape of *own* — independence inside guardrails, not without them.
+
+---
+
 ### Tier M · Mecco — the account you actually own · days 25–90
 
 Mecco is small, it's Alex's own account, and it's **half-built** — which is exactly why it's
@@ -145,8 +167,9 @@ Do them in order — M-1 finds what M-2 and M-3 fix.
 
 ### Still to come
 
-Tiers 3 and 4, the tools thread and the AI thread aren't written up yet — the table further
-up this page is the honest preview of what's in them. Ask if you want a look ahead.
+Tier 4 (the week-long capstones), the tools thread and the AI thread aren't written up yet —
+the table further up this page is the honest preview of what's in them. Ask if you want a look
+ahead.
 
 ---
 
