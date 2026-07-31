@@ -5,6 +5,14 @@ points back to, because it's the thing most likely to make you confidently wrong
 if you skip it. It's also normal for it to feel unclear the first couple of reads — that's
 not a reflection on you.
 
+> **Coming from finance, accounting, audit, or an analyst role? Read this page as
+> reconciliation — because that's what it is.** The vocabulary is new (first-touch,
+> attribution windows, guardrails), but the discipline underneath isn't: every number has a
+> source, two sources will disagree, and you don't trust a figure until you know which one it
+> came from and what's wrong with it. *Tie it out before you quote it* is the exact instinct
+> this whole page is trying to build — so if you already have it, this is your home turf, not
+> the thing to be nervous about.
+
 ---
 
 ## The one rule everything else follows

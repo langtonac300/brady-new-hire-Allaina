@@ -55,6 +55,28 @@ You run your accounts day to day and bring recommendations rather than open ques
 
 ---
 
+## The ramp, week by week
+
+The projects come in **tiers that overlap on purpose** — you'll often have a couple of tracks
+running at once, which is why "what am I doing this week?" isn't always obvious from the
+project list alone. Here's the whole arc in one place. **The weeks are approximate** — the
+phases above are the real markers, and your calendar wins over any number here.
+
+| Weeks | Phase | The ladder work | Running alongside |
+|:-----:|-------|-----------------|-------------------|
+| **1–2** | Learn | Onboarding, reading, shadowing; your first paired project (T1-1) | Start your `questions/` file; three lines in chat each evening |
+| **3–5** | Learn | **Tier 1** — one-hour, read-only projects, ~two a week | Sit in on the weekly meetings; keep working through the fundamentals |
+| **4–7** | Learn → Assist | **Tier 2** — half-day projects, reviewed; **Mecco** begins (M-1 → M-3) | The **daily keep/kill review** becomes your one standing habit (~day 31) |
+| **7–10** | Assist → Own | **Tier 3** — one-to-two-day diagnosis work; your first live experiment | **Mecco is yours** — M-5 is a standing weekly line (~day 45) |
+| **11–13** | Own | Week-long capstones *(added when you reach them)* | Own and present your PDC section of the monthly Deep Dive |
+
+The per-project detail for each tier is in [`../03-projects/`](../03-projects/README.md); the
+day-by-day of your first two weeks is in
+[`your-first-two-weeks.md`](./your-first-two-weeks.md); the recurring weekly meetings are in
+[`your-week.md`](./your-week.md).
+
+---
+
 ## Your accounts, and what each one is for
 
 | Account | Your relationship to it |

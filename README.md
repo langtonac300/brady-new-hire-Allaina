@@ -62,3 +62,13 @@ can build in your first month.
 - If something in here turns out to be wrong or out of date, **fix it or flag it.** You'll
   spot things a person who's been here three years can't see any more, and that's genuinely
   valuable — say so.
+
+**Three house rules if you do edit or add a file** — this repo gets touched by a lot of
+people, so a little tidiness keeps it usable for the next one:
+
+1. **Edit the file that's already there** rather than making a second copy. A `pdc-primer-v2`
+   sitting next to `pdc-primer` is how a repo turns into a maze — change the original.
+2. **If you add a file, add one line for it** to that folder's `README.md`. A folder's README
+   is its table of contents, and a stale one is worse than none.
+3. **Keep personnel and performance matters out of here.** Those conversations live with Alex
+   and HR, not in version control.
