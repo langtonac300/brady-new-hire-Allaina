@@ -1,19 +1,29 @@
 # Learning material
 
-Reference you'll come back to. Read in this order.
+Reference you'll come back to.
+
+> ## ⚠️ Don't try to read this folder
+>
+> **[`your-first-two-weeks.md`](../01-start-here/your-first-two-weeks.md) is the order of
+> operations.** It tells you what to read on which day, and it is the only list you need to
+> follow. Everything here is **lookup** — you'll be sent to each file at the moment it
+> becomes useful.
+>
+> The "when" column below is a hint, not a queue. Nobody reads ten files in week one, and
+> trying to is the fastest way to retain none of them.
 
 | File | What it is | When |
 |------|-----------|------|
-| `ppc-fundamentals.md` | Paid search from zero — account structure, match types, bidding, feeds, conversion tracking | Week 1 |
+| `ppc-fundamentals.md` | Paid search from zero — account structure, match types, bidding, feeds, conversion tracking | Day 2–3 |
 | `cheat-sheet.md` | The ~30 terms you'll actually use, in plain English. Keep it open | From day 1, ongoing |
 | `pdc-primer.md` | Your accounts: what PDC is, how the two accounts work, and the quirks that will trip you up | Weeks 2–3, right before you open the accounts |
 | `seton-emedco-primer.md` | The second account group you'll work on | Week 3–4 |
 | `how-brady-measures.md` | Attribution, guardrails, and which numbers to trust | Week 2 — **the important one** |
-| `the-l10-huddle.md` | The team's weekly meeting in depth — the seven segments, the rules that aren't obvious, and what's expected of you | Week 1, before your first huddle |
-| `how-to-run-a-project.md` | The wrapper around every brief — what to sort out before you start, and what happens after the deliverable exists | Week 1, before your first project |
-| `what-a-deliverable-looks-like.md` | A finished project write-up, annotated — plus the weak version of the same thing for contrast | Week 1, before your first write-up |
+| `the-l10-huddle.md` | The team's weekly meeting in depth — the seven segments, the rules that aren't obvious, and what's expected of you | Skim before your first huddle; read properly week 2 |
+| `how-to-run-a-project.md` | The wrapper around every brief — what to sort out before you start, and what happens after the deliverable exists | Day 4, before T1-1 |
+| `what-a-deliverable-looks-like.md` | A finished project write-up, annotated — plus the weak version of the same thing for contrast | Day 5, before you write up T1-1 |
 | `who-else-is-searching.md` | The groups that bad search terms fall into — and the ones that look bad and aren't | Week 4, before your first search-terms round |
-| `before-it-ships.md` | The checklist to run on your own work before you post a change for review | Week 4 onward — **every time you change something** |
+| `before-it-ships.md` | The checklist to run on your own work before you post a change for review | Week 4 onward — every time you change something |
 
 ---
 

@@ -1,6 +1,8 @@
 # Start here
 
-Read these in order, on your first day.
+Read the first two on your first day. The rest are lookup — **`your-first-two-weeks.md` will
+send you to each one at the point it becomes useful**, and it's the only sequence you need to
+follow.
 
 | File | What it is |
 |------|-----------|
