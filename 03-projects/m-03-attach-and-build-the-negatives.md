@@ -86,10 +86,12 @@ them. If a negative would block one of your own keywords, you'll see it there.
 
 ---
 
-## What good looks like
+## You're done when
 
-- The list is attached, to campaigns you can justify.
-- The first build is applied, and each kill has a one-line reason.
-- You can say roughly **how much spend this would have blocked over the last 30 days** —
-  even approximately. That number is what makes the work legible to someone else.
-- You checked your negatives against existing keywords, and you say so.
+- [ ] You **read the list before attaching** — confirmed it's hygiene, not a routing list
+- [ ] It's attached to campaigns you can **justify**, with which ones and why noted
+- [ ] A first Mecco build from its own search terms, each kill with a one-line **intent** reason
+- [ ] Checked against the account's **existing keywords** — no negative blocks a keyword you bid on
+- [ ] You can say **roughly how much spend this would have blocked** over the last 30 days
+- [ ] Reviewed, applied by you, date noted
+- [ ] Standard wrap — prediction first, written up the same day
