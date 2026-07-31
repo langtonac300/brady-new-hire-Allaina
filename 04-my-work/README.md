@@ -26,7 +26,15 @@ that's genuinely part of the job, not a chore attached to it.
 answer and the date rather than deleting the question. By day 90 that file is the clearest
 record you'll have of how much you learned.
 
-## Uploading
+## Getting your work in here (no git needed)
 
-You don't need to know git. Dragging a file into the GitHub web interface works fine, and
-so does asking for help with it.
+You don't need to know git. Everything works from the GitHub website:
+
+1. Open the folder you want — for a project deliverable that's `04-my-work/projects/`.
+2. **To upload a file you made on your computer:** **Add file → Upload files**, drag it in,
+   then click the green **Commit changes** button at the bottom. That's it — it's saved.
+3. **To write something new right here:** **Add file → Create new file**, give it a name
+   ending in `.md` (e.g. `t1-01-account-tour.md`), write, then **Commit changes**.
+
+One file per project, named for the project, in `projects/`. And **asking someone to help with
+the upload is completely fine** — nobody expects git fluency on day one.

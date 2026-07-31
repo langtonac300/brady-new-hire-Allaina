@@ -18,6 +18,12 @@ subject matter and the ability to work at that size.
 | **Deliverable** | Every project leaves something behind — a list, a doc, a diagram. Put it in `04-my-work/projects/` |
 | **Paired or solo** | Some you'll do with Alex, most on your own with a short readout |
 
+> **"Read-only" on a brief is chosen restraint, not a locked door.** Your account access is
+> standard from day one — nothing technically stops you changing something (see
+> [`how-the-ramp-works.md`](../01-start-here/how-the-ramp-works.md)). So when a brief says
+> *read-only*, that instruction itself **is** the safeguard — which is exactly why it's worth
+> taking literally, not treating as a setting someone else enforces for you.
+
 ## The mechanic that does most of the work: predict, then compare
 
 On anything with a right answer, **you make your call first, then see the answer, then
