@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Time box** | 1 hour |
-| **Account** | PDC Wristbands |
+| **Account** | **Both PDC accounts** — Wristbands *and* Healthcare. The comparison is the project |
 | **Safety** | Read-only |
 | **Paired or solo** | Solo, with a 10-minute readout |
 | **Deliverable** | Half a page → `04-my-work/projects/` |
@@ -31,11 +31,15 @@ Healthcare runs lead-gen PMax with no feed — is the fastest way to stop confla
 
 1. **Open PDC Wristbands and sort the campaigns by type.** PMax, Search, anything else.
 2. **For each PMax campaign, establish whether a product feed is attached.** Look at the
-   asset groups and at whether there's a listing group / product selection at all.
-3. **For the ones with no feed, write down what's actually doing the targeting** — which
+   asset groups and at whether there's a listing group / product selection at all. Expect
+   Wristbands to be the **retail** shape — it's the feed-driven one.
+3. **Now open PDC Healthcare and find its PMax campaigns.** This is where you'll find the
+   **lead-gen** shape, with no product feed at all. You need both to see the contrast, which
+   is why this project spans two accounts.
+4. **For the no-feed campaigns, write down what's actually doing the targeting** — which
    asset types are present, which audience signals are attached, which URLs it's allowed to
    send traffic to.
-4. **Write the half page:** what is a lead-gen PMax campaign with no product feed actually
+5. **Write the half page:** what is a lead-gen PMax campaign with no product feed actually
    doing? What is it showing, where, and to whom?
 
 ---

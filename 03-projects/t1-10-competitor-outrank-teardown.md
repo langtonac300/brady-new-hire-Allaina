@@ -31,8 +31,15 @@ That's a step up, and it's meant to be.
 
 ## What to do
 
-1. **Find it.** Locate the campaigns using the outrank-share strategy and note which
-   competitors are named.
+1. **Find it, and work out *how* it's done.** Locate where the account targets those two
+   competitors, and note which ones they are.
+
+   ⚠️ **Don't go hunting for a bidding strategy with "outrank" in the name.** Google
+   retired the old target-outranking-share strategy years ago, so whatever is happening
+   here is being achieved some other way — a bid strategy plus monitoring, campaign
+   structure, Auction Insights driving manual work, or something else. **Establishing which
+   is the first half of the project.** If you can't work it out from the account, ask —
+   but form a theory first.
 2. **Work out what it's doing to cost per click.** Compare against something — the same
    campaigns before the strategy was applied, or a comparable campaign in the account that
    isn't using it. State what you compared and over what window.
@@ -59,8 +66,8 @@ just gets you someone else's answer.
 
 ## ⚠️ Read-only
 
-Do not change the bidding strategy, the targets, or the named competitors. This is a week-3
-reading exercise on a live account that spends real money.
+Do not change the bidding strategy, the targets, or the named competitors. This is a reading
+exercise on a live account that spends real money.
 
 ---
 

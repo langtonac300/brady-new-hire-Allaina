@@ -54,6 +54,8 @@ worked examples of the two things everyone gets wrong at first.
 | **tROAS** | "Target ROAS" — smart bidding aimed at a return target |
 | **tCPA** | "Target CPA" — aimed at a cost-per-conversion target |
 | **PDC note** | PDC is **already fully on smart bidding** — your lever is the target/budget, not manual bids |
+| **RSA** | "Responsive search ad" — the standard text ad format. You supply up to 15 headlines and 4 descriptions and Google assembles combinations per auction, so you're writing **parts that must work in any order**, not one ad |
+| **Pinning** | Locking an RSA asset to a fixed position. Useful for a required line; overused, it turns a responsive ad back into a static one |
 
 ## Process & meetings
 

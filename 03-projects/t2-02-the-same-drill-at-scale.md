@@ -47,7 +47,9 @@ on a young process than to reverse-engineer on a mature one.
 1. Confirm with Alex **which account** to pull from — Seton US and EMEDCO behave differently
    enough that it matters, and it may depend on what's live that week.
 2. Pull **50 search terms**, same method as T2-1: recent window, mixed across the spend
-   range, cost and conversion columns hidden before you start.
+   range — and then, once you've sampled, **copy the terms alone into a fresh sheet** so you
+   can't see cost or conversions while you make the calls. Sample with cost visible, judge
+   with it hidden. That order matters and it's easy to get backwards.
 3. Call every row Keep/Kill with a one-line reason. Same table, same rules.
 4. **Then, and only then**, look at how the existing negatives are set up for that account
    group — what lists exist, what they cover, and what they don't.

@@ -32,6 +32,13 @@ machinery that keeps the two apart**, which is not obvious and is easy to break.
    toggle in the interface — you'll build it from the campaign naming convention. Check the
    convention with Alex first rather than guessing at it.
 2. **Report both numbers and the ratio.** Note what surprised you about the balance.
+
+   ⚠️ **Some campaigns won't fit the convention.** This is the untidy account — expect
+   names that predate the current scheme, or don't follow it at all. **Don't force them into
+   a bucket.** Put them in a third pile, report what share of spend sits there, and say so.
+   *"I could classify 88% of spend and here's what the other 12% looks like"* is a better
+   answer than a clean split you had to fudge — and the size of that third pile is often the
+   most interesting number in the exercise.
 3. **Now find the mechanism.** Something has to stop the non-brand campaigns from bidding on
    brand searches, and vice versa — otherwise they'd compete with each other for the same
    auctions. Go and find what's doing that job, and describe how it works.

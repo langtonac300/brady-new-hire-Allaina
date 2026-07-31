@@ -65,6 +65,15 @@ Then: **how far off was your hypothesis, and what did you not know when you wrot
 
 ---
 
+## 🛑 Stop here until your step-2 hypothesis is written down
+
+**The section below gives away a large part of the answer.** That's unavoidable — it's also
+a safety rule you need before you quote either of these numbers anywhere.
+
+So: **write your hypothesis first, save it, then read on.** If you've already read ahead,
+say so in your write-up rather than pretending otherwise — an honest "I read the warning
+first and it steered me" is worth more than a hypothesis you've quietly back-fitted.
+
 ## ⚠️ Platform ROAS on this account group is not a revenue number
 
 These two accounts bid on a blended mix that includes actual purchases, **placeholder values

@@ -64,7 +64,17 @@ Say plainly what it does and doesn't mean: it's what those terms *did* cost, not
 save. Budget doesn't vanish when a term is blocked — it moves, and whether it moves somewhere
 better is the open question.
 
-### 4 · Post it for review, then apply it
+### 4 · Check your negatives against the account's own keywords
+
+**Before you post anything.** Take your proposed negative list and check it against the
+keywords the account is actively bidding on. **If one of your negatives would block one of
+your own keywords, you'll see it here** — and that's the single most common way a new
+analyst quietly kills traffic they wanted.
+
+It takes a few minutes and it catches the mistake that is otherwise invisible until someone
+asks why a product line stopped selling.
+
+### 5 · Post it for review, then apply it
 
 Post the structure, the list and the estimate to the proposed-change thread. Once Alex has
 reviewed it, **you make the change** — and you write down the date and time you made it.

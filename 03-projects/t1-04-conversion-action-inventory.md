@@ -9,9 +9,10 @@
 | **Deliverable** | The inventory + a one-sentence conclusion → `04-my-work/projects/` |
 | **Builds toward** | [B · How Brady measures things](../05-self-assessment/baseline.md#b--how-brady-measures-things) · [C · The accounts](../05-self-assessment/baseline.md#c--the-accounts) |
 
-**Read first:** the tracking-landmines section of
-[`pdc-primer.md`](../02-learning/pdc-primer.md) — but see the warning below about *when* to
-read it.
+**Read AFTER, not before:** the tracking-landmines section of
+[`pdc-primer.md`](../02-learning/pdc-primer.md). It tells you what you're about to find, so
+reading it first would hand you the answer. Do steps 1–3, *then* open it and compare — see
+the warning below.
 
 ---
 
@@ -45,10 +46,21 @@ two other accounts, and it's the single highest-value thing you'll learn to chec
 
 ---
 
-## ⚠️ Do step 3 before you re-read the primer
+## ⚠️ The account list isn't the whole answer
+
+Everything above is the **account-level** inventory. But a campaign can be pointed at a
+different set of conversion goals from the account default — which means two campaigns in
+the same account can be optimizing toward different things.
+
+So after step 3, **open two or three individual campaigns and check whether they use the
+account defaults or their own goals.** That's the link between this project and the third
+column you filled in on [T1-1](./t1-01-account-tour.md), and it's the mechanism by which an
+account's steering wheel turns out to have more than one steering wheel.
+
+## ⚠️ Do step 3 before you open the primer
 
 [`pdc-primer.md`](../02-learning/pdc-primer.md) already tells you what you're going to find
-here. **Write your own read of the inventory first, then go back and compare.** That order
+here. **Write your own read of the inventory first, then go and compare.** That order
 is the whole method — reading the answer and then agreeing with it teaches almost nothing.
 
 If your read matches, good. If it doesn't, the gap between the two is the most useful thing

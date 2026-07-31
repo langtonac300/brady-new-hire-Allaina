@@ -9,9 +9,10 @@
 | **Deliverable** | The audit plus five rewritten headlines → `04-my-work/projects/` |
 | **Builds toward** | [A · Foundational paid-search skills](../05-self-assessment/baseline.md#a--foundational-paid-search-skills) |
 
-**Read first:** the campaign-types section of
-[`ppc-fundamentals.md`](../02-learning/ppc-fundamentals.md) for what an RSA is, and its
-Part 10 for the brand rules.
+**Read first:** Part 10 of
+[`ppc-fundamentals.md`](../02-learning/ppc-fundamentals.md) for the brand rules. **RSAs
+aren't covered in the fundamentals** — the next section here is the explanation, so start
+with it rather than going looking.
 
 ---
 
