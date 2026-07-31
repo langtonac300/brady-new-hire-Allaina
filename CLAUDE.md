@@ -86,10 +86,13 @@ other except what's written down here — so a few habits matter more than usual
 Some things here are deliberately incomplete. Don't "helpfully" invent content to fill
 these — flag them to Alex instead:
 
-- `03-projects/` holds the ladder overview plus the **Tier 1 (T1-1…T1-12)** and **Tier M
-  (Mecco, M-1…M-5)** briefs. Tier 1 covers days 1–25, so it ships as a block. **Everything
-  past Tier M gets added a tier at a time as she reaches it** — not all at once, on purpose.
-  Don't write Tier 2/3/4 briefs ahead of that without checking with Alex.
+- `03-projects/` holds the ladder overview plus the **Tier 1 (T1-1…T1-12)**, **Tier 2
+  (T2-1…T2-8)** and **Tier M (Mecco, M-1…M-5)** briefs. Each tier ships as a block once
+  Alex calls for it. **Everything past Tier 2 gets added a tier at a time as she reaches
+  it** — not all at once, on purpose. Don't write Tier 3/4, the tools thread or the AI
+  thread ahead of that without checking with Alex.
+  - **T2-7 has no file of its own** — it's the same project as M-1, and `m-01` and the
+    `03-projects/README.md` index both say so. Don't create `t2-07-*.md`.
 - A guided Sheets workbook for hands-on practice doesn't exist yet.
 - The five `02-learning/` files were adapted from a separate manager-side source in
   2026-07; if that source has moved on since, this repo may lag it slightly. Cross-check

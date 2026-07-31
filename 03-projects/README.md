@@ -47,9 +47,9 @@ than as a question box).
 ## The individual projects
 
 Each project is its own file with the brief, what you'll need, and what "good" looks like.
-**Tier 1 and the Mecco track are here now.** The later tiers get added as you reach them, so
-you're not looking at 40 projects on day one — if you want to see further ahead than you've
-been given, just ask.
+**Tier 1, Tier 2 and the Mecco track are here now.** The later tiers get added as you reach
+them, so you're not looking at 40 projects on day one — if you want to see further ahead
+than you've been given, just ask.
 
 ---
 
@@ -74,6 +74,32 @@ Two a week — one paired with Alex, one solo. Each one is genuinely an hour.
 
 > **Why some are paired:** T1-1, T1-4, T1-5, T1-6 and T1-11 are the ones where a wrong
 > mental model is expensive to unlearn later. The rest are solo with a 10-minute readout.
+
+---
+
+### Tier 2 · Half-day projects · days 20–45 · reversible and reviewed
+
+One a week. The step up from Tier 1 isn't difficulty so much as **length and consequence** —
+half a day instead of an hour, and this is the tier where your first change on a PDC account
+goes live.
+
+| # | Project | Account | What you produce |
+|---|---------|---------|------------------|
+| [T2-1](./t2-01-sqr-predict-then-compare.md) | **SQR predict-then-compare, 50 terms** | PDC Healthcare | Your calls, Alex's calls, every disagreement explained |
+| [T2-2](./t2-02-the-same-drill-at-scale.md) | **The same drill at scale** | Seton / EMEDCO | Same format + one observation about the loop |
+| [T2-3](./t2-03-negative-keyword-build-v1.md) | **Negative-keyword build v1** *(goes live)* | PDC Wristbands | The list, the architecture, a before/after estimate |
+| [T2-4](./t2-04-the-pacing-note.md) | **The pacing note** | PDC | Five lines |
+| [T2-5](./t2-05-feed-label-qa.md) | **Feed-label QA** | Seton US | The QA + flagged rows, routed to Alex |
+| [T2-6](./t2-06-ad-copy-audit.md) | **Ad copy audit against brand** | PDC Healthcare | The audit + five rewritten headlines |
+| T2-7 | **"Find everything wrong with this account"** | Mecco | → **see [M-1](./m-01-the-defect-audit.md)** — same project |
+| [T2-8](./t2-08-trace-one-click.md) | **Trace one click end to end** | PDC + EMEDCO | The trace diagram + where it could break |
+
+> **Only T2-3 touches a live PDC account.** The rest are analysis, audits and proposals —
+> you flag and recommend, someone else decides. That's deliberate: the tier is about
+> building a track record on judgment before it's about making changes.
+>
+> **T2-7 doesn't have its own file.** It's the same project as M-1, listed under Mecco
+> because it starts an arc rather than standing alone.
 
 ---
 
@@ -102,5 +128,5 @@ Do them in order — M-1 finds what M-2, M-3 and M-4 fix.
 
 ### Still to come
 
-Tiers 2, 3 and 4, the tools thread and the AI thread aren't written up yet — the table
-further up this page is the honest preview of what's in them. Ask if you want a look ahead.
+Tiers 3 and 4, the tools thread and the AI thread aren't written up yet — the table further
+up this page is the honest preview of what's in them. Ask if you want a look ahead.
