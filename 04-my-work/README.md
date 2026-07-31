@@ -2,7 +2,7 @@
 
 Put your own work here. Notes, drafts, deliverables, half-finished thinking — all of it.
 
-Suggested folders (make them as you need them):
+The folders already exist — just drop things in:
 
 | Folder | For |
 |--------|-----|
@@ -10,6 +10,10 @@ Suggested folders (make them as you need them):
 | `notes/` | Meeting notes, capture sessions, things people told you |
 | `projects/` | Deliverables from the project ladder, one file per project |
 | `drafts/` | Anything you want a second pair of eyes on before it goes anywhere |
+
+Not sure what a finished deliverable should look like?
+[`what-a-deliverable-looks-like.md`](../02-learning/what-a-deliverable-looks-like.md) is a
+worked example with the reasoning annotated.
 
 ## Two habits worth building
 

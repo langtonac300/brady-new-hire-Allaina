@@ -7,6 +7,11 @@ once and it's hard to tell what to do next.
 > **This is a plan, not a contract.** Days slip. Meetings move. Access takes longer than it
 > should. If a day gets pushed, push it — say so and the rest slides. Nothing here is a
 > deadline you can miss.
+>
+> **When that happens, go to
+> [`when-youre-stuck-or-idle.md`](./when-youre-stuck-or-idle.md).** It has a list of things
+> you can always do alone, and the rule about how long to stay stuck before asking. Some of
+> these ten days *will* fall through — that's planned for, not a surprise.
 
 Two things run alongside every day below:
 

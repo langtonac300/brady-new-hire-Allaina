@@ -10,6 +10,7 @@ Reference you'll come back to. Read in this order.
 | `seton-emedco-primer.md` | The second account group you'll work on | Week 3–4 |
 | `how-brady-measures.md` | Attribution, guardrails, and which numbers to trust | Week 2 — **the important one** |
 | `the-l10-huddle.md` | The team's weekly meeting in depth — the seven segments, the rules that aren't obvious, and what's expected of you | Week 1, before your first huddle |
+| `what-a-deliverable-looks-like.md` | A finished project write-up, annotated — plus the weak version of the same thing for contrast | Week 1, before your first write-up |
 | `who-else-is-searching.md` | The groups that bad search terms fall into — and the ones that look bad and aren't | Week 4, before your first search-terms round |
 | `before-it-ships.md` | The checklist to run on your own work before you post a change for review | Week 4 onward — **every time you change something** |
 

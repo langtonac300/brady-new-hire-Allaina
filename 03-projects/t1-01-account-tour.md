@@ -12,6 +12,10 @@
 **Read first:** [`pdc-primer.md`](../02-learning/pdc-primer.md) and the structure section of
 [`cheat-sheet.md`](../02-learning/cheat-sheet.md).
 
+**This is your first write-up, so look at
+[`what-a-deliverable-looks-like.md`](../02-learning/what-a-deliverable-looks-like.md)** — it
+works this exact deliverable through on an invented account, and shows the weak version too.
+
 ---
 
 ## The point
