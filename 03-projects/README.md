@@ -46,8 +46,61 @@ than as a question box).
 
 ## The individual projects
 
-Alex will add these as you reach them, so you're not looking at 40 projects on day one.
-Each arrives as its own file in this folder with the brief, what you need, and what "good"
-looks like.
+Each project is its own file with the brief, what you'll need, and what "good" looks like.
+**Tier 1 and the Mecco track are here now.** The later tiers get added as you reach them, so
+you're not looking at 40 projects on day one — if you want to see further ahead than you've
+been given, just ask.
 
-If you want to see further ahead than you've been given, just ask.
+---
+
+### Tier 1 · One-hour projects · days 1–25 · read-only
+
+Two a week — one paired with Alex, one solo. Each one is genuinely an hour.
+
+| # | Project | Account | What you produce |
+|---|---------|---------|------------------|
+| [T1-1](./t1-01-account-tour.md) | **Account tour, narrated** *(paired)* | PDC Healthcare | A one-page structure map |
+| [T1-2](./t1-02-a-different-animal.md) | **The same tour on a different animal** | Seton US | Three structural differences, with reasons |
+| [T1-3](./t1-03-keyword-vs-search-term.md) | **Keyword vs. search term** | PDC Healthcare | An annotated 30-row list |
+| [T1-4](./t1-04-conversion-action-inventory.md) | **Conversion-action inventory** *(paired)* | PDC Healthcare | The inventory + one conclusion |
+| [T1-5](./t1-05-source-and-caveat-the-slide.md) | **Source and caveat the slide** *(paired)* | Both | An annotated Deep Dive slide |
+| [T1-6](./t1-06-guardrail-drill.md) | **Guardrail drill** *(paired)* | Both | Ten calls, plus what looked wrong |
+| [T1-7](./t1-07-brand-vs-nonbrand.md) | **Brand vs. non-brand** | Seton US | The split + what keeps them apart |
+| [T1-8](./t1-08-the-timezone-trap.md) | **The timezone trap** | PDC + Seton + EMEDCO | Three numbers and a rule |
+| [T1-9](./t1-09-pmax-with-no-feed.md) | **PMax with no feed** | PDC Wristbands | Half a page |
+| [T1-10](./t1-10-competitor-outrank-teardown.md) | **Competitor-outrank teardown** | PDC Wristbands | A recommendation with a number |
+| [T1-11](./t1-11-the-roas-puzzle.md) | **The ROAS puzzle** *(paired)* | Seton + EMEDCO | Hypothesis, answer, and the gap between |
+| [T1-12](./t1-12-dont-clean-that-up.md) | **Don't clean that up** | EMEDCO | What breaks if the "junk" goes |
+
+> **Why some are paired:** T1-1, T1-4, T1-5, T1-6 and T1-11 are the ones where a wrong
+> mental model is expensive to unlearn later. The rest are solo with a 10-minute readout.
+
+---
+
+### Tier M · Mecco — the account you actually own · days 25–90
+
+Mecco is small, it's Alex's own account, and it's **half-built** — which is exactly why it's
+yours. The spend is tiny enough that being wrong is cheap, there's no handover to negotiate,
+and there is real, visible improvement available to someone six weeks in.
+
+**This is where you get to be an owner before you're ready to own PDC.** Day 60 is a long
+time to go without having been trusted with anything.
+
+| # | Project | Time | What you produce |
+|---|---------|------|------------------|
+| [M-1](./m-01-the-defect-audit.md) | **The defect audit** | Half a day | A defect list, ranked by cost |
+| [M-2](./m-02-fix-the-conversion-values.md) | **Fix the $1 conversion values** | Half a day | A value model — **and your first live change** |
+| [M-3](./m-03-attach-and-build-the-negatives.md) | **Attach and build the negatives** | Half a day | The list attached + a first build |
+| [M-4](./m-04-diagnose-the-clarity-gap.md) | **Diagnose the Clarity gap** | 1–2 days | A trace, routed to Alex |
+| [M-5](./m-05-own-it.md) | **Own it** | Ongoing from ~day 45 | A standing weekly line that's yours |
+
+Do them in order — M-1 finds what M-2, M-3 and M-4 fix.
+
+⚠️ **MECCO ≠ EMEDCO.** Different account, different account group, very easy to typo.
+
+---
+
+### Still to come
+
+Tiers 2, 3 and 4, the tools thread and the AI thread aren't written up yet — the table
+further up this page is the honest preview of what's in them. Ask if you want a look ahead.
