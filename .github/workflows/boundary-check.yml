@@ -1,0 +1,34 @@
+name: Boundary check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for manager-side terms outside CLAUDE.md
+        run: |
+          set +e
+          MATCHES=$(grep -rinE \
+            "wrong-hire|fit-with-support|business case|headcount|probation|I-9|background check" \
+            . --include=*.md | grep -vE '^(\./)?CLAUDE\.md:')
+          set -e
+
+          if [ -n "$MATCHES" ]; then
+            echo "$MATCHES"
+            echo ""
+            echo "::error::Found manager-side boundary terms outside CLAUDE.md (see matches above)."
+            echo "::error::This repo is for the analyst — manager-side content (playbooks, the"
+            echo "::error::business case, hiring machinery, competency gates, judgments about"
+            echo "::error::people) must never land here. Review and remove before this merges."
+            exit 1
+          fi
+
+          echo "No boundary-term matches outside CLAUDE.md. Clean."

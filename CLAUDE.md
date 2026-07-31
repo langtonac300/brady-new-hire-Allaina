@@ -31,6 +31,65 @@ manager-side and leave it out.
 
 ---
 
+## Scope — what belongs here, and what doesn't
+
+**In scope:** the analyst's onboarding — her learning material, her project work, her
+self-assessments, anything that helps her ramp on Brady's paid-search accounts.
+
+**Out of scope — don't add these, even if a session is asked to:**
+- Manager-side content (see the boundary rule above).
+- Anything about a different Brady initiative, account, or team that isn't part of her
+  ramp — this repo is not a general Brady knowledge dump.
+- Session artifacts: scratch notes, "here's what I did this session" summaries, debug
+  output, half-finished drafts — unless they're clearly her own work-in-progress and belong
+  in `04-my-work/`.
+- A second version of something that already exists. If content is close to an existing
+  file, edit that file — don't create `pdc-primer-v2.md` or `pdc-primer-updated.md`.
+
+---
+
+## Keeping this repo clean across many sessions
+
+This repo gets touched by a lot of different Claude sessions over time, plus Kelsey
+uploading things directly through the GitHub web UI. None of them share context with each
+other except what's written down here — so a few habits matter more than usual:
+
+1. **Check before you create.** Search the repo for related content before adding a new
+   file. If something adjacent already exists, extend it instead of duplicating it.
+2. **Stay inside the five numbered folders** unless there's a genuine new category of
+   content — not just convenience. A sixth top-level folder should be rare.
+3. **Match the existing voice.** Second person, plain language, ⚠️ callouts for gotchas,
+   concise tables over long prose. Skim a neighboring file before writing a new one so it
+   doesn't read like it was written by someone else — because it was.
+4. **Update the index.** Every folder with multiple files has its own `README.md` acting
+   as an index. If you add, rename, or remove a file, update that README in the same
+   commit — a stale index is worse than no index.
+5. **Run the boundary check before committing anything:**
+   ```
+   grep -rinE "wrong-hire|fit-with-support|business case|headcount|probation|I-9|background check" . --include=*.md
+   ```
+   Only the mentions inside this file's boundary-rule section above should match. Anything
+   in another file, stop and investigate before pushing. (A GitHub Action also runs this
+   check automatically on every push to `main` — but it only reports after the fact; don't
+   rely on it instead of checking yourself.)
+6. **When in doubt, don't add it.** If you're not sure content belongs in this repo —
+   because it's not clearly about her ramp, or you can't tell which side of the boundary
+   it came from — say so and leave it out, rather than guessing.
+
+## Known gaps (not bugs)
+
+Some things here are deliberately incomplete. Don't "helpfully" invent content to fill
+these — flag them to Alex instead:
+
+- `03-projects/` only has the ladder overview, not individual project briefs. Alex adds
+  those one at a time as she reaches them — not all at once, on purpose.
+- A guided Sheets workbook for hands-on practice doesn't exist yet.
+- The five `02-learning/` files were adapted from a separate manager-side source in
+  2026-07; if that source has moved on since, this repo may lag it slightly. Cross-check
+  live numbers against the real systems (Google Ads, dashboards), never against this repo.
+
+---
+
 ## What's here
 
 | Folder | What it is |

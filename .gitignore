@@ -1,0 +1,12 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Accidental drag-and-drop uploads
+*.zip
+*.tmp
+
+# Editor/tooling cruft
+.vscode/
+.idea/
+node_modules/
