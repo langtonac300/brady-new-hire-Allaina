@@ -1,8 +1,8 @@
 # CLAUDE.md — agent entry point
 
-**This repo belongs to Allaina Struve, the new Paid Search Analyst on Brady's Americas
-paid media team.** It holds their learning material, their project work, and their
-self-assessments. It is a working space, not a reference archive.
+**This repo belongs to Allaina Struve, the new Paid Search Analyst on Brady's Americas paid
+media team.** It holds Allaina's learning material, project work and self-assessments. It is
+a working space, not a reference archive.
 
 ---
 
@@ -33,16 +33,16 @@ manager-side and leave it out.
 
 ## Scope — what belongs here, and what doesn't
 
-**In scope:** the analyst's onboarding — their learning material, their project work,
-their self-assessments, anything that helps them ramp on Brady's paid-search accounts.
+**In scope:** Allaina's onboarding — the learning material, the project work, the
+self-assessments, anything that helps Allaina ramp on Brady's paid-search accounts.
 
 **Out of scope — don't add these, even if a session is asked to:**
 - Manager-side content (see the boundary rule above).
-- Anything about a different Brady initiative, account, or team that isn't part of their
+- Anything about a different Brady initiative, account, or team that isn't part of Allaina's
   ramp — this repo is not a general Brady knowledge dump.
 - Session artifacts: scratch notes, "here's what I did this session" summaries, debug
-  output, half-finished drafts — unless they're clearly the analyst's own work-in-progress
-  and belong in `04-my-work/`.
+  output, half-finished drafts — unless they're clearly Allaina's own work-in-progress and
+  belong in `04-my-work/`.
 - A second version of something that already exists. If content is close to an existing
   file, edit that file — don't create `pdc-primer-v2.md` or `pdc-primer-updated.md`.
 
@@ -73,7 +73,7 @@ other except what's written down here — so a few habits matter more than usual
    check automatically on every push to `main` — but it only reports after the fact; don't
    rely on it instead of checking yourself.)
 6. **When in doubt, don't add it.** If you're not sure content belongs in this repo —
-   because it's not clearly about their ramp, or you can't tell which side of the boundary
+   because it's not clearly about Allaina's ramp, or you can't tell which side of the boundary
    it came from — say so and leave it out, rather than guessing.
 7. **Never `git push --force` or delete `main`.** This repo is private, and GitHub's
    branch-protection enforcement for private repos needs a paid plan this repo doesn't
@@ -89,7 +89,7 @@ these — flag them to Alex instead:
 - `03-projects/` holds the ladder overview plus the **Tier 1 (T1-1…T1-12)**, **Tier 2
   (T2-1…T2-8)**, **Tier 3 (T3-1…T3-5)** and **Tier M (Mecco, M-1…M-5)** briefs. Each tier
   ships as a block once Alex calls for it. **Everything past Tier 3 gets added a tier at a
-  time as they reach it** — not all at once, on purpose. Don't write Tier 4, the tools
+  time as Allaina reaches it** — not all at once, on purpose. Don't write Tier 4, the tools
   thread or the AI thread ahead of that without checking with Alex.
   - **T3-5 is the first-experiment brief** — it's the ramp project `running-a-real-test.md`
     and `after-the-ramp.md` both point forward to, and it's the only Tier 3 project that
@@ -97,9 +97,9 @@ these — flag them to Alex instead:
   - **T2-7 has no file of its own** — it's the same project as M-1, and `m-01` and the
     `03-projects/README.md` index both say so. Don't create `t2-07-*.md`.
   - **There is no `m-04-*.md`, on purpose.** M-4 (the Clarity trace) was removed by Alex on
-    2026-07-31 because it was the only project depending on a tool he'd decided not to train
-    them on. Tier M is M-1, M-2, M-3, M-5. **Don't recreate it and don't renumber M-5** to
-    close the gap — same convention as the missing `t2-07-*.md`.
+    2026-07-31 because it was the only project depending on a tool he'd decided not to
+    train the analyst on. Tier M is M-1, M-2, M-3, M-5. **Don't recreate it and don't
+    renumber M-5** to close the gap — same convention as the missing `t2-07-*.md`.
   - **`03-projects/after-the-ramp.md` is not a tier.** It's a horizon doc about year one —
     rocks, goals, the four shifts, and directions that are open. Alex asked for it
     explicitly (2026-07-31). It describes directions, deliberately not briefs, so the
@@ -118,25 +118,25 @@ these — flag them to Alex instead:
 | `01-start-here/` | Read these first — orientation and how the ramp works |
 | `02-learning/` | Reference material: PPC fundamentals, the accounts, the glossary |
 | `03-projects/` | The project ladder — the actual work, project by project |
-| `04-my-work/` | Their workspace: notes, drafts, deliverables, capture notes |
+| `04-my-work/` | Allaina's workspace: notes, drafts, deliverables, capture notes |
 | `05-self-assessment/` | The Day-1 baseline and the Day-90 re-score |
 
 ---
 
-## How to help them well
+## How to help Allaina well
 
-- **They are new to paid search.** Explain rather than assume; expand acronyms the first
+- **Allaina is new to paid search.** Explain rather than assume; expand acronyms the first
   time; don't skip the "why."
 - **Uncertainty goes at the top.** If a number or a claim needs verifying, say so before
   the answer, not in a footnote.
-- **Never invent a Brady number.** If a figure isn't in this repo or in a system they can
+- **Never invent a Brady number.** If a figure isn't in this repo or in a system Allaina can
   open, say you don't have it and name where it lives. Fabricated-but-plausible numbers are
   the single most damaging thing an assistant can produce in this job.
 - **Point at the source of truth.** This repo describes systems; it isn't the live system.
   Real numbers come from Google Ads, the MTD Spend dashboard, Power BI, Adobe or BigQuery.
 - **No credentials, ever.** If a task needs one, say where it's stored.
 
-## Brady house rules that apply to their work product
+## Brady house rules that apply to Allaina's work product
 
 - **Gemini is the company's sanctioned AI tool.** Anything pushed into a corporate system
   — Google Ads scripts, GTM, shared docs, BigQuery SQL comments — must not reference other
