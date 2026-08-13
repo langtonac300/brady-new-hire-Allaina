@@ -137,7 +137,7 @@
   /* ============================== rail ============================== */
 
   .nav {
-    flex: 0 0 216px; background: var(--paper);
+    flex: 0 0 234px; background: var(--paper);
     border-right: 1px solid var(--hairline);
     padding: 18px 12px; overflow-y: auto;
   }
@@ -173,7 +173,9 @@
   /* ============================== main ============================== */
 
   .main { flex: 1; min-width: 0; overflow-y: auto; }
-  .wrap { max-width: 1120px; padding: 30px 34px 90px; }
+  /* Wide enough to use a real monitor. The reader keeps its own narrow measure regardless -
+     long-form text wants 68 characters no matter how much room there is. */
+  .wrap { max-width: 1560px; padding: 30px 40px 90px; }
   .main.split { display: flex; gap: 0; padding: 0; overflow: hidden; }
 
   .page-head { margin-bottom: 26px; }
@@ -195,14 +197,23 @@
 
   /* ============================== hero ============================== */
 
+  /* The masthead, the phase strip and the day-one card are one stacked column and all run to
+     the same width. Three different caps read as an accident rather than a hierarchy. */
   .welcomehero, .welcomecard, .rampstrip {
     display: block; width: 100%; height: auto; border-radius: var(--r-lg);
   }
-  .welcomehero { margin-bottom: 16px; box-shadow: var(--shadow); }
-  .rampstrip { margin-bottom: 22px; max-width: 900px; border-radius: var(--r); }
+  .welcomehero { margin-bottom: 14px; box-shadow: var(--shadow); }
+  .rampstrip { margin-bottom: 14px; }
   .welcomecard {
-    margin: 0 0 22px; max-width: 720px;
+    margin: 0 0 26px;
     border: 1px solid var(--hairline); box-shadow: var(--shadow-sm);
+  }
+
+  /* Concept diagrams sit above the document that teaches them. They are self-contained
+     slides, so they get the full reader width rather than the text measure. */
+  .diagram {
+    display: block; width: 100%; height: auto; max-width: 1100px;
+    border-radius: var(--r); margin: 14px 0 26px; box-shadow: var(--shadow);
   }
 
   .hero {
@@ -250,11 +261,11 @@
   .medals { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-start; }
   .medals img { width: 132px; height: auto; }
 
-  /* Library folder headers. */
-  .folderhead {
-    display: block; width: 100%; height: auto;
-    position: sticky; top: 0; z-index: 1;
-    border-bottom: 1px solid var(--hairline);
+  /* The folder banner, in the reader where it is wide enough to read. */
+  .folderbanner {
+    display: block; width: 100%; height: auto; max-width: 1100px;
+    border: 1px solid var(--hairline); border-radius: var(--r);
+    margin: 14px 0 20px;
   }
 
   /* Status stamps and project badges, in the detail panel only. */

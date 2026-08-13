@@ -41,6 +41,7 @@ copy you can annotate. If the source changes, you re-import and your notes survi
 | **Readout builder** | The three-part readout, pre-filled with your prediction and anything you logged as wrong |
 | **1:1 prep** | Your agenda assembled from what you have already written — finished work, what's in flight, the habits behind your misses, open questions, follow-ups you owe, access still outstanding. Copy it and go |
 | **Reading** | Mark a document read and it dates itself. Internal links between documents work |
+| **Concept diagrams** | Three of them, shown above the document that teaches the concept — attribution on `how-brady-measures`, keyword-vs-search-term on the fundamentals and T1-3, the guardrail on T1-6 and T2-4 |
 
 > The 1:1 is analyst-led — you bring the agenda and Alex doesn't prepare one. That's the one
 > this app earns its keep on.
@@ -127,10 +128,14 @@ When the graphics change:
 python3 06-tracker/tools/build-images.py     # needs: pip install pillow
 ```
 
-That rewrites `apps-script/Images.html`. The 54 images in
+That rewrites `apps-script/Images.html`. The 57 images in
 [`graphics/`](./graphics/) get resized to the largest size the interface actually renders them
-at and recompressed — 2.5 MB of source becomes about 400 KB inlined, because Apps Script has
+at and recompressed — 9.5 MB of source becomes about 600 KB inlined, because Apps Script has
 no way to serve a file and every image has to travel inside the page.
+
+> One image in the kit isn't used as supplied: the folder banners are 1386 px wide with type
+> set for that size, and the library list column is 336 px. Squeezed in there they scale to a
+> quarter and stop being readable, so they run in the reader instead, where there is room.
 
 ### Checking it still works
 

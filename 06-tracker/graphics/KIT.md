@@ -46,6 +46,16 @@ Apps Script can't serve local files — either base64-inline these (`<img src="d
 | badge-paired.png / badge-solo.png | 3x | yes | Project brief "Paired or solo" rows. |
 | badge-timebox.png | 3x | yes | Project brief "Time box" rows — pair with live "1 hour" text. |
 
+## Batch 3 — concept diagrams (dark navy, hero style)
+
+| File | Size (px) | Where to use |
+|---|---|---|
+| diagram-keyword-vs-search-term.png | 2800×1200 (2x) | ppc-fundamentals Part 2, T1-3 brief. The net vs what people typed, incl. Keep/Kill. |
+| diagram-attribution.png | 2800×1280 (2x) | how-brady-measures — the one rule. FT 180-day vs platform Conversions, worked journey. |
+| diagram-guardrail.png | 2800×1120 (2x) | Guardrail drill T1-6 / pacing note T2-4. Ceiling-not-target gauge + the three caveats. |
+
+Render diagrams full content width (~800–1100px). They're self-contained slides — no text overlay needed.
+
 ## Usage notes
 
 - 2x/3x files are retina exports — render at half/third size in CSS.
