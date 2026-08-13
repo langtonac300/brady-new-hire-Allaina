@@ -87,10 +87,21 @@ Some things here are deliberately incomplete. Don't "helpfully" invent content t
 these — flag them to Alex instead:
 
 - `03-projects/` holds the ladder overview plus the **Tier 1 (T1-1…T1-12)**, **Tier 2
-  (T2-1…T2-8)**, **Tier 3 (T3-1…T3-5)** and **Tier M (Mecco, M-1…M-5)** briefs. Each tier
-  ships as a block once Alex calls for it. **Everything past Tier 3 gets added a tier at a
-  time as Allaina reaches it** — not all at once, on purpose. Don't write Tier 4, the tools
-  thread or the AI thread ahead of that without checking with Alex.
+  (T2-1…T2-8)**, **Tier 3 (T3-1…T3-5)**, **Tier M (Mecco, M-1…M-5)** and **Tier 4
+  (T4-1…T4-4)** briefs. Each tier shipped as a block once Alex called for it. **The ladder
+  is now complete** — Tier 4 is the last tier and there is no Tier 5. Don't invent one, and
+  don't extend Tier 4 past T4-4 without checking with Alex; year-one direction lives in
+  `after-the-ramp.md`, deliberately as directions rather than briefs.
+  - **Tier 4 is the capstone, added by Alex on 2026-08-13.** One arc on Mecco across days
+    70–90, four staged briefs that depend on each other in order, not four standalone
+    projects. Two things hold it together and shouldn't be edited out:
+    **(a)** the *change log* T4-1 starts and all four stages feed — it's the deliverable that
+    makes the day-90 readout attributable; **(b)** T4-3's **blocked-test fallback**, which is
+    deliberate, not a hedge. T4-3 depends on landing-page work outside the analyst's control,
+    and the brief's stated outcome if it can't launch is the design plus the power math plus
+    what it would take to unblock. **Don't rewrite that into "run a before-and-after
+    instead."** T4-2 also deliberately leaves *which* new conversion action to propose to the
+    analyst — the brief gives constraints, not the answer. Don't fill it in.
   - **T3-5 is the first-experiment brief** — it's the ramp project `running-a-real-test.md`
     and `after-the-ramp.md` both point forward to, and it's the only Tier 3 project that
     goes live. Don't duplicate the experiment method into it; it points at that learning file.
