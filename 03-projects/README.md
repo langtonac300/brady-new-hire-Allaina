@@ -72,9 +72,8 @@ start in week one.
 ## The individual projects
 
 Each project is its own file with the brief, what you'll need, and what "good" looks like.
-**Tier 1, Tier 2, Tier 3 and the Mecco track are here now.** The later tiers get added as you
-reach them, so you're not looking at 40 projects on day one — if you want to see further ahead
-than you've been given, just ask.
+**The whole ladder is here now** — Tier 1, Tier 2, Tier 3, the Mecco track and the Tier 4
+capstone. That's the complete 90 days; there isn't a hidden tier behind it.
 
 ---
 
@@ -172,6 +171,38 @@ Do them in order — M-1 finds what M-2 and M-3 fix.
 
 ---
 
+### Tier 4 · The capstone · days 70–90 · one arc, four stages
+
+**This is the final project.** Not four separate briefs that happen to be next to each other —
+one continuous piece of work on Mecco, where each stage is measured against the one before it.
+
+It's on Mecco because by day 70 you'll have owned that account for a month
+([M-5](./m-05-own-it.md)) and fixed what was broken on it (M-1 → M-3). The capstone is what an
+owner does *next*: **change what the account earns, and be able to prove it was you.**
+
+| # | Stage | Time | What you produce |
+|---|---------|------|------------------|
+| [T4-1](./t4-01-where-the-money-goes.md) | **Where the money goes** | 2–3 days | The spend, search-term and Quality Score diagnosis — plus the change log |
+| [T4-2](./t4-02-a-second-way-in.md) | **A second way in** | 2–3 days | A new conversion action: what it is, what it's worth, primary or secondary |
+| [T4-3](./t4-03-the-landing-page-test.md) | **The landing page test** *(goes live)* | 1 day to design, then it runs | The design and the power math, then the honest readout |
+| [T4-4](./t4-04-what-it-should-spend.md) | **What it should spend** | 1–2 days | A budget recommendation and the order campaigns get turned on |
+
+**Do them in order.** T4-1 produces the numbers T4-3 and T4-4 depend on, and T4-2 is very likely
+what makes T4-3 answerable at all.
+
+> **The change log is the spine.** T4-1 starts it and all four stages feed it: every change, the
+> date, what it should move, and what it makes un-comparable. It exists because you'll be the
+> largest source of change on this account for three weeks — and without it, the day-90 readout
+> is four changes and a number nobody can attribute. It's the [M-2](./m-02-fix-the-conversion-values.md)
+> lesson about non-retroactive values, generalized to everything.
+
+> ⚠️ **T4-3 may not be launchable, and the brief says what to do about that.** It depends on
+> landing-page work outside your control. Check that gate at the *start* of the stage — a
+> designed test you correctly decline to run is a real outcome, and running a weak version
+> instead is not.
+
+---
+
 ### The two continuous threads — they run alongside the whole ladder
 
 Neither is a tier. Both start in week one and thread through the projects above, so read each
@@ -185,11 +216,11 @@ early and come back when a project names a move it covers.
 
 ---
 
-### Still to come
+### That's the whole ladder
 
-Tier 4 (the week-long capstones) isn't written up yet — the table further up this page is the
-honest preview of what's in it. Both continuous threads above are written up now. Ask if you
-want a look ahead at the rest.
+Nothing is being held back now — Tier 1 through Tier 4, the Mecco track and both continuous
+threads are all written up. If something on it looks wrong for where you actually are, say so;
+the sequence is a plan, not a contract.
 
 ---
 
