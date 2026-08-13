@@ -952,6 +952,7 @@
       return (
         '<div class="head">' +
         '<h3>' + esc(meta.Title) + '</h3>' +
+        (meta.Status === 'Read' ? '<img class="readstamp" src="' + IMG.stampRead + '" alt="Read">' : '') +
         '<span class="chip">' + esc(meta.Folder) + '</span>' +
         (linked.length
           ? linked.map(function (p) {
@@ -1413,10 +1414,14 @@
         return Number(a.Order) - Number(b.Order);
       });
 
+      // The Reference group in the rail is text-only, so this icon earns its place here
+      // instead - it is the one the kit provides for this view.
       var html =
-        '<div class="page-head"><h2 class="page">Self-assessment</h2>' +
+        '<div class="page-head titled">' +
+        '<img class="pageicon" src="' + IMG.navSkills + '" alt="">' +
+        '<div><h2 class="page">Self-assessment</h2>' +
         '<p class="lede">Rate yourself before any training starts, then again at day 30 and day 90. It is ' +
-        'not a test and nobody else scores it - its only job is to show you how far you moved.</p></div>' +
+        'not a test and nobody else scores it - its only job is to show you how far you moved.</p></div></div>' +
         '<div class="callout"><b>Some scores will go down at day 30, and that is the training working.</b> ' +
         'On things you have not learned yet, a day-one rating is usually too high - you cannot see the shape ' +
         'of something you have not learned. Measurement and attribution is where this hits hardest.</div>';

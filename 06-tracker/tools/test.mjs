@@ -557,6 +557,40 @@ check('re-import refreshes the content stamp', String(run('getSetting("Content v
 run('repairWorkbook()');
 eq('repair does not lose data', run('dbSelect(T.DOCS)').length, 63);
 
+/* ================================ graphics ================================= */
+
+/**
+ * Every image in the kit has to be three things: present on disk, inlined into Images.html,
+ * and actually referenced by the interface. The third is the one that slips - an image can
+ * sit in the payload costing bytes on every page load without ever being drawn.
+ */
+{
+  const GFX = join(HERE, '..', 'graphics');
+  const files = readdirSync(GFX).filter((f) => f.endsWith('.png')).sort();
+  const plan = readFileSync(join(HERE, 'build-images.py'), 'utf8');
+  const inlined = readFileSync(join(SRC, 'Images.html'), 'utf8');
+  const ui = readFileSync(join(SRC, 'JavaScript.html'), 'utf8');
+
+  const keyFor = {};
+  for (const [, file, key] of plan.matchAll(/\("([^"]+\.png)",\s*"([^"]+)"/g)) keyFor[file] = key;
+
+  const unplanned = files.filter((f) => !keyFor[f]);
+  const notInlined = files.filter((f) => keyFor[f] && !inlined.includes(`${keyFor[f]}:`));
+  const notDrawn = files.filter(
+    (f) => keyFor[f] && inlined.includes(`${keyFor[f]}:`) && !new RegExp(`\\b${keyFor[f]}\\b`).test(ui)
+  );
+
+  check('every graphic is in the build plan', unplanned.length === 0, unplanned.join(', '));
+  check('every graphic is inlined', notInlined.length === 0, notInlined.join(', '));
+  check('every inlined graphic is actually displayed', notDrawn.length === 0,
+    `${notDrawn.join(', ')} - costing bytes on every load without ever being drawn`);
+  check('the inlined payload stays under a megabyte',
+    Buffer.byteLength(inlined) < 1024 * 1024,
+    `Images.html is ${Math.round(Buffer.byteLength(inlined) / 1024)} KB`);
+
+  console.log(`  ${files.length} graphics, all inlined and drawn, ${Math.round(Buffer.byteLength(inlined) / 1024)} KB on the page.\n`);
+}
+
 /* =============================== markdown ================================= */
 
 console.log('Rendering all 63 documents...\n');
