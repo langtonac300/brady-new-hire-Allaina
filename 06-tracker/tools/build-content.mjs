@@ -67,6 +67,8 @@ const ORDER = [
   '02-learning/what-a-deliverable-looks-like.md',
   '02-learning/the-l10-huddle.md',
   '02-learning/who-else-is-searching.md',
+  '02-learning/ad-copy-and-assets.md',
+  '02-learning/landing-pages.md',
   '02-learning/before-it-ships.md',
   '02-learning/running-a-real-test.md',
 
