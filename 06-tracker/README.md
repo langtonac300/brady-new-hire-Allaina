@@ -52,6 +52,11 @@ About ten minutes, and you only do it once.
 > Click **Advanced → Go to (your project)**. You're granting your own script access to your
 > own Sheet.
 
+**Step 4 is thirteen files pasted by hand, and it is the dullest part of this.** If you'd
+rather not: Google's `clasp` tool pushes the whole folder in one command. It needs Node and a
+one-time `clasp login`, then `clasp clone <script id>` in `apps-script/` and `clasp push`.
+Worth it if you expect to change the code more than once; not worth it for a single setup.
+
 ### Opening the app
 
 **Ramp workbook → Open the app** works straight away, in a window over the Sheet.
