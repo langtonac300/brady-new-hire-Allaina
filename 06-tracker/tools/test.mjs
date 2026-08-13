@@ -9,7 +9,7 @@
  * it, and a lock that is always free. That is enough to build the whole workbook, seed it, and
  * drive every API call the browser can make.
  *
- * It then renders all 63 documents through the real markdown renderer, lifted out of
+ * It then renders all 65 documents through the real markdown renderer, lifted out of
  * JavaScript.html, and checks the output is well formed and that internal links resolve.
  *
  * Exit code 0 means everything passed.
@@ -316,7 +316,7 @@ const docs = run('dbSelect(T.DOCS)');
 const projects = run('dbSelect(T.PROJECTS)');
 const skills = run('dbSelect(T.SKILLS)');
 
-eq('63 documents seeded', docs.length, 63);
+eq('65 documents seeded', docs.length, 65);
 eq('33 projects seeded', projects.length, 33);
 eq('31 skills seeded', skills.length, 31);
 
@@ -401,7 +401,7 @@ const api = (fn, ...args) => run(`${fn}(${args.map((a) => JSON.stringify(a)).joi
 
 const boot = api('apiBootstrap');
 check('apiBootstrap succeeds', boot.ok === true, JSON.stringify(boot.error));
-eq('bootstrap carries the documents', boot.data.docs.length, 63);
+eq('bootstrap carries the documents', boot.data.docs.length, 65);
 check('bootstrap does not ship document bodies', boot.data.docs.every((d) => d.Body === undefined),
   'the bootstrap payload would be 350 KB if it did');
 
@@ -542,7 +542,7 @@ eq('a skill score saves', skillSave.data['Day 1'], 'Developing');
 
 console.log('Re-running setup and re-importing...');
 run('setupWorkbook()');
-eq('setup twice does not duplicate documents', run('dbSelect(T.DOCS)').length, 63);
+eq('setup twice does not duplicate documents', run('dbSelect(T.DOCS)').length, 65);
 eq('setup twice does not duplicate projects', run('dbSelect(T.PROJECTS)').length, 33);
 eq('setup twice keeps reading progress', run('dbGet(T.DOCS,"README")["My notes"]'), 'The attribution bit is the one to re-read.');
 
@@ -551,11 +551,11 @@ run('reimportContent()');
 eq('re-import keeps project status', run('dbGet(T.PROJECTS,"T2-3").Status'), 'In progress');
 eq('re-import keeps project notes', run('dbGet(T.PROJECTS,"T2-3").Notes'), 'Waiting on the negatives list');
 eq('re-import keeps document notes', run('dbGet(T.DOCS,"README")["My notes"]'), 'The attribution bit is the one to re-read.');
-eq('re-import keeps the document count', run('dbSelect(T.DOCS)').length, 63);
-check('re-import refreshes the content stamp', String(run('getSetting("Content version")')).includes('63 documents'));
+eq('re-import keeps the document count', run('dbSelect(T.DOCS)').length, 65);
+check('re-import refreshes the content stamp', String(run('getSetting("Content version")')).includes('65 documents'));
 
 run('repairWorkbook()');
-eq('repair does not lose data', run('dbSelect(T.DOCS)').length, 63);
+eq('repair does not lose data', run('dbSelect(T.DOCS)').length, 65);
 
 /* ================================ graphics ================================= */
 
@@ -644,7 +644,7 @@ eq('repair does not lose data', run('dbSelect(T.DOCS)').length, 63);
 
 /* =============================== markdown ================================= */
 
-console.log('Rendering all 63 documents...\n');
+console.log('Rendering all 65 documents...\n');
 
 const clientSrc = readFileSync(join(SRC, 'JavaScript.html'), 'utf8')
   .replace(/^[\s\S]*?<script>/, '')
