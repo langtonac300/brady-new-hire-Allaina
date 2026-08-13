@@ -352,6 +352,8 @@
       index: {},
       openDoc: null,
       docCache: {},
+      diagrams: {},
+      diagramsAsked: {},
       libraryFilter: '',
       libraryFolder: 'All',
       openProject: null,
@@ -604,14 +606,54 @@
      *
      * A diagram can serve more than one document - the guardrail one is the same idea whether
      * it is met on the drill or on the pacing note - so the map is many-to-one on purpose.
+     *
+     * These are the only images not inlined into the page: each is a slide of about 70 KB, and
+     * they are fetched one at a time by diagramFor() below.
      */
     var DOC_DIAGRAM = {
       '02-learning/how-brady-measures': 'diagramAttribution',
       '02-learning/ppc-fundamentals': 'diagramKeywordSearchTerm',
       '03-projects/t1-03-keyword-vs-search-term': 'diagramKeywordSearchTerm',
       '03-projects/t1-06-guardrail-drill': 'diagramGuardrail',
-      '03-projects/t2-04-the-pacing-note': 'diagramGuardrail'
+      '03-projects/t2-04-the-pacing-note': 'diagramGuardrail',
+      '02-learning/the-l10-huddle': 'diagramL10',
+      '02-learning/how-to-run-a-project': 'diagramProjectLoop',
+      '02-learning/what-a-deliverable-looks-like': 'diagramDeliverable',
+      '03-projects/t1-01-account-tour': 'diagramDeliverable',
+      '02-learning/who-else-is-searching': 'diagramArchetypes',
+      '03-projects/t2-01-sqr-predict-then-compare': 'diagramArchetypes',
+      '02-learning/before-it-ships': 'diagramPreship',
+      '02-learning/running-a-real-test': 'diagramTestModes',
+      '03-projects/t3-05-your-first-experiment': 'diagramTestModes',
+      '02-learning/pdc-primer': 'diagramPdc',
+      '03-projects/t1-04-conversion-action-inventory': 'diagramPdc',
+      '02-learning/seton-emedco-primer': 'diagramSetonEmedco',
+      '02-learning/cheat-sheet': 'diagramKeepKill'
     };
+
+    /**
+     * The diagram for a document, if it has one and it has arrived. Asking for one that has not
+     * arrived starts the fetch and returns nothing; the reader redraws when it lands, the same
+     * way it does for a document body.
+     */
+    function diagramFor(docId) {
+      var key = DOC_DIAGRAM[docId];
+      if (!key) return '';
+      if (state.diagrams[key]) return state.diagrams[key];
+      if (state.diagramsAsked[key]) return '';
+      state.diagramsAsked[key] = true;
+      call('apiGetDiagram', key)
+        .then(function (uri) {
+          state.diagrams[key] = uri;
+          if (DOC_DIAGRAM[state.openDoc] === key) render();
+        })
+        .catch(function () {
+          // Not worth a toast. The document is the point; the picture is an aid, and a
+          // missing one should not put an error in front of her.
+          state.diagramsAsked[key] = false;
+        });
+      return '';
+    }
 
     function counts() {
       var d = state.data;
@@ -1343,6 +1385,7 @@
       var linked = state.data.projects.filter(function (p) {
         return p['Doc ID'] === state.openDoc;
       });
+      var diagram = diagramFor(state.openDoc);
 
       return (
         '<div class="head">' +
@@ -1361,8 +1404,8 @@
         (FOLDER_ART[meta.Folder] && IMG[FOLDER_ART[meta.Folder]]
           ? '<img class="folderbanner" src="' + IMG[FOLDER_ART[meta.Folder]] + '" alt="' + esc(meta.Folder) + '">'
           : '') +
-        (DOC_DIAGRAM[state.openDoc] && IMG[DOC_DIAGRAM[state.openDoc]]
-          ? '<img class="diagram" src="' + IMG[DOC_DIAGRAM[state.openDoc]] + '" alt="Concept diagram for ' + esc(meta.Title) + '">'
+        (diagram
+          ? '<img class="diagram" src="' + diagram + '" alt="Concept diagram for ' + esc(meta.Title) + '">'
           : '') +
         '<div class="md">' + renderMarkdown(doc.Body, { docId: state.openDoc, index: state.index }) + '</div>' +
         '<hr>' +

@@ -54,7 +54,32 @@ Apps Script can't serve local files — either base64-inline these (`<img src="d
 | diagram-attribution.png | 2800×1280 (2x) | how-brady-measures — the one rule. FT 180-day vs platform Conversions, worked journey. |
 | diagram-guardrail.png | 2800×1120 (2x) | Guardrail drill T1-6 / pacing note T2-4. Ceiling-not-target gauge + the three caveats. |
 
+## Batch 4 — one diagram per learning file
+
+| File | Size (px) | Where to use |
+|---|---|---|
+| diagram-l10.png | 2800×1280 (2x) | the-l10-huddle. The seven timed segments, and why the scorecard stays five minutes. |
+| diagram-project-loop.png | 2800×1240 (2x) | how-to-run-a-project. Before / during / after, prediction and write-up either side. |
+| diagram-deliverable.png | 2800×1280 (2x) | what-a-deliverable-looks-like, T1-1 write-up. The strong and weak versions side by side. |
+| diagram-archetypes.png | 2800×1360 (2x) | who-else-is-searching, T2-1. The archetypes, and the Famous Brady Terms list. |
+| diagram-preship.png | 2800×1320 (2x) | before-it-ships. The checklist, plus the two changes with the widest blast radius. |
+| diagram-test-modes.png | 2800×1360 (2x) | running-a-real-test, T3-5. Control and treatment, and SPLIT / PAIRED / PRE_POST. |
+| diagram-pdc.png | 2800×1320 (2x) | pdc-primer, T1-4. The two accounts, and the conversion-action landmine. |
+| diagram-seton-emedco.png | 2800×1280 (2x) | seton-emedco-primer. The two accounts, blended ROAS, paused legacy structure. |
+| diagram-keep-kill.png | 2800×1320 (2x) | cheat-sheet worked example 2. The daily SQR as an intent test. |
+
 Render diagrams full content width (~800–1100px). They're self-contained slides — no text overlay needed.
+
+⚠️ **Every claim in these is from the learning files, and it has to stay that way.** The numbers
+in the PDC and Seton/EMEDCO slides — timezones, the CVR band, which conversion action is
+primary — are read out of `02-learning/`, not invented for the picture. If a source file
+changes, the slide is wrong until it is redrawn, and a wrong number in a diagram is worse than
+no diagram: it looks authoritative and it is not in a system anyone can check it against.
+
+⚠️ **The diagrams are not inlined into the app.** Each is a slide of about 70 KB and belongs to
+one or two of the 63 documents, so the build puts them in `apps-script/DataDiagrams.gs` and the
+browser fetches one when a document needs it. Everything else in this kit is inlined and lands
+on every page load. `tools/build-images.py` decides which pile an image goes in.
 
 ## Usage notes
 

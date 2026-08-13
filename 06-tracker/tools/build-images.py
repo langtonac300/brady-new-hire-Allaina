@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-build-images.py - turns the graphics kit into an Apps Script file.
+build-images.py - turns the graphics kit into Apps Script files.
 
     python3 06-tracker/tools/build-images.py
 
@@ -9,7 +9,16 @@ Pasting the kit in at full size would add roughly a megabyte of base64 to a page
 otherwise about 60 KB, so each image is first resized to the largest size the interface
 actually renders it at (times two, for retina) and then recompressed.
 
-Writes 06-tracker/apps-script/Images.html, which sets window.IMG.
+Two outputs, because the kit has two kinds of image in it:
+
+    apps-script/Images.html       the chrome - icons, badges, banners, stamps. Small, needed
+                                  on nearly every screen, so it is inlined and sets window.IMG.
+    apps-script/DataDiagrams.gs   the twelve concept diagrams. Each is a full slide and by far
+                                  the heaviest thing in the kit, and each appears on exactly
+                                  one or two of the 63 documents. Inlining all twelve would put
+                                  about 800 KB on every single page load to show at most one of
+                                  them, so they stay on the server and the browser asks for one
+                                  when it needs it - the same bargain the document bodies make.
 
 Needs Pillow:  pip install pillow
 """
@@ -27,6 +36,7 @@ except ImportError:
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "..", "graphics")
 OUT = os.path.join(HERE, "..", "apps-script", "Images.html")
+OUT_DIAGRAMS = os.path.join(HERE, "..", "apps-script", "DataDiagrams.gs")
 
 # name -> (key used in window.IMG, widest it is ever rendered x2, notes)
 #
@@ -104,13 +114,27 @@ PLAN = [
     # match exactly and the rest stay as text.
     ("account-pdc.png", "accountPdc", 560, "jpeg"),
     ("account-seton.png", "accountSeton", 560, "jpeg"),
+]
 
-    # Concept diagrams, shown at the top of the document that teaches each concept. These
-    # are 2800px slides and by far the heaviest things in the kit, so they are cut harder
-    # than the rest - they render around 700px and the text still holds at 1400.
-    ("diagram-attribution.png", "diagramAttribution", 1400, "jpeg"),
-    ("diagram-keyword-vs-search-term.png", "diagramKeywordSearchTerm", 1400, "jpeg"),
-    ("diagram-guardrail.png", "diagramGuardrail", 1400, "jpeg"),
+# Concept diagrams, shown above the document that teaches each concept. Fetched one at a time
+# rather than inlined - see the note at the top of this file.
+#
+# WebP rather than JPEG: these are flat colour and large type on a gradient, which is the shape
+# WebP is best at, and at matched quality it comes out about a third smaller. Every browser
+# released since 2020 reads it. They render at up to 1100 CSS px and hold their text at 1400.
+DIAGRAMS = [
+    ("diagram-attribution.png", "diagramAttribution", 1400, "webp"),
+    ("diagram-keyword-vs-search-term.png", "diagramKeywordSearchTerm", 1400, "webp"),
+    ("diagram-guardrail.png", "diagramGuardrail", 1400, "webp"),
+    ("diagram-l10.png", "diagramL10", 1400, "webp"),
+    ("diagram-project-loop.png", "diagramProjectLoop", 1400, "webp"),
+    ("diagram-deliverable.png", "diagramDeliverable", 1400, "webp"),
+    ("diagram-archetypes.png", "diagramArchetypes", 1400, "webp"),
+    ("diagram-preship.png", "diagramPreship", 1400, "webp"),
+    ("diagram-test-modes.png", "diagramTestModes", 1400, "webp"),
+    ("diagram-pdc.png", "diagramPdc", 1400, "webp"),
+    ("diagram-seton-emedco.png", "diagramSetonEmedco", 1400, "webp"),
+    ("diagram-keep-kill.png", "diagramKeepKill", 1400, "webp"),
 ]
 
 # Optional. Drop the real asset in as graphics/brady-logo.png and re-run - it is picked up
@@ -130,6 +154,9 @@ def encode(path, width, fmt):
     if fmt == "jpeg":
         im.convert("RGB").save(buf, "JPEG", quality=82, optimize=True, progressive=True)
         mime = "image/jpeg"
+    elif fmt == "webp":
+        im.convert("RGB").save(buf, "WEBP", quality=80, method=6)
+        mime = "image/webp"
     else:
         # FASTOCTREE is the one quantizer that keeps an alpha channel intact.
         im = im.convert("RGBA").quantize(colors=255, method=Image.Quantize.FASTOCTREE)
@@ -140,51 +167,98 @@ def encode(path, width, fmt):
     return data, mime, original, im.size
 
 
-def main():
+def build(plan, optional=()):
+    """Encode a list of images and return [(key, data URI)], plus the byte totals."""
     entries = []
     before = after = 0
 
-    for name, key, width, fmt in PLAN + OPTIONAL:
+    for name, key, width, fmt in list(plan) + list(optional):
         path = os.path.join(SRC, name)
         if not os.path.exists(path):
-            if (name, key, width, fmt) in OPTIONAL:
-                print("  %-22s not present - skipped (optional)" % name)
+            if (name, key, width, fmt) in optional:
+                print("  %-32s not present - skipped (optional)" % name)
                 continue
             sys.exit("Missing image: %s" % path)
 
         data, mime, original, size = encode(path, width, fmt)
         before += original
         after += len(data)
-
-        uri = "data:%s;base64,%s" % (mime, base64.b64encode(data).decode("ascii"))
-        entries.append((key, uri))
+        entries.append((key, "data:%s;base64,%s" % (mime, base64.b64encode(data).decode("ascii"))))
 
         print(
-            "  %-22s %5d KB -> %4d KB   %dx%d"
+            "  %-32s %5d KB -> %4d KB   %dx%d"
             % (name, original / 1024, len(data) / 1024, size[0], size[1])
         )
 
-    body = ",\n".join('    %s: "%s"' % (key, uri) for key, uri in entries)
+    return entries, before, after
+
+
+def main():
+    print("Chrome, inlined into the page:")
+    chrome, chrome_before, chrome_after = build(PLAN, OPTIONAL)
+
+    print("\nConcept diagrams, served one at a time:")
+    diagrams, diagram_before, diagram_after = build(DIAGRAMS)
 
     html = """<!--
   GENERATED FILE - do not edit here.
 
   Rebuilt from the graphics kit by the image build script kept alongside this project.
   Every image is inlined as a data URI because Apps Script has no way to serve a file.
+
+  The concept diagrams are NOT in here - they are a slide each, and putting all twelve on
+  every page load to show at most one of them is a bad trade. They live in DataDiagrams.gs
+  and the browser asks for one when a document needs it.
 -->
 <script>
   window.IMG = {
 %s
   };
 </script>
-""" % body
+""" % ",\n".join('    %s: "%s"' % (key, uri) for key, uri in chrome)
+
+    gs = """/**
+ * GENERATED FILE - do not edit here.
+ *
+ * Rebuilt from the graphics kit by the image build script kept alongside this project.
+ *
+ * The concept diagrams, one data URI each. They stay on this side rather than in Images.html
+ * because each one is a full slide: inlined they would add about %d KB to every page load, to
+ * show at most one of them. apiGetDiagram() hands over one when the browser asks, and the
+ * browser keeps it for the rest of the session.
+ */
+
+/** %d diagrams. */
+function DATA_DIAGRAMS() {
+  return {
+%s
+  };
+}
+""" % (
+        diagram_after * 4 / 3 / 1024,
+        len(diagrams),
+        ",\n".join('    %s: "%s"' % (key, uri) for key, uri in diagrams),
+    )
 
     with open(OUT, "w", encoding="utf-8") as handle:
         handle.write(html)
+    with open(OUT_DIAGRAMS, "w", encoding="utf-8") as handle:
+        handle.write(gs)
 
     print(
-        "\n%d images. %d KB of source became %d KB encoded (%d KB of base64 on the page)."
-        % (len(entries), before / 1024, after / 1024, os.path.getsize(OUT) / 1024)
+        "\n%d images inlined. %d KB of source became %d KB (%d KB of base64 on every page load)."
+        % (len(chrome), chrome_before / 1024, chrome_after / 1024, os.path.getsize(OUT) / 1024)
+    )
+    print(
+        "%d diagrams held back. %d KB of source became %d KB (%d KB in DataDiagrams.gs, "
+        "about %d KB fetched per diagram actually opened)."
+        % (
+            len(diagrams),
+            diagram_before / 1024,
+            diagram_after / 1024,
+            os.path.getsize(OUT_DIAGRAMS) / 1024,
+            diagram_after * 4 / 3 / 1024 / max(len(diagrams), 1),
+        )
     )
 
 

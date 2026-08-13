@@ -44,7 +44,7 @@ copy you can annotate. If the source changes, you re-import and your notes survi
 | **Readout builder** | The three-part readout, pre-filled with your prediction and anything you logged as wrong |
 | **1:1 prep** | Your agenda assembled from what you have already written — finished work, what's in flight, the habits behind your misses, open questions, follow-ups you owe, access still outstanding. Copy it and go |
 | **Reading** | Mark a document read and it dates itself. Internal links between documents work |
-| **Concept diagrams** | Three of them, shown above the document that teaches the concept — attribution on `how-brady-measures`, keyword-vs-search-term on the fundamentals and T1-3, the guardrail on T1-6 and T2-4 |
+| **Concept diagrams** | Twelve of them, shown above the document that teaches the concept — one for every learning file, plus the project briefs that lean on the same idea. They load when you open the document rather than on every page |
 
 > The 1:1 is analyst-led — you bring the agenda and Alex doesn't prepare one. That's the one
 > this app earns its keep on.
@@ -66,6 +66,8 @@ About ten minutes, and you only do it once.
    - `.gs` files → choose **Script**, name it without the extension (`Code`, `Db`, `Setup`…)
    - `.html` files → choose **HTML**, name it without the extension (`Index`, `Stylesheet`,
      `JavaScript`, `Images`)
+   - `DataDiagrams.gs` is the big one — it holds the twelve concept diagrams and it is about
+     840 KB. The editor takes a moment to settle after you paste it. That is expected.
 5. **Replace the manifest.** Click the gear (*Project Settings*), tick **Show `appsscript.json`**,
    then paste in [`apps-script/appsscript.json`](./apps-script/appsscript.json).
 6. **Go back to the Sheet and reload the tab.** A **Ramp workbook** menu appears next to Help.
@@ -77,7 +79,7 @@ About ten minutes, and you only do it once.
 > published to their marketplace, which includes every script anyone writes for themselves.
 > Click **Advanced → Go to (your project)**.
 
-**Step 4 is fourteen files pasted by hand, and it is the dullest part of this.** If you'd
+**Step 4 is fifteen files pasted by hand, and it is the dullest part of this.** If you'd
 rather not: Google's `clasp` tool pushes the whole folder in one command. It needs Node and a
 one-time `clasp login`, then `clasp clone <script id>` in `apps-script/` and `clasp push`.
 
@@ -135,10 +137,21 @@ When the graphics change:
 python3 06-tracker/tools/build-images.py     # needs: pip install pillow
 ```
 
-That rewrites `apps-script/Images.html`. The 57 images in
-[`graphics/`](./graphics/) get resized to the largest size the interface actually renders them
-at and recompressed — 9.5 MB of source becomes about 600 KB inlined, because Apps Script has
-no way to serve a file and every image has to travel inside the page.
+That rewrites two files, because the kit has two kinds of image in it. Every image is resized
+to the largest size the interface actually renders it at and recompressed — Apps Script has no
+way to serve a file, so each one has to travel as text either way.
+
+| Output | What goes in it | Cost |
+|--------|-----------------|------|
+| `apps-script/Images.html` | The chrome — icons, badges, banners, stamps, empty states | ~540 KB, inlined, on **every** page load |
+| `apps-script/DataDiagrams.gs` | The twelve concept diagrams | ~840 KB held on the server; the browser asks for **one**, ~70 KB, when a document needs it |
+
+Twenty megabytes of source PNG becomes about a megabyte of payload across the two.
+
+> The diagrams are held back deliberately. Each one is a full slide and each belongs to one or
+> two of the 63 documents, so inlining all twelve would put 840 KB on every screen to show at
+> most one of them. They're fetched the way document bodies already are, and kept for the rest
+> of the session once fetched. They're WebP, which every browser released since 2020 reads.
 
 > One image in the kit isn't used as supplied: the folder banners are 1386 px wide with type
 > set for that size, and the library list column is 336 px. Squeezed in there they scale to a
@@ -153,7 +166,9 @@ node 06-tracker/tools/test.mjs
 Builds the workbook against a stand-in for Google's runtime, drives every call the browser can
 make, checks setup and re-import are idempotent, then renders all 63 documents and verifies the
 output is well formed, that every internal link resolves, and that nothing rendered as
-`undefined`. **148 checks.**
+`undefined`. It also drives the trail — what gets remembered and what gets offered back — and
+checks every graphic is built into the right payload and pinned to a document that exists.
+**183 checks.**
 
 ### Looking at it
 
@@ -178,7 +193,8 @@ interface in a browser without deploying anything.
 | `Seed.gs` | The 33 projects, 31 skills, 12 systems and 3 scripts, transcribed from the source |
 | `Api.gs` | The only functions the browser is allowed to call |
 | `Data01…Data06.gs` | The document text. **Generated — don't edit by hand** |
-| `Images.html` | The graphics, inlined. **Generated — don't edit by hand** |
+| `DataDiagrams.gs` | The concept diagrams, handed over one at a time. **Generated — don't edit by hand** |
+| `Images.html` | The rest of the graphics, inlined. **Generated — don't edit by hand** |
 | `Index.html` · `Stylesheet.html` · `JavaScript.html` | The interface |
 
 Three things in here are deliberate and worth not "fixing":

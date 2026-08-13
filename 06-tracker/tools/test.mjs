@@ -560,35 +560,86 @@ eq('repair does not lose data', run('dbSelect(T.DOCS)').length, 63);
 /* ================================ graphics ================================= */
 
 /**
- * Every image in the kit has to be three things: present on disk, inlined into Images.html,
- * and actually referenced by the interface. The third is the one that slips - an image can
- * sit in the payload costing bytes on every page load without ever being drawn.
+ * Every image in the kit has to be three things: present on disk, built into whichever payload
+ * it belongs to, and actually referenced by the interface. The third is the one that slips - an
+ * image can sit in a payload costing bytes without ever being drawn.
+ *
+ * The kit is built into two payloads. The chrome is inlined into Images.html and lands on every
+ * page load; the concept diagrams are held in DataDiagrams.gs and fetched one at a time. An
+ * image in the wrong one of those is the mistake worth catching here.
  */
 {
   const GFX = join(HERE, '..', 'graphics');
   const files = readdirSync(GFX).filter((f) => f.endsWith('.png')).sort();
   const plan = readFileSync(join(HERE, 'build-images.py'), 'utf8');
   const inlined = readFileSync(join(SRC, 'Images.html'), 'utf8');
+  const served = readFileSync(join(SRC, 'DataDiagrams.gs'), 'utf8');
   const ui = readFileSync(join(SRC, 'JavaScript.html'), 'utf8');
 
-  const keyFor = {};
-  for (const [, file, key] of plan.matchAll(/\("([^"]+\.png)",\s*"([^"]+)"/g)) keyFor[file] = key;
+  const keysIn = (src) => {
+    const map = {};
+    for (const [, file, key] of src.matchAll(/\("([^"]+\.png)",\s*"([^"]+)"/g)) map[file] = key;
+    return map;
+  };
+  const diagramPlan = plan.match(/\nDIAGRAMS = \[([\s\S]*?)\n\]/)[1];
+  const chromeKey = keysIn(plan.replace(diagramPlan, ''));
+  const diagramKey = keysIn(diagramPlan);
 
+  const keyFor = { ...chromeKey, ...diagramKey };
   const unplanned = files.filter((f) => !keyFor[f]);
-  const notInlined = files.filter((f) => keyFor[f] && !inlined.includes(`${keyFor[f]}:`));
+  const misplaced = files.filter(
+    (f) => (chromeKey[f] && !inlined.includes(`${chromeKey[f]}:`)) ||
+      (diagramKey[f] && !served.includes(`${diagramKey[f]}:`))
+  );
   const notDrawn = files.filter(
-    (f) => keyFor[f] && inlined.includes(`${keyFor[f]}:`) && !new RegExp(`\\b${keyFor[f]}\\b`).test(ui)
+    (f) => keyFor[f] && !new RegExp(`\\b${keyFor[f]}\\b`).test(ui)
   );
 
   check('every graphic is in the build plan', unplanned.length === 0, unplanned.join(', '));
-  check('every graphic is inlined', notInlined.length === 0, notInlined.join(', '));
-  check('every inlined graphic is actually displayed', notDrawn.length === 0,
-    `${notDrawn.join(', ')} - costing bytes on every load without ever being drawn`);
-  check('the inlined payload stays under a megabyte',
-    Buffer.byteLength(inlined) < 1024 * 1024,
+  check('every graphic is built into its payload', misplaced.length === 0, misplaced.join(', '));
+  check('every built graphic is actually displayed', notDrawn.length === 0,
+    `${notDrawn.join(', ')} - costing bytes without ever being drawn`);
+  check('no diagram was inlined into the page',
+    Object.values(diagramKey).every((k) => !inlined.includes(`${k}:`)),
+    'a slide in the page payload is 70 KB everyone pays for to see at most one of them');
+  check('the page payload stays well under a megabyte',
+    Buffer.byteLength(inlined) < 700 * 1024,
     `Images.html is ${Math.round(Buffer.byteLength(inlined) / 1024)} KB`);
+  check('the diagram file stays inside what a script file should hold',
+    Buffer.byteLength(served) < 1024 * 1024,
+    `DataDiagrams.gs is ${Math.round(Buffer.byteLength(served) / 1024)} KB`);
 
-  console.log(`  ${files.length} graphics, all inlined and drawn, ${Math.round(Buffer.byteLength(inlined) / 1024)} KB on the page.\n`);
+  /* Which document each diagram is pinned to. A typo here fails silently in the browser -
+     the document renders, the picture just never appears. */
+  const pinned = [...ui.match(/var DOC_DIAGRAM = \{([\s\S]*?)\n    \};/)[1]
+    .matchAll(/'([^']+)':\s*'([^']+)'/g)].map(([, doc, key]) => ({ doc, key }));
+  const diagrams = run('DATA_DIAGRAMS()');
+
+  check('the diagram pins were found', pinned.length > 10, `only ${pinned.length}`);
+  const strayDoc = pinned.filter((p) => !docIds.has(p.doc));
+  const strayKey = pinned.filter((p) => !diagrams[p.key]);
+  const unpinned = Object.keys(diagrams).filter((k) => !pinned.some((p) => p.key === k));
+  check('every diagram is pinned to a document that exists', strayDoc.length === 0,
+    strayDoc.map((p) => p.doc).join(', '));
+  check('every pin names a diagram that was built', strayKey.length === 0,
+    strayKey.map((p) => p.key).join(', '));
+  check('every diagram is pinned to at least one document', unpinned.length === 0,
+    `${unpinned.join(', ')} - built and shipped, never shown`);
+
+  const oneDiagram = api('apiGetDiagram', pinned[0].key);
+  check('apiGetDiagram hands over one diagram',
+    oneDiagram.ok && /^data:image\/webp;base64,/.test(oneDiagram.data), JSON.stringify(oneDiagram.error));
+  check('apiGetDiagram refuses a key it does not have', api('apiGetDiagram', 'nope').ok === false);
+  check('the bootstrap does not carry the diagrams',
+    JSON.stringify(boot.data).indexOf('data:image/webp') === -1,
+    'the whole point is that they are fetched one at a time');
+
+  console.log(
+    `  ${files.length} graphics: ${Object.keys(chromeKey).length} inlined ` +
+    `(${Math.round(Buffer.byteLength(inlined) / 1024)} KB on the page), ` +
+    `${Object.keys(diagrams).length} diagrams served on demand ` +
+    `(${Math.round(Buffer.byteLength(served) / 1024)} KB held back).\n`
+  );
 }
 
 /* =============================== markdown ================================= */
