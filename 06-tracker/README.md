@@ -205,9 +205,14 @@ into a corporate system. `tools/test.mjs` checks it stayed out.
 - **Two colours in the graphics don't match the brand standard exactly.** The kit is built on
   navy `#003087` and uses an orange accent; the binding Brady Blue is `#002D72`. The interface
   chrome uses `#002D72` and the artwork keeps its own. Worth a decision from Alex.
-- **There is no logo.** `graphics/brady-logo.png` is picked up automatically by the image
-  build if you drop the real asset in — until then the masthead is a text lockup. Nothing here
-  draws a trademark from memory.
+- **The logo is derived from a screenshot, not an official asset.** `graphics/brady-logo.png`
+  was cut from a supplied screenshot: the flat background was keyed out to transparency so it
+  can sit on the navy bar, where it renders reversed to white. Two caveats — the mark comes in
+  at `#004288`, which is neither the binding Brady Blue `#002D72` nor the kit's `#003087`, and
+  it is a raster at 1209 px rather than a vector. **Replace it with the official asset when
+  you have one**: drop it in at the same path and re-run the image build, nothing else
+  changes. It only ever renders reversed today, so the colour makes no visible difference —
+  but it would the moment it appeared on a light background.
 - **Nobody has run this in a real Sheet yet.** The tests verify the logic against a fake
   spreadsheet; the actual formatting and dropdown calls need one real **Set up workbook** run
   to confirm.
