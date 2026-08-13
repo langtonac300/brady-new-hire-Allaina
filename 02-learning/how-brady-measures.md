@@ -148,6 +148,84 @@ keeping in mind when a first-touch number seems to tell a very clean story.
 
 ---
 
+## The long B2B buying cycle — and what it means for how you read numbers
+
+Everything above explains *which* numbers to trust. This section explains *when* to trust
+them — because in B2B, the answer is "not yet" more often than you'd expect.
+
+### The timeline is different
+
+A consumer clicks an ad for shoes and either buys them that session or doesn't. The
+click-to-conversion window is hours to days. Most of paid search is built around this
+cadence — and most PPC advice assumes it.
+
+Brady's B2B buyers don't work that way:
+
+| Stage | What happens | Time from first click |
+|-------|-------------|----------------------|
+| **Research** | A facility manager searches, clicks the ad, browses the catalog, leaves | Day 0 |
+| **Internal review** | They share the spec sheet with their safety director, discuss options | Days 1–14 |
+| **Approval** | The purchase gets budgeted, approved by procurement, maybe an RFQ issued | Days 14–60 |
+| **Purchase** | A PO is placed, possibly through a distributor, possibly months after the first search | Days 30–180 |
+
+**That click you paid for on Day 0? Its conversion might not show up for weeks or months.**
+The first-touch, 180-day window exists for exactly this reason — a 7-day or even 30-day
+window misses a large share of B2B conversions because the buyer hasn't finished buying yet.
+
+### What this means for reading CPA and ROAS
+
+When you pull a CPA or ROAS number for a B2B campaign over the last 30 days, **you're
+looking at a number that is structurally incomplete.** The clicks from the most recent weeks
+haven't had time to convert yet, so:
+
+- **Recent CPA always looks worse than it will eventually be.** You're dividing spend by
+  conversions, but the conversions from recent spend haven't finished arriving.
+- **Recent ROAS always looks lower than it will eventually be.** Same dynamic — revenue from
+  recent clicks is still in the pipeline.
+- **Month-over-month comparisons are misleading near the boundary.** Last month's numbers
+  have had more time to mature than this month's. The gap isn't a performance change — it's
+  a maturation lag.
+
+### The patience problem with smart bidding
+
+Smart bidding (Part 5 in [`ppc-fundamentals.md`](./ppc-fundamentals.md)) learns from
+conversions. On a consumer account with 500 conversions a month and a 1-day conversion
+window, the algorithm has dense, fast feedback. On a B2B account with 20 conversions a month
+and a 60-day conversion window, the algorithm is learning from signals that are weeks old
+and sparse.
+
+**Practical implications:**
+
+- **Give smart bidding more time to learn on B2B accounts.** The standard "1–2 week learning
+  period" from Part 5 is a minimum. On thin B2B volume, useful signal can take 4–6 weeks
+  to accumulate.
+- **Change targets even more gradually.** The 15–20% rule from Part 5 applies double — a big
+  target change on thin data causes wilder swings than on a high-volume account.
+- **Don't panic at a "bad week."** On a B2B account with 5 conversions per week, a
+  single-week CPA swing of 40% is normal variance, not a signal. Look at 4-week rolling
+  averages at minimum.
+
+### ⚠️ The lead-form trap
+
+On accounts where the conversion is a **lead form** (like PDC Healthcare), there's an
+additional complication: the form fill is a proxy, not the sale.
+
+- Smart bidding optimizes to form fills because that's what you told it to optimize to.
+- But not all form fills are equal. Some become $50,000 orders. Some are a student asking a
+  question. The form fill doesn't tell you which.
+- If you optimize aggressively for form volume (low tCPA), you'll get more forms — but the
+  quality tends to decline, because the algorithm finds the cheapest clicks that produce
+  *any* form fill, not the ones that produce *valuable* form fills.
+
+**This is why conversion value matters so much** (see Part 6 in
+[`ppc-fundamentals.md`](./ppc-fundamentals.md) and [M-2](../03-projects/m-02-fix-the-conversion-values.md)).
+When every lead is worth "$1" in the system, the algorithm treats them all equally. When
+leads are valued by pipeline stage or estimated deal size, the algorithm can chase the right
+ones. Getting those values right is one of the highest-leverage things you can do on a B2B
+account.
+
+---
+
 ## The takeaway
 
 Every number you'll see at Brady has three questions attached to it, whether or not
