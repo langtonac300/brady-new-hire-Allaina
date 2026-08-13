@@ -55,6 +55,10 @@ can build in your first month.
 
 ## Using this repo
 
+- **Prefer working in a spreadsheet?** **[`06-tracker/`](./06-tracker/)** builds all of this
+  into a Google Sheet with a small web app on top — read the material, tick things off, keep
+  your questions and notes in one place. Everything here works fine without it; it's an
+  option, not a step.
 - Put your own work in **[`04-my-work/`](./04-my-work/)** — notes, drafts, deliverables,
   anything you want a second pair of eyes on.
 - You don't need to be a git expert. Uploading a file through the GitHub web interface is

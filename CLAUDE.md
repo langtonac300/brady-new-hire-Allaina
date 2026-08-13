@@ -56,8 +56,11 @@ other except what's written down here — so a few habits matter more than usual
 
 1. **Check before you create.** Search the repo for related content before adding a new
    file. If something adjacent already exists, extend it instead of duplicating it.
-2. **Stay inside the five numbered folders** unless there's a genuine new category of
-   content — not just convenience. A sixth top-level folder should be rare.
+2. **Stay inside the five numbered content folders** unless there's a genuine new category of
+   content — not just convenience. A seventh top-level folder should be rare.
+   `06-tracker/` is the one exception and it is *tooling*, not content: the Sheets + Apps
+   Script build of this repo. New learning material, briefs or workspace files still belong
+   in `01-` to `05-`, never in `06-`.
 3. **Match the existing voice.** Second person, plain language, ⚠️ callouts for gotchas,
    concise tables over long prose. Skim a neighboring file before writing a new one so it
    doesn't read like it was written by someone else — because it was.
@@ -131,6 +134,7 @@ these — flag them to Alex instead:
 | `03-projects/` | The project ladder — the actual work, project by project |
 | `04-my-work/` | Allaina's workspace: notes, drafts, deliverables, capture notes |
 | `05-self-assessment/` | The Day-1 baseline and the Day-90 re-score |
+| `06-tracker/` | Tooling, not content — the Google Sheets + Apps Script build of this repo |
 
 ---
 

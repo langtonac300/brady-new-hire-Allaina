@@ -1,0 +1,1146 @@
+<script>
+  /*
+   * The client. One page, seven views, all drawn from the bootstrap payload.
+   *
+   * The markdown renderer near the top is the part that matters most: it is what turns the
+   * imported source text back into something readable, and it is exercised against every
+   * document in the library by the test harness kept with this project.
+   */
+  (function () {
+    'use strict';
+
+    /* ============================== markdown ============================== */
+
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function leading(line) {
+      var m = String(line).match(/^[ \t]*/);
+      return m ? m[0].replace(/\t/g, '    ').length : 0;
+    }
+
+    /**
+     * Turn a relative Markdown link into a document ID.
+     *
+     * Links in the source are written relative to the file they sit in ("../02-learning/x.md"),
+     * so resolving one needs to know which document is being read. A link to a folder resolves
+     * to that folder's README, which is how the source uses them.
+     */
+    function resolveDocId(href, fromDocId, index) {
+      var path = String(href || '').split('#')[0].trim();
+      if (!path) return '';
+
+      var baseDir = '';
+      if (fromDocId && fromDocId.indexOf('/') !== -1) {
+        baseDir = fromDocId.slice(0, fromDocId.lastIndexOf('/'));
+      }
+
+      var joined = path.charAt(0) === '/' ? path.slice(1) : baseDir + '/' + path;
+      var out = [];
+      joined.split('/').forEach(function (part) {
+        if (!part || part === '.') return;
+        if (part === '..') out.pop();
+        else out.push(part);
+      });
+
+      var id = out.join('/').replace(/\.md$/i, '');
+      if (!index) return id;
+      if (index[id]) return id;
+      if (index[id + '/README']) return id + '/README';
+      return '';
+    }
+
+    function inlineMd(text, ctx) {
+      var codes = [];
+      var s = String(text).replace(/`([^`]+)`/g, function (m, c) {
+        codes.push(c);
+        return '\u0000' + (codes.length - 1) + '\u0000';
+      });
+
+      s = s.replace(/\[([^\]]*)\]\(([^)\s]*)(?:\s+&quot;[^&]*&quot;)?\)/g, function (m, label, href) {
+        var text = inlineMd(label, ctx);
+        if (/^https?:/i.test(href)) {
+          return '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + text + '</a>';
+        }
+        if (href.charAt(0) === '#') return text;
+        var id = resolveDocId(href, ctx.docId, ctx.index);
+        if (id) return '<a class="doclink" href="#" data-doc="' + esc(id) + '">' + text + '</a>';
+        return '<span class="dead">' + text + '</span>';
+      });
+
+      // Emphasis, in the order the shapes have to be resolved.
+      //
+      // The source nests italic inside bold in a lot of places, and when the italic sits at
+      // either end the two runs collide into a *** that has to be split the right way round.
+      // "**tools is *for***" is bold-containing-italic, not italic-containing-bold, and a
+      // single lazy ** rule gets that backwards and interleaves the tags.
+      s = s.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+      s = s.replace(/\*\*([^*]*)\*([^*]+)\*\*\*/g, '<strong>$1<em>$2</em></strong>');
+      s = s.replace(/\*\*\*([^*]+)\*([^*]*)\*\*/g, '<strong><em>$1</em>$2</strong>');
+      s = s.replace(/\*\*((?:[^*]|\*(?!\*))+?)\*\*/g, '<strong>$1</strong>');
+      s = s.replace(/(^|[^*\w])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+      s = s.replace(/(^|[^_\w])_([^_\n]+)_(?![_\w])/g, '$1<em>$2</em>');
+      s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+
+      return s.replace(/\u0000(\d+)\u0000/g, function (m, i) {
+        return '<code>' + codes[Number(i)] + '</code>';
+      });
+    }
+
+    function splitRow(line) {
+      var t = String(line).trim().replace(/\\\|/g, '\u0001');
+      if (t.charAt(0) === '|') t = t.slice(1);
+      if (t.charAt(t.length - 1) === '|') t = t.slice(0, -1);
+      return t.split('|').map(function (c) {
+        return c.replace(/\u0001/g, '|').trim();
+      });
+    }
+
+    function isTableSeparator(line) {
+      var t = String(line).trim();
+      return t.indexOf('-') !== -1 && t.indexOf('|') !== -1 && /^\|?[\s:|-]+\|?$/.test(t);
+    }
+
+    function isBlockStart(line) {
+      return (
+        !String(line).trim() ||
+        /^\s*#{1,6}\s/.test(line) ||
+        /^\s*>/.test(line) ||
+        /^\s*```/.test(line) ||
+        /^\s*([-*_])\1{2,}\s*$/.test(line) ||
+        /^\s*([-*+]|\d+[.)])\s+/.test(line)
+      );
+    }
+
+    /** A list, however it is nested. Returns the HTML and the line to carry on from. */
+    function listBlock(lines, start, ctx) {
+      var first = lines[start].match(/^(\s*)([-*+]|\d+[.)])\s+(.*)$/);
+      var indent = leading(first[1]);
+      var ordered = /\d/.test(first[2]);
+      var items = [];
+      var i = start;
+
+      while (i < lines.length) {
+        var line = lines[i];
+
+        if (!line.trim()) {
+          var next = lines[i + 1];
+          if (next && next.trim() && leading(next) >= indent && /^\s*([-*+]|\d+[.)])\s+/.test(next)) {
+            i++;
+            continue;
+          }
+          break;
+        }
+
+        var m = line.match(/^(\s*)([-*+]|\d+[.)])\s+(.*)$/);
+        var ind = leading(line);
+
+        if (m && ind === indent) {
+          items.push({ lines: [m[3]], nested: [] });
+          i++;
+          continue;
+        }
+
+        if (!items.length) break;
+
+        if (ind > indent) {
+          // Indented prose under a bullet is the same sentence carrying on, not a new block.
+          // The source hard-wraps at about 95 characters and indents the wrapped line, so
+          // treating those as nested blocks would split a sentence - and any bold or italic
+          // spanning the wrap - across two elements.
+          if (!/^\s*([-*+]|\d+[.)])\s+/.test(line) && !/^\s*```/.test(line)) {
+            items[items.length - 1].lines.push(line.trim());
+            i++;
+            continue;
+          }
+
+          // A genuine nested block: another list, or a fenced one.
+          var chunk = [];
+          while (i < lines.length && (!lines[i].trim() || leading(lines[i]) > indent)) {
+            if (!lines[i].trim() && !(lines[i + 1] && leading(lines[i + 1]) > indent)) break;
+            chunk.push(lines[i].slice(Math.min(leading(lines[i]), indent + 2)));
+            i++;
+          }
+          items[items.length - 1].nested = items[items.length - 1].nested.concat(chunk);
+          continue;
+        }
+
+        if (!m && ind >= indent) {
+          items[items.length - 1].lines.push(line.trim());
+          i++;
+          continue;
+        }
+
+        break;
+      }
+
+      var isTaskList = items.length > 0 && items.every(function (it) {
+        return /^\[[ xX]\]\s/.test(it.lines[0]);
+      });
+
+      var html = items
+        .map(function (it) {
+          var head = it.lines.join(' ');
+          var cls = '';
+          var box = '';
+          var task = head.match(/^\[([ xX])\]\s+(.*)$/);
+          if (task) {
+            cls = ' class="task"';
+            box = '<input type="checkbox" disabled' + (task[1].toLowerCase() === 'x' ? ' checked' : '') + '> ';
+            head = task[2];
+          }
+          var inner = inlineMd(esc(head), ctx);
+          var sub = it.nested.length ? renderMarkdown(it.nested.join('\n'), ctx) : '';
+          return '<li' + cls + '>' + box + inner + (sub ? '\n' + sub : '') + '</li>';
+        })
+        .join('\n');
+
+      var tag = ordered ? 'ol' : 'ul';
+      var attr = isTaskList ? ' style="list-style:none;padding-left:4px"' : '';
+      return { html: '<' + tag + attr + '>\n' + html + '\n</' + tag + '>', next: i };
+    }
+
+    /** Markdown to HTML. Deliberately small: it covers what the source material uses. */
+    function renderMarkdown(src, ctx) {
+      ctx = ctx || {};
+      if (!ctx.index) ctx.index = {};
+      var lines = String(src == null ? '' : src).replace(/\r\n/g, '\n').split('\n');
+      var out = [];
+      var i = 0;
+
+      while (i < lines.length) {
+        var line = lines[i];
+
+        if (!line.trim()) {
+          i++;
+          continue;
+        }
+
+        var fence = line.match(/^\s*```(.*)$/);
+        if (fence) {
+          var code = [];
+          i++;
+          while (i < lines.length && !/^\s*```/.test(lines[i])) {
+            code.push(lines[i]);
+            i++;
+          }
+          i++;
+          out.push('<pre><code>' + esc(code.join('\n')) + '</code></pre>');
+          continue;
+        }
+
+        var heading = line.match(/^\s*(#{1,6})\s+(.*?)\s*#*\s*$/);
+        if (heading) {
+          var level = heading[1].length;
+          out.push('<h' + level + '>' + inlineMd(esc(heading[2]), ctx) + '</h' + level + '>');
+          i++;
+          continue;
+        }
+
+        if (/^\s*([-*_])\1{2,}\s*$/.test(line)) {
+          out.push('<hr>');
+          i++;
+          continue;
+        }
+
+        if (/^\s*>/.test(line)) {
+          var quoted = [];
+          while (i < lines.length && (/^\s*>/.test(lines[i]) || (quoted.length && lines[i].trim() && !isBlockStart(lines[i])))) {
+            quoted.push(lines[i].replace(/^\s*>\s?/, ''));
+            i++;
+          }
+          out.push('<blockquote>' + renderMarkdown(quoted.join('\n'), ctx) + '</blockquote>');
+          continue;
+        }
+
+        if (line.indexOf('|') !== -1 && i + 1 < lines.length && isTableSeparator(lines[i + 1])) {
+          var header = splitRow(line);
+          var aligns = splitRow(lines[i + 1]).map(function (c) {
+            if (/^:-+:$/.test(c)) return 'center';
+            if (/-+:$/.test(c)) return 'right';
+            return 'left';
+          });
+          i += 2;
+
+          var bodyRows = [];
+          while (i < lines.length && lines[i].trim() && lines[i].indexOf('|') !== -1) {
+            bodyRows.push(splitRow(lines[i]));
+            i++;
+          }
+
+          var hasHeader = header.some(function (h) {
+            return h !== '';
+          });
+
+          var html = '<div class="tablewrap"><table>';
+          if (hasHeader) {
+            html += '<thead><tr>' + header.map(function (h, c) {
+              return '<th style="text-align:' + (aligns[c] || 'left') + '">' + inlineMd(esc(h), ctx) + '</th>';
+            }).join('') + '</tr></thead>';
+          }
+          html += '<tbody>' + bodyRows.map(function (row) {
+            var cells = [];
+            for (var c = 0; c < header.length; c++) {
+              cells.push('<td style="text-align:' + (aligns[c] || 'left') + '">' + inlineMd(esc(row[c] || ''), ctx) + '</td>');
+            }
+            return '<tr>' + cells.join('') + '</tr>';
+          }).join('') + '</tbody></table></div>';
+
+          out.push(html);
+          continue;
+        }
+
+        if (/^\s*([-*+]|\d+[.)])\s+/.test(line)) {
+          var list = listBlock(lines, i, ctx);
+          out.push(list.html);
+          i = list.next;
+          continue;
+        }
+
+        var para = [];
+        while (i < lines.length && lines[i].trim() && !isBlockStart(lines[i])) {
+          para.push(lines[i].trim());
+          i++;
+        }
+        // Joined with a space, not a newline: a single line break inside a paragraph is a
+        // space in Markdown, and the source relies on that everywhere it hard-wraps prose.
+        if (para.length) out.push('<p>' + inlineMd(esc(para.join(' ')), ctx) + '</p>');
+        else i++;
+      }
+
+      return out.join('\n');
+    }
+
+    /* ============================== plumbing ============================== */
+
+    var state = {
+      view: 'today',
+      data: null,
+      index: {},
+      openDoc: null,
+      docCache: {},
+      libraryFilter: '',
+      libraryFolder: 'All',
+      openProject: null
+    };
+
+    /** Promise wrapper over google.script.run. The runner has to stay the receiver of the
+     *  call, which is why this uses apply(runner, ...) rather than apply(null, ...). */
+    function call(name) {
+      var args = Array.prototype.slice.call(arguments, 1);
+      return new Promise(function (resolve, reject) {
+        var runner = google.script.run
+          .withSuccessHandler(function (res) {
+            if (res && res.ok) resolve(res.data);
+            else reject(new Error((res && res.error) || 'The server did not say why that failed.'));
+          })
+          .withFailureHandler(function (err) {
+            reject(err instanceof Error ? err : new Error(String(err && err.message ? err.message : err)));
+          });
+        runner[name].apply(runner, args);
+      });
+    }
+
+    var toastTimer = null;
+    function toast(message, isError) {
+      var el = document.getElementById('toast');
+      el.textContent = String(message && message.message ? message.message : message);
+      el.className = 'toast show' + (isError ? ' error' : '');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () {
+        el.className = 'toast';
+      }, isError ? 6000 : 1800);
+    }
+
+    function el(id) {
+      return document.getElementById(id);
+    }
+
+    function chipFor(value) {
+      var map = {
+        Done: 'green', Read: 'green', Answered: 'green', Independent: 'green',
+        'In progress': 'blue', Reading: 'blue',
+        'Ready for readout': 'amber', Developing: 'amber',
+        Blocked: 'red', Open: 'red', 'Not yet': 'red'
+      };
+      return 'chip ' + (map[value] || '');
+    }
+
+    function options(list, selected) {
+      return list.map(function (o) {
+        return '<option value="' + esc(o) + '"' + (o === selected ? ' selected' : '') + '>' + esc(o) + '</option>';
+      }).join('');
+    }
+
+    function field(label, control) {
+      return '<label class="field"><span>' + esc(label) + '</span>' + control + '</label>';
+    }
+
+    /* ================================ views =============================== */
+
+    var VIEWS = [
+      { id: 'today', label: 'Today' },
+      { id: 'library', label: 'Library' },
+      { id: 'ladder', label: 'The ladder' },
+      { id: 'questions', label: 'Questions' },
+      { id: 'wrong', label: 'What I got wrong' },
+      { id: 'notes', label: 'Notes' },
+      { id: 'skills', label: 'Self-assessment' }
+    ];
+
+    function counts() {
+      var d = state.data;
+      return {
+        library: d.docs.filter(function (x) { return x.Status !== 'Read' && x.Status !== 'Reference'; }).length,
+        ladder: d.projects.filter(function (x) { return x.Status !== 'Done' && !x['Same as']; }).length,
+        questions: d.questions.filter(function (x) { return x.Status === 'Open'; }).length,
+        wrong: d.wrong.length,
+        notes: d.notes.length
+      };
+    }
+
+    function renderNav() {
+      var c = counts();
+      el('nav').innerHTML = VIEWS.map(function (v) {
+        var n = c[v.id];
+        return (
+          '<button data-view="' + v.id + '" aria-current="' + (state.view === v.id) + '">' +
+          '<span>' + esc(v.label) + '</span>' +
+          (n === undefined ? '' : '<span class="count">' + n + '</span>') +
+          '</button>'
+        );
+      }).join('');
+    }
+
+    function renderHeader() {
+      var p = state.data.position;
+      var chip = el('daychip');
+      if (p.started && p.day !== null) {
+        chip.hidden = false;
+        el('dayNumber').textContent = 'Day ' + p.day;
+        el('dayPhase').textContent = p.phase;
+      } else {
+        chip.hidden = true;
+      }
+      el('whoami').textContent = state.data.displayName || '';
+    }
+
+    /* ---- Today ---- */
+
+    function viewToday() {
+      var d = state.data;
+      var p = d.position;
+      var c = counts();
+      var html = '<h2 class="page">Today</h2>';
+
+      if (!p.started) {
+        html +=
+          '<div class="callout"><b>Set your start date.</b> Everything that counts days ' +
+          'works from it. You can change it later.</div>' +
+          '<div class="card"><div class="row">' +
+          '<input type="date" id="startDate" style="max-width:220px" value="' + esc(p.startDate || '') + '">' +
+          '<button class="btn" data-act="save-start">Save</button>' +
+          '</div></div>';
+      } else {
+        html +=
+          '<p class="lede">' + esc(p.phase) + '. Day ' + p.day + ' of 90, starting ' + esc(p.startDate) + '.</p>';
+      }
+
+      var inFlight = d.projects.filter(function (x) {
+        return x.Status === 'In progress' || x.Status === 'Blocked' || x.Status === 'Ready for readout';
+      });
+      var nextUp = d.projects.filter(function (x) {
+        return x.Status === 'Not started' && !x['Same as'];
+      }).slice(0, 3);
+
+      html += '<div class="grid">' +
+        stat(d.projects.filter(function (x) { return x.Status === 'Done'; }).length + ' / ' + d.projects.filter(function (x) { return !x['Same as']; }).length, 'Projects done') +
+        stat(d.docs.filter(function (x) { return x.Status === 'Read'; }).length + ' / ' + d.docs.length, 'Documents read') +
+        stat(c.questions, 'Questions open') +
+        stat(d.wrong.length, 'Things I got wrong') +
+        '</div>';
+
+      html += '<h3 class="group">In flight</h3>';
+      html += inFlight.length
+        ? inFlight.map(projectSummary).join('')
+        : '<div class="empty">Nothing in progress. Pick the next one up from the ladder.</div>';
+
+      if (nextUp.length) {
+        html += '<h3 class="group">Next up</h3>' + nextUp.map(projectSummary).join('');
+      }
+
+      var open = d.questions.filter(function (x) { return x.Status === 'Open'; }).slice(0, 5);
+      if (open.length) {
+        html += '<h3 class="group">Open questions</h3>' +
+          open.map(function (q) {
+            return '<div class="card flat"><div class="row"><span class="chip">' + esc(q.ID) + '</span><b>' +
+              esc(q.Question) + '</b></div></div>';
+          }).join('');
+      }
+
+      html +=
+        '<h3 class="group">Every day, first month</h3>' +
+        '<div class="card flat"><ol style="margin:0;padding-left:20px">' +
+        '<li>What you worked on</li><li>One thing you learned</li><li>One thing that surprised you</li>' +
+        '</ol><p class="meta" style="margin:8px 0 0">Three lines in chat before you log off. It takes two minutes ' +
+        'and it is not a status report.</p></div>';
+
+      return html;
+    }
+
+    function stat(n, k) {
+      return '<div class="stat"><div class="n">' + esc(n) + '</div><div class="k">' + esc(k) + '</div></div>';
+    }
+
+    function projectSummary(p) {
+      return (
+        '<div class="card flat"><div class="row">' +
+        '<span class="chip blue">' + esc(p.ID) + '</span>' +
+        '<b>' + esc(p.Project) + '</b>' +
+        '<span class="meta">' + esc(p.Account) + '</span>' +
+        '<span class="' + chipFor(p.Status) + ' push">' + esc(p.Status) + '</span>' +
+        '</div></div>'
+      );
+    }
+
+    /* ---- Library ---- */
+
+    function libraryDocs() {
+      var needle = state.libraryFilter.toLowerCase();
+      return state.data.docs
+        .slice()
+        .sort(function (a, b) {
+          return Number(a.Order) - Number(b.Order);
+        })
+        .filter(function (d) {
+          if (state.libraryFolder !== 'All' && d.Folder !== state.libraryFolder) return false;
+          if (!needle) return true;
+          return (d.Title + ' ' + d.Summary + ' ' + d['Source file']).toLowerCase().indexOf(needle) !== -1;
+        });
+    }
+
+    function libraryListHtml() {
+      var shown = libraryDocs();
+      if (!shown.length) return '<div class="empty">Nothing matches that.</div>';
+
+      var html = '';
+      var lastFolder = null;
+      shown.forEach(function (d) {
+        if (d.Folder !== lastFolder) {
+          html += '<div class="folder">' + esc(d.Folder) + '</div>';
+          lastFolder = d.Folder;
+        }
+        html +=
+          '<button data-doc="' + esc(d.ID) + '" aria-current="' + (state.openDoc === d.ID) + '">' +
+          '<span class="t">' + esc(d.Title) + '</span>' +
+          '<span class="s">' + esc(d.Summary || d['Source file']) + '</span>' +
+          '<span class="row tight" style="margin-top:6px">' +
+          '<span class="' + chipFor(d.Status) + '">' + esc(d.Status) + '</span>' +
+          '<span class="chip">' + esc(d.Words) + ' words</span>' +
+          '</span></button>';
+      });
+      return html;
+    }
+
+    /** Redraw the list on its own. Searching must not re-render the reader - re-parsing a
+     *  25,000-word document on every keystroke is slow, and it would throw away the caret. */
+    function refreshLibraryList() {
+      var node = el('liblist');
+      if (node) node.innerHTML = libraryListHtml();
+    }
+
+    function viewLibrary() {
+      var folders = ['All'];
+      state.data.docs.forEach(function (d) {
+        if (folders.indexOf(d.Folder) === -1) folders.push(d.Folder);
+      });
+
+      return (
+        '<div class="libnav">' +
+        '<div class="search"><input type="text" id="libSearch" placeholder="Search the library" value="' +
+        esc(state.libraryFilter) + '"></div>' +
+        '<div class="search"><select id="libFolder">' + options(folders, state.libraryFolder) + '</select></div>' +
+        '<div class="liblist" id="liblist">' + libraryListHtml() + '</div>' +
+        '</div>' +
+        '<div class="reader" id="reader">' + readerHtml() + '</div>'
+      );
+    }
+
+    function readerHtml() {
+      if (!state.openDoc) {
+        return '<div class="empty" style="margin:40px;border:0">Pick something from the list to read it.</div>';
+      }
+      var meta = state.index[state.openDoc];
+      var doc = state.docCache[state.openDoc];
+      if (!doc) return '<div class="loading">Loading...</div>';
+
+      var linked = state.data.projects.filter(function (p) {
+        return p['Doc ID'] === state.openDoc;
+      });
+
+      return (
+        '<div class="head">' +
+        '<h3>' + esc(meta.Title) + '</h3>' +
+        '<span class="chip">' + esc(meta.Folder) + '</span>' +
+        (linked.length ? '<span class="chip blue">' + linked.map(function (p) { return esc(p.ID); }).join(', ') + '</span>' : '') +
+        '<div class="push row tight">' +
+        '<select id="docStatus" style="width:auto">' + options(state.data.lists.DocStatus, meta.Status) + '</select>' +
+        '</div></div>' +
+        '<div class="scroll">' +
+        '<div class="md">' + renderMarkdown(doc.Body, { docId: state.openDoc, index: state.index }) + '</div>' +
+        '<hr>' +
+        field('My notes on this', '<textarea id="docNotes" placeholder="What you want to remember, or what did not make sense">' + esc(meta['My notes'] || '') + '</textarea>') +
+        '</div>'
+      );
+    }
+
+    /* ---- The ladder ---- */
+
+    function viewLadder() {
+      var d = state.data;
+      var byTier = {};
+      d.projects.slice().sort(function (a, b) {
+        return Number(a.Order) - Number(b.Order);
+      }).forEach(function (p) {
+        (byTier[p.Tier] = byTier[p.Tier] || []).push(p);
+      });
+
+      var html =
+        '<h2 class="page">The ladder</h2>' +
+        '<p class="lede">Thirty-three projects across five tiers. They start at about an hour and grow to ' +
+        'week-long by the end, and the length is part of the training.</p>';
+
+      ['Tier 1', 'Tier 2', 'Tier 3', 'Mecco', 'Tier 4'].forEach(function (tier) {
+        var rows = byTier[tier] || [];
+        if (!rows.length) return;
+        var done = rows.filter(function (p) { return p.Status === 'Done'; }).length;
+        html +=
+          '<h3 class="group">' + esc(tier) + ' &middot; ' + esc(rows[0].Window) + ' &middot; ' +
+          esc(rows[0].Safety) + ' &middot; ' + done + ' of ' + rows.length + ' done</h3>';
+        html += rows.map(projectRow).join('');
+      });
+
+      return html;
+    }
+
+    function projectRow(p) {
+      var isOpen = state.openProject === p.ID;
+      var alias = p['Same as'];
+
+      var head =
+        '<div class="top">' +
+        '<span class="idbadge">' + esc(p.ID) + '</span>' +
+        '<span class="title"><b>' + esc(p.Project) + '</b>' +
+        '<span class="meta">' + esc(p.Account) + ' &middot; ' + esc(p.Mode) + ' &middot; ' + esc(p['Time box']) +
+        (p['Goes live'] === 'Yes' ? ' &middot; <span class="chip live">goes live</span>' : '') +
+        '</span></span>' +
+        (alias
+          ? '<span class="chip">same as ' + esc(alias) + '</span>'
+          : '<span class="' + chipFor(p.Status) + '">' + esc(p.Status) + '</span>') +
+        '<button class="btn ghost small" data-toggle-project="' + esc(p.ID) + '">' +
+        (isOpen ? 'Close' : 'Open') + '</button>' +
+        '</div>';
+
+      if (!isOpen) return '<div class="proj' + (alias ? ' alias' : '') + '">' + head + '</div>';
+
+      var detail;
+      if (alias) {
+        detail =
+          '<div class="detail"><p style="margin:0">This is the same project as <b>' + esc(alias) +
+          '</b>. It is listed here so the ladder reads correctly - track it on ' + esc(alias) + '.</p></div>';
+      } else {
+        detail =
+          '<div class="detail">' +
+          '<p style="margin:0 0 12px"><b>Deliverable:</b> ' + esc(p.Deliverable) + '</p>' +
+          '<div class="cols">' +
+          field('Status', '<select data-project="' + esc(p.ID) + '" data-f="Status">' + options(state.data.lists.ProjectStatus, p.Status) + '</select>') +
+          field('Started', '<input type="date" data-project="' + esc(p.ID) + '" data-f="Started" value="' + esc(p.Started) + '">') +
+          field('Finished', '<input type="date" data-project="' + esc(p.ID) + '" data-f="Finished" value="' + esc(p.Finished) + '">') +
+          field('Hours', '<input type="number" step="0.25" min="0" data-project="' + esc(p.ID) + '" data-f="Hours" value="' + esc(p.Hours) + '">') +
+          '</div>' +
+          field('Where the deliverable lives', '<input type="text" data-project="' + esc(p.ID) + '" data-f="Deliverable link" placeholder="A link, or where you filed it" value="' + esc(p['Deliverable link']) + '">') +
+          field('Notes', '<textarea data-project="' + esc(p.ID) + '" data-f="Notes">' + esc(p.Notes) + '</textarea>') +
+          (p['Doc ID'] ? '<div class="brief"><button class="btn ghost small" data-doc="' + esc(p['Doc ID']) + '">Read the brief</button></div>' : '') +
+          '</div>';
+      }
+
+      return '<div class="proj' + (alias ? ' alias' : '') + '">' + head + detail + '</div>';
+    }
+
+    /* ---- Questions ---- */
+
+    function viewQuestions() {
+      var rows = state.data.questions.slice().reverse();
+      var html =
+        '<h2 class="page">Questions</h2>' +
+        '<p class="lede">Your running list of things you do not understand yet. It is meant to get long. ' +
+        'When you can answer one, write the answer in rather than deleting the question.</p>' +
+        '<div class="card">' +
+        field('Ask something', '<textarea id="qNew" placeholder="What do you not understand yet?"></textarea>') +
+        field('Context, if it helps', '<input type="text" id="qContext" placeholder="Where it came up">') +
+        '<div class="row"><input type="text" id="qProject" placeholder="Project, e.g. T1-4" style="max-width:160px">' +
+        '<button class="btn" data-act="add-question">Add it</button></div>' +
+        '</div>';
+
+      if (!rows.length) return html + '<div class="empty">Nothing yet. Start this on day one.</div>';
+
+      html += rows.map(function (q) {
+        return (
+          '<div class="entry">' +
+          '<div class="head"><span class="chip">' + esc(q.ID) + '</span>' +
+          '<span class="' + chipFor(q.Status) + '">' + esc(q.Status) + '</span>' +
+          (q.Project ? '<span class="chip blue">' + esc(q.Project) + '</span>' : '') +
+          '<span class="meta">' + esc(q['Asked on']) + '</span>' +
+          '<button class="btn danger small push" data-del="questions" data-id="' + esc(q.ID) + '">Delete</button></div>' +
+          '<div class="q">' + esc(q.Question) + '</div>' +
+          (q.Context ? '<p class="meta">' + esc(q.Context) + '</p>' : '') +
+          field('Answer', '<textarea data-section="questions" data-id="' + esc(q.ID) + '" data-f="Answer" placeholder="Write it when you have it, with the date">' + esc(q.Answer) + '</textarea>') +
+          '<div class="row"><select data-section="questions" data-id="' + esc(q.ID) + '" data-f="Status" style="max-width:160px">' +
+          options(state.data.lists.QuestionStatus, q.Status) + '</select>' +
+          (q['Answered on'] ? '<span class="meta">answered ' + esc(q['Answered on']) + '</span>' : '') +
+          '</div></div>'
+        );
+      }).join('');
+
+      return html;
+    }
+
+    /* ---- What I got wrong ---- */
+
+    function viewWrong() {
+      var rows = state.data.wrong.slice().reverse();
+      var html =
+        '<h2 class="page">What I got wrong</h2>' +
+        '<p class="lede">One line per surprise, all ninety days. Nobody reads this but you, and the blunter it ' +
+        'is the more it is worth. The last box is the one that earns its place: the gap is data, the habit ' +
+        'behind it is the lesson.</p>' +
+        '<div class="card">' +
+        '<div class="row"><input type="text" id="wProject" placeholder="Project, e.g. T1-1" style="max-width:160px"></div>' +
+        field('I predicted', '<textarea id="wPredicted"></textarea>') +
+        field('What actually happened', '<textarea id="wActual"></textarea>') +
+        field('Why I was off', '<textarea id="wWhy"></textarea>') +
+        field('The habit to watch', '<textarea id="wHabit"></textarea>') +
+        '<button class="btn" data-act="add-wrong">Add it</button>' +
+        '</div>';
+
+      if (!rows.length) {
+        return html + '<div class="empty">Nothing yet. A long list here at day 90 is a good outcome.</div>';
+      }
+
+      html += rows.map(function (w) {
+        return (
+          '<div class="entry">' +
+          '<div class="head"><span class="chip">' + esc(w.ID) + '</span>' +
+          (w.Project ? '<span class="chip blue">' + esc(w.Project) + '</span>' : '') +
+          '<span class="meta">' + esc(w.Date) + '</span>' +
+          '<button class="btn danger small push" data-del="wrong" data-id="' + esc(w.ID) + '">Delete</button></div>' +
+          '<dl>' +
+          '<dt>Predicted</dt><dd>' + esc(w['I predicted']) + '</dd>' +
+          '<dt>Actually</dt><dd>' + esc(w['What actually happened']) + '</dd>' +
+          '<dt>Why</dt><dd>' + esc(w['Why I was off']) + '</dd>' +
+          '<dt>Habit</dt><dd><b>' + esc(w['Habit to watch']) + '</b></dd>' +
+          '</dl></div>'
+        );
+      }).join('');
+
+      return html;
+    }
+
+    /* ---- Notes ---- */
+
+    function viewNotes() {
+      var rows = state.data.notes.slice().reverse();
+      var html =
+        '<h2 class="page">Notes</h2>' +
+        '<p class="lede">Meeting notes, capture sessions, things people told you. Write them down the same ' +
+        'day - especially in the first three weeks, when a lot of what you are told only exists in ' +
+        'someone\'s head.</p>' +
+        '<div class="card">' +
+        '<div class="row">' +
+        '<select id="nKind" style="max-width:150px">' + options(state.data.lists.NoteKind, 'Capture') + '</select>' +
+        '<input type="text" id="nTitle" placeholder="Title" style="flex:1;min-width:200px">' +
+        '<input type="text" id="nWho" placeholder="Who" style="max-width:170px">' +
+        '<input type="text" id="nProject" placeholder="Project" style="max-width:130px">' +
+        '</div>' +
+        field('The note', '<textarea id="nBody"></textarea>') +
+        field('Follow-up, if any', '<input type="text" id="nFollow" placeholder="What you owe someone, or what to chase">') +
+        '<button class="btn" data-act="add-note">Add it</button>' +
+        '</div>';
+
+      if (!rows.length) return html + '<div class="empty">Nothing yet.</div>';
+
+      html += rows.map(function (n) {
+        return (
+          '<div class="entry">' +
+          '<div class="head"><span class="chip">' + esc(n.ID) + '</span>' +
+          '<span class="chip blue">' + esc(n.Kind) + '</span>' +
+          '<b>' + esc(n.Title) + '</b>' +
+          (n.Who ? '<span class="meta">' + esc(n.Who) + '</span>' : '') +
+          '<span class="meta">' + esc(n.Date) + '</span>' +
+          '<button class="btn danger small push" data-del="notes" data-id="' + esc(n.ID) + '">Delete</button></div>' +
+          (n.Body ? '<p style="white-space:pre-wrap;margin:0 0 8px">' + esc(n.Body) + '</p>' : '') +
+          (n['Follow-up']
+            ? '<div class="row"><span class="chip amber">follow-up</span><span>' + esc(n['Follow-up']) + '</span>' +
+              '<select data-section="notes" data-id="' + esc(n.ID) + '" data-f="Done" style="max-width:110px">' +
+              options(state.data.lists.YesNo, n.Done) + '</select></div>'
+            : '') +
+          '</div>'
+        );
+      }).join('');
+
+      return html;
+    }
+
+    /* ---- Self-assessment ---- */
+
+    function viewSkills() {
+      var rows = state.data.skills.slice().sort(function (a, b) {
+        return Number(a.Order) - Number(b.Order);
+      });
+
+      var html =
+        '<h2 class="page">Self-assessment</h2>' +
+        '<p class="lede">Rate yourself before any training starts, then again at day 30 and day 90. It is not ' +
+        'a test and nobody else scores it. Expect some scores to go <em>down</em> at day 30 - that means you ' +
+        'have found out what you did not know, which is the training working.</p>';
+
+      var lastSection = null;
+      var open = false;
+      rows.forEach(function (s) {
+        if (s.Section !== lastSection) {
+          if (open) html += '</tbody></table>';
+          html +=
+            '<h3 class="group">' + esc(s.Section) + '</h3>' +
+            '<table class="skills"><thead><tr><th class="skill">Skill</th><th>Day 1</th><th>Day 30</th>' +
+            '<th>Day 90</th><th>Evidence</th></tr></thead><tbody>';
+          lastSection = s.Section;
+          open = true;
+        }
+        html +=
+          '<tr><td class="skill">' + esc(s.Skill) + '</td>' +
+          ['Day 1', 'Day 30', 'Day 90'].map(function (f) {
+            return '<td><select data-skill="' + esc(s.ID) + '" data-f="' + f + '">' +
+              '<option value=""></option>' + options(state.data.lists.Score, s[f]) + '</select></td>';
+          }).join('') +
+          '<td><input type="text" data-skill="' + esc(s.ID) + '" data-f="Evidence" value="' + esc(s.Evidence) + '" placeholder="What proves it"></td></tr>';
+      });
+      if (open) html += '</tbody></table>';
+
+      return html;
+    }
+
+    /* ============================== rendering ============================== */
+
+    function render() {
+      var main = el('main');
+      main.className = 'main' + (state.view === 'library' ? ' split' : '');
+
+      var map = {
+        today: viewToday,
+        library: viewLibrary,
+        ladder: viewLadder,
+        questions: viewQuestions,
+        wrong: viewWrong,
+        notes: viewNotes,
+        skills: viewSkills
+      };
+
+      main.innerHTML = (map[state.view] || viewToday)();
+      renderNav();
+      renderHeader();
+      main.scrollTop = state.view === 'library' ? main.scrollTop : 0;
+    }
+
+    function refreshDoc(id) {
+      if (state.docCache[id]) {
+        render();
+        return;
+      }
+      render();
+      call('apiGetDoc', id)
+        .then(function (doc) {
+          state.docCache[id] = doc;
+          if (state.openDoc === id) render();
+        })
+        .catch(function (e) {
+          toast(e, true);
+        });
+    }
+
+    function openDoc(id) {
+      if (!state.index[id]) {
+        toast('That document is not in the library.', true);
+        return;
+      }
+      state.view = 'library';
+      state.openDoc = id;
+      refreshDoc(id);
+    }
+
+    function replaceRow(list, row, key) {
+      for (var i = 0; i < list.length; i++) {
+        if (list[i][key] === row[key]) {
+          list[i] = row;
+          return;
+        }
+      }
+      list.push(row);
+    }
+
+    /* =============================== events =============================== */
+
+    document.addEventListener('click', function (e) {
+      var t = e.target;
+
+      var navBtn = t.closest('[data-view]');
+      if (navBtn) {
+        state.view = navBtn.getAttribute('data-view');
+        render();
+        return;
+      }
+
+      var docBtn = t.closest('[data-doc]');
+      if (docBtn) {
+        e.preventDefault();
+        openDoc(docBtn.getAttribute('data-doc'));
+        return;
+      }
+
+      var toggle = t.closest('[data-toggle-project]');
+      if (toggle) {
+        var id = toggle.getAttribute('data-toggle-project');
+        state.openProject = state.openProject === id ? null : id;
+        render();
+        return;
+      }
+
+      var del = t.closest('[data-del]');
+      if (del) {
+        var section = del.getAttribute('data-del');
+        if (!window.confirm('Delete ' + del.getAttribute('data-id') + '? This cannot be undone.')) return;
+        call('apiDelete', section, del.getAttribute('data-id'))
+          .then(function () {
+            return call('apiReload', section);
+          })
+          .then(function (rows) {
+            state.data[section] = rows;
+            toast('Deleted');
+            render();
+          })
+          .catch(function (err) {
+            toast(err, true);
+          });
+        return;
+      }
+
+      var act = t.closest('[data-act]');
+      if (act) handleAction(act.getAttribute('data-act'));
+    });
+
+    function handleAction(action) {
+      if (action === 'save-start') {
+        var value = el('startDate').value;
+        if (!value) {
+          toast('Pick a date first.', true);
+          return;
+        }
+        call('apiSetSetting', 'Start date', value)
+          .then(function (res) {
+            state.data.position = res.position;
+            toast('Saved');
+            render();
+          })
+          .catch(function (err) {
+            toast(err, true);
+          });
+        return;
+      }
+
+      if (action === 'add-question') {
+        var text = el('qNew').value.trim();
+        if (!text) {
+          toast('Write the question first.', true);
+          return;
+        }
+        create('questions', {
+          Question: text,
+          Context: el('qContext').value.trim(),
+          Project: el('qProject').value.trim().toUpperCase()
+        });
+        return;
+      }
+
+      if (action === 'add-wrong') {
+        var predicted = el('wPredicted').value.trim();
+        var actual = el('wActual').value.trim();
+        if (!predicted && !actual) {
+          toast('Fill in at least the prediction and what happened.', true);
+          return;
+        }
+        create('wrong', {
+          Project: el('wProject').value.trim().toUpperCase(),
+          'I predicted': predicted,
+          'What actually happened': actual,
+          'Why I was off': el('wWhy').value.trim(),
+          'Habit to watch': el('wHabit').value.trim()
+        });
+        return;
+      }
+
+      if (action === 'add-note') {
+        var title = el('nTitle').value.trim();
+        if (!title) {
+          toast('Give it a title.', true);
+          return;
+        }
+        create('notes', {
+          Kind: el('nKind').value,
+          Title: title,
+          Who: el('nWho').value.trim(),
+          Project: el('nProject').value.trim().toUpperCase(),
+          Body: el('nBody').value.trim(),
+          'Follow-up': el('nFollow').value.trim()
+        });
+      }
+    }
+
+    function create(section, record) {
+      call('apiCreate', section, record)
+        .then(function () {
+          return call('apiReload', section);
+        })
+        .then(function (rows) {
+          state.data[section] = rows;
+          toast('Added');
+          render();
+        })
+        .catch(function (err) {
+          toast(err, true);
+        });
+    }
+
+    document.addEventListener('change', function (e) {
+      var t = e.target;
+
+      if (t.id === 'libFolder') {
+        state.libraryFolder = t.value;
+        refreshLibraryList();
+        return;
+      }
+
+      if (t.id === 'docStatus') {
+        saveDoc({ Status: t.value });
+        return;
+      }
+      if (t.id === 'docNotes') {
+        saveDoc({ 'My notes': t.value });
+        return;
+      }
+
+      var project = t.getAttribute('data-project');
+      if (project) {
+        var patch = {};
+        patch[t.getAttribute('data-f')] = t.value;
+        call('apiSaveProject', project, patch)
+          .then(function (row) {
+            replaceRow(state.data.projects, row, 'ID');
+            toast('Saved');
+            render();
+          })
+          .catch(function (err) {
+            toast(err, true);
+          });
+        return;
+      }
+
+      var skill = t.getAttribute('data-skill');
+      if (skill) {
+        var sp = {};
+        sp[t.getAttribute('data-f')] = t.value;
+        call('apiSaveSkill', skill, sp)
+          .then(function (row) {
+            replaceRow(state.data.skills, row, 'ID');
+            toast('Saved');
+          })
+          .catch(function (err) {
+            toast(err, true);
+          });
+        return;
+      }
+
+      var section = t.getAttribute('data-section');
+      if (section) {
+        var lp = {};
+        lp[t.getAttribute('data-f')] = t.value;
+        call('apiUpdate', section, t.getAttribute('data-id'), lp)
+          .then(function () {
+            return call('apiReload', section);
+          })
+          .then(function (rows) {
+            state.data[section] = rows;
+            toast('Saved');
+            render();
+          })
+          .catch(function (err) {
+            toast(err, true);
+          });
+      }
+    });
+
+    function saveDoc(patch) {
+      var id = state.openDoc;
+      call('apiSaveDoc', id, patch)
+        .then(function (row) {
+          // The saved row comes back with its Body attached. Keep that out of the list state:
+          // it is up to 25 KB per document and nothing in the list needs it.
+          var light = {};
+          Object.keys(row).forEach(function (k) {
+            if (k !== 'Body') light[k] = row[k];
+          });
+
+          replaceRow(state.data.docs, light, 'ID');
+          state.index[id] = light;
+          toast('Saved');
+
+          // Only the list and the nav counts can have changed. Redrawing the reader would
+          // re-parse the document and scroll her back to the top mid-sentence.
+          refreshLibraryList();
+          renderNav();
+        })
+        .catch(function (err) {
+          toast(err, true);
+        });
+    }
+
+    document.addEventListener('input', function (e) {
+      if (e.target.id !== 'libSearch') return;
+      state.libraryFilter = e.target.value;
+      refreshLibraryList();
+    });
+
+    /* ================================ boot ================================ */
+
+    call('apiBootstrap')
+      .then(function (data) {
+        state.data = data;
+        data.docs.forEach(function (d) {
+          state.index[d.ID] = d;
+        });
+        render();
+      })
+      .catch(function (err) {
+        el('main').innerHTML =
+          '<div class="card"><h4>Could not load the workbook</h4><p>' + esc(err.message || err) + '</p>' +
+          '<p class="meta">If this is the first time, run <b>Ramp workbook &gt; Set up workbook</b> from the ' +
+          'menu in the spreadsheet, then reload.</p></div>';
+      });
+
+    // Exposed so the test harness can exercise the renderer against the real documents.
+    window.MD = { render: renderMarkdown, resolveDocId: resolveDocId, esc: esc };
+  })();
+</script>

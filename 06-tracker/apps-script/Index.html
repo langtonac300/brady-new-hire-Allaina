@@ -1,0 +1,38 @@
+<!-- The whole interface. Apps Script serves one page; everything below is drawn by JavaScript.html. -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <base target="_top" />
+    <meta charset="utf-8" />
+    <title>The ramp</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400&display=swap"
+      rel="stylesheet"
+    />
+    <?!= include('Stylesheet'); ?>
+  </head>
+
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <h1>The ramp</h1>
+        <div class="daychip" id="daychip" hidden>
+          <b id="dayNumber">-</b><span id="dayPhase"></span>
+        </div>
+        <div class="spacer"></div>
+        <div class="who" id="whoami"></div>
+      </header>
+
+      <div class="body">
+        <nav class="nav" id="nav" aria-label="Sections"></nav>
+        <main class="main" id="main">
+          <div class="loading">Loading the workbook...</div>
+        </main>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <?!= include('JavaScript'); ?>
+  </body>
+</html>
