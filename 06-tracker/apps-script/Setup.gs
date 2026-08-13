@@ -59,7 +59,10 @@ function setupWorkbook() {
 
   // Put the sheets in reading order and drop the empty default sheet Google creates.
   // A hidden sheet cannot be made active, so Lists is briefly shown while it is moved.
-  var order = [T.DASHBOARD, T.DOCS, T.PROJECTS, T.QUESTIONS, T.WRONG, T.NOTES, T.SKILLS, T.SETTINGS, T.LISTS];
+  var order = [
+    T.DASHBOARD, T.DOCS, T.PROJECTS, T.QUESTIONS, T.WRONG, T.NOTES, T.DAILY,
+    T.SKILLS, T.SYSTEMS, T.SCRIPTS, T.SETTINGS, T.LISTS
+  ];
   order.forEach(function (name, i) {
     var sheet = book.getSheetByName(name);
     if (!sheet) return;
@@ -263,6 +266,9 @@ function seedIfEmpty() {
       })
     );
   }
+
+  if (!dbSelect(T.SYSTEMS).length) dbWriteAll(T.SYSTEMS, SEED_SYSTEMS());
+  if (!dbSelect(T.SCRIPTS).length) dbWriteAll(T.SCRIPTS, SEED_SCRIPTS());
 }
 
 /**

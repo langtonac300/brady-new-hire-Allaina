@@ -17,7 +17,10 @@ var T = {
   QUESTIONS: 'Questions',
   WRONG: 'What I got wrong',
   NOTES: 'Notes',
+  DAILY: 'Daily lines',
   SKILLS: 'Self-assessment',
+  SYSTEMS: 'Systems',
+  SCRIPTS: 'Scripts',
   LISTS: 'Lists',
   SETTINGS: 'Settings'
 };
@@ -33,7 +36,16 @@ function LISTS() {
     Score: ['Not yet', 'Developing', 'Independent'],
     Tier: ['Tier 1', 'Tier 2', 'Tier 3', 'Mecco', 'Tier 4'],
     Mode: ['Paired', 'Solo'],
-    YesNo: ['Yes', 'No']
+    YesNo: ['Yes', 'No'],
+    // "Say whether the timebox held" is a step in the project routine, and it is useful
+    // feedback in both directions - a half-day project that took forty minutes is worth
+    // knowing too.
+    Timebox: ['Held', 'Ran over', 'Came in under'],
+    // Access is not automatic and some of it goes through another team, so where each
+    // request has got to is worth tracking rather than remembering.
+    Access: ['Not requested', 'Requested', 'Granted', 'Blocked'],
+    ScriptStatus: ['Idea', 'Draft', 'Running', 'Paused'],
+    Schedule: ['Not scheduled', 'Hourly', 'Daily', 'Weekly', 'Monthly']
   };
 }
 
@@ -93,11 +105,36 @@ function SCHEMA() {
         // own. T2-7 is the only one: it is the same work as M-1 and is tracked there.
         { name: 'Same as', w: 90 },
         { name: 'Status', w: 140, list: 'ProjectStatus' },
+        // The prediction is the first step of the routine and it only works written down
+        // before the account is opened. Storing the date it was written is what makes it a
+        // prediction rather than a recollection.
+        { name: 'Prediction', w: 380, wrap: true },
+        { name: 'Predicted on', w: 110, type: 'date' },
         { name: 'Started', w: 100, type: 'date' },
         { name: 'Finished', w: 100, type: 'date' },
         { name: 'Hours', w: 70, type: 'number' },
+        { name: 'Timebox held', w: 130, list: 'Timebox' },
         { name: 'Deliverable link', w: 240 },
         { name: 'Notes', w: 340, wrap: true },
+        { name: 'Updated', w: 140, type: 'date' }
+      ]
+    },
+
+    {
+      // The three lines posted in chat at the end of each day for the first month. One row
+      // per day; the app edits today's row rather than adding a second one.
+      name: T.DAILY,
+      title: 'Daily lines',
+      colour: '#0B6E4F',
+      key: 'ID',
+      columns: [
+        { name: 'ID', w: 80 },
+        { name: 'Date', w: 100, type: 'date' },
+        { name: 'Worked on', w: 380, wrap: true },
+        { name: 'Learned', w: 380, wrap: true },
+        { name: 'Surprised me', w: 380, wrap: true },
+        { name: 'Keep/Kill done', w: 120, list: 'YesNo' },
+        { name: 'Posted', w: 90, list: 'YesNo' },
         { name: 'Updated', w: 140, type: 'date' }
       ]
     },
@@ -171,6 +208,53 @@ function SCHEMA() {
         { name: 'Day 30', w: 120, list: 'Score' },
         { name: 'Day 90', w: 120, list: 'Score' },
         { name: 'Evidence', w: 360, wrap: true },
+        { name: 'Updated', w: 140, type: 'date' }
+      ]
+    },
+
+    {
+      // Where every number lives, what it owns, and the one gotcha attached to it. Doubles
+      // as the access tracker: access is not automatic, some of it goes through another
+      // team, and a request that has not landed is worth seeing rather than remembering.
+      name: T.SYSTEMS,
+      title: 'Systems',
+      colour: '#1F4C97',
+      key: 'Tool',
+      columns: [
+        { name: 'Tool', w: 190 },
+        { name: 'What it is', w: 360, wrap: true },
+        { name: 'What it owns', w: 300, wrap: true },
+        { name: 'The gotcha', w: 400, wrap: true },
+        { name: 'Access by', w: 190 },
+        { name: 'Status', w: 130, list: 'Access' },
+        { name: 'Requested', w: 105, type: 'date' },
+        { name: 'Granted', w: 105, type: 'date' },
+        // Deliberately blank on import. No URL for any of these is recorded anywhere in the
+        // source material, and a plausible-looking guess would be worse than an empty cell.
+        { name: 'Link', w: 300 },
+        { name: 'Notes', w: 300, wrap: true },
+        { name: 'Updated', w: 140, type: 'date' }
+      ]
+    },
+
+    {
+      // Google Ads scripts: the ones shipped with this project and any she writes later.
+      name: T.SCRIPTS,
+      title: 'Scripts',
+      colour: '#1F4C97',
+      key: 'ID',
+      columns: [
+        { name: 'ID', w: 80 },
+        { name: 'Name', w: 260 },
+        { name: 'What it does', w: 400, wrap: true },
+        { name: 'Reads or writes', w: 130 },
+        { name: 'Account', w: 170 },
+        { name: 'Feeds', w: 170 },
+        { name: 'Status', w: 110, list: 'ScriptStatus' },
+        { name: 'Schedule', w: 130, list: 'Schedule' },
+        { name: 'Last run', w: 105, type: 'date' },
+        { name: 'Source file', w: 300 },
+        { name: 'Notes', w: 340, wrap: true },
         { name: 'Updated', w: 140, type: 'date' }
       ]
     },

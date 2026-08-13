@@ -308,7 +308,8 @@ try {
 console.log('  ' + setupMessage + '\n');
 
 const names = book.sheets.map((s) => s.name);
-['Dashboard', 'Library', 'Ladder', 'Questions', 'What I got wrong', 'Notes', 'Self-assessment', 'Lists', 'Settings']
+['Dashboard', 'Library', 'Ladder', 'Questions', 'What I got wrong', 'Notes', 'Daily lines',
+ 'Self-assessment', 'Systems', 'Scripts', 'Lists', 'Settings']
   .forEach((n) => check(`sheet "${n}" exists`, names.includes(n), `sheets are: ${names.join(', ')}`));
 
 const docs = run('dbSelect(T.DOCS)');
@@ -438,27 +439,83 @@ check('a patch cannot write a column the API does not allow',
 
 /* --------------------------- the three log tables ------------------------- */
 
-for (const section of ['questions', 'wrong', 'notes']) {
+const SECTION_FIXTURES = {
+  questions: { Question: 'Why do the two dashboards disagree?', Project: 'T1-5' },
+  wrong: { 'I predicted': 'mostly search', 'What actually happened': 'three PMax campaigns', 'Habit to watch': 'I default to search' },
+  notes: { Kind: 'Meeting', Title: 'Kickoff with Alex', Who: 'Alex' },
+  daily: { 'Worked on': 'T1-1 account tour', Learned: 'PMax is most of this account', 'Surprised me': 'brand was a bigger share than I guessed' }
+};
+
+for (const section of ['questions', 'wrong', 'notes', 'daily']) {
   const before = api('apiReload', section).data.length;
-  const created = api('apiCreate', section, section === 'questions'
-    ? { Question: 'Why do the two dashboards disagree?', Project: 'T1-5' }
-    : section === 'wrong'
-      ? { 'I predicted': 'mostly search', 'What actually happened': 'three PMax campaigns', 'Habit to watch': 'I default to search' }
-      : { Kind: 'Meeting', Title: 'Kickoff with Alex', Who: 'Alex' });
+  const created = api('apiCreate', section, SECTION_FIXTURES[section]);
   check(`${section}: create succeeds`, created.ok === true, JSON.stringify(created.error));
   const after = api('apiReload', section).data;
   eq(`${section}: one row was added`, after.length, before + 1);
-  check(`${section}: the id is prefixed`, /^[QWN]-\d{3}$/.test(created.data.ID), created.data.ID);
+  check(`${section}: the id is prefixed`, /^[QWND]-\d{3}$/.test(created.data.ID), created.data.ID);
   check(`${section}: the date defaulted to today`,
     /^\d{4}-\d{2}-\d{2}$/.test(created.data[section === 'questions' ? 'Asked on' : 'Date']));
 
-  const second = api('apiCreate', section, { Title: 'second', Question: 'second' });
+  const second = api('apiCreate', section, { Title: 'second', Question: 'second', 'Worked on': 'second' });
   check(`${section}: ids increment`, second.data.ID !== created.data.ID, `${created.data.ID} vs ${second.data.ID}`);
 
   const gone = api('apiDelete', section, second.data.ID);
   check(`${section}: delete succeeds`, gone.ok && gone.data === true);
   eq(`${section}: the row is gone`, api('apiReload', section).data.length, before + 1);
 }
+
+/* ------------------------- the prediction discipline ----------------------- */
+
+let pred = api('apiSaveProject', 'T1-3', { Prediction: 'Mostly brand terms, one PMax.' });
+check('writing a prediction stamps the day it was written',
+  /^\d{4}-\d{2}-\d{2}$/.test(pred.data['Predicted on']), pred.data['Predicted on']);
+
+const firstStamp = pred.data['Predicted on'];
+pred = api('apiSaveProject', 'T1-3', { Prediction: 'Revised after looking.' });
+eq('the prediction date is never overwritten', pred.data['Predicted on'], firstStamp);
+
+const box = api('apiSaveProject', 'T1-3', { 'Timebox held': 'Ran over' });
+eq('the timebox verdict saves', box.data['Timebox held'], 'Ran over');
+
+/* --------------------------- systems and scripts --------------------------- */
+
+const systems = run('dbSelect(T.SYSTEMS)');
+eq('12 systems seeded', systems.length, 12);
+check('every system carries its gotcha', systems.every((s) => String(s['The gotcha']).length > 20));
+check('no system link was invented', systems.every((s) => !s.Link),
+  'the source records no URLs for these, and a plausible guess is worse than an empty cell');
+eq('Google Ads is day-one access', systems.find((s) => s.Tool === 'Google Ads')['Access by'], 'Day 1');
+check('BigQuery is flagged as the slow one',
+  /week 1/i.test(systems.find((s) => s.Tool === 'BigQuery / SQL')['Access by']));
+
+let sys = api('apiSaveSystem', 'Power BI', { Status: 'Requested' });
+check('requesting access stamps the request date', /^\d{4}-\d{2}-\d{2}$/.test(sys.data.Requested));
+sys = api('apiSaveSystem', 'Power BI', { Status: 'Granted' });
+check('granting stamps its own date', /^\d{4}-\d{2}-\d{2}$/.test(sys.data.Granted));
+
+const scripts = run('dbSelect(T.SCRIPTS)');
+eq('3 scripts seeded', scripts.length, 3);
+check('every shipped script is read-only',
+  scripts.every((s) => s['Reads or writes'] === 'Reads only'),
+  'a script that writes to an account cannot be used during the read-only phase');
+check('each script says what it feeds', scripts.every((s) => String(s.Feeds).length > 3));
+eq('a script setting saves', api('apiSaveScript', 'GAS-1', { Schedule: 'Weekly' }).data.Schedule, 'Weekly');
+
+/* --------------------------------- search --------------------------------- */
+
+const hits = api('apiSearch', 'attribution');
+check('search succeeds', hits.ok === true, JSON.stringify(hits.error));
+check('search finds documents', hits.data.documents.length > 0, 'nothing matched "attribution"');
+check('search returns a readable snippet', String(hits.data.documents[0].snippet).length > 20);
+check('search counts hits per document', hits.data.documents[0].hits >= 1);
+check('a title match sorts first',
+  api('apiSearch', 'timezone').data.documents.length > 0);
+eq('a one-character query is refused', api('apiSearch', 'a').data.documents.length, 0);
+check('search covers her own writing',
+  api('apiSearch', 'PMax').data.entries.some((e) => e.section === 'wrong'),
+  'the wrong-log entry created above should have matched');
+check('search never ships a whole body',
+  JSON.stringify(hits.data).length < 200000, 'the payload is far larger than snippets would be');
 
 // Answering a question closes it without being told to.
 const q = api('apiCreate', 'questions', { Question: 'What is a guardrail?' });
@@ -592,7 +649,15 @@ if (win.MD) {
     if (/^\s*#{1,6}\s/m.test(text)) problems.push(`${d.ID}: a heading rendered as raw text`);
     if (/\]\(\.{0,2}\/?[\w./-]+\)/.test(text)) problems.push(`${d.ID}: a link rendered as raw text`);
     if (/\*\*[^*]+\*\*/.test(text)) problems.push(`${d.ID}: bold rendered as raw text`);
-    if (text.includes(' ') || text.includes('')) problems.push(`${d.ID}: a sentinel leaked into the output`);
+    if (/[\u0000\u0001]/.test(text)) problems.push(`${d.ID}: a sentinel leaked into the output`);
+
+    // "undefined" in rendered output always means a lookup missed. The source never uses the
+    // word, so any occurrence is a renderer bug rather than content.
+    if (text.includes("undefined")) {
+      const at = text.indexOf("undefined");
+      const around = text.slice(Math.max(0, at - 60), at + 20).replace(/\s+/g, " ");
+      problems.push(`${d.ID}: rendered "undefined" - ...${around}`);
+    }
 
     docLinks += (html.match(/class="doclink"/g) || []).length;
     const dead = html.match(/<span class="dead">([^<]*)<\/span>/g) || [];
@@ -628,6 +693,24 @@ if (win.MD) {
   check('a blockquote renders', render('> warning\n> second line').includes('<blockquote>'));
   check('html in the source is escaped', render('a <b>tag</b> here').includes('&lt;b&gt;'));
   check('an external link opens in a new tab', render('[x](https://example.com)').includes('target="_blank"'));
+
+  // A link whose label is inline code is the house style throughout the source. The label is
+  // processed by a recursive pass, and that pass must not try to restore code spans itself.
+  const codeLink = win.MD.render('See [`ppc-fundamentals.md`](./02-learning/ppc-fundamentals.md) first.', {
+    docId: 'README',
+    index
+  });
+  check('a code-labelled link keeps its code span',
+    codeLink.includes('<code>ppc-fundamentals.md</code>'), codeLink);
+  check('a code-labelled link is still a link',
+    codeLink.includes('class="doclink"'), codeLink);
+  check('a code-labelled link does not render as undefined',
+    !codeLink.includes('undefined'), codeLink);
+  check('two code-labelled links in one line both survive',
+    (win.MD.render('[`a.md`](./README.md) and [`b.md`](./README.md)', { docId: 'README', index })
+      .match(/<code>/g) || []).length === 2);
+  check('inline code inside bold survives',
+    render('**the `Conversions` column**').includes('<code>Conversions</code>'));
 
   // Emphasis. Every one of these appears in the source and every one of them was rendered
   // wrongly at some point while this was being written.

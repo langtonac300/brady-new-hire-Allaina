@@ -9,6 +9,13 @@
   (function () {
     'use strict';
 
+    // Sentinels for text that must survive the inline passes untouched. They are control
+    // characters precisely because no real document contains them. Built with
+    // fromCharCode so this file stays plain ASCII.
+    var CODE_MARK = String.fromCharCode(0);
+    var PIPE_MARK = String.fromCharCode(1);
+    var RESTORE_RE = new RegExp(CODE_MARK + '(\\d+)' + CODE_MARK, 'g');
+
     /* ============================== markdown ============================== */
 
     function esc(s) {
@@ -55,15 +62,36 @@
       return '';
     }
 
+    /**
+     * Inline formatting, deliberately split in two.
+     *
+     * Code spans are lifted out once here and put back once here. Everything in between
+     * runs on the sentinel-carrying string via inlineBody(), including the recursive pass
+     * over a link label.
+     *
+     * That split is the whole point. A link label is very often itself inline code - the
+     * house style writes [`ppc-fundamentals.md`](../02-learning/ppc-fundamentals.md) - and
+     * if that recursion restored code spans it would restore them against its own empty
+     * list and render every such label as "undefined".
+     */
     function inlineMd(text, ctx) {
       var codes = [];
       var s = String(text).replace(/`([^`]+)`/g, function (m, c) {
         codes.push(c);
-        return '\u0000' + (codes.length - 1) + '\u0000';
+        return CODE_MARK + (codes.length - 1) + CODE_MARK;
       });
 
+      s = inlineBody(s, ctx);
+
+      return s.replace(RESTORE_RE, function (m, i) {
+        return '<code>' + codes[Number(i)] + '</code>';
+      });
+    }
+
+    function inlineBody(s, ctx) {
+
       s = s.replace(/\[([^\]]*)\]\(([^)\s]*)(?:\s+&quot;[^&]*&quot;)?\)/g, function (m, label, href) {
-        var text = inlineMd(label, ctx);
+        var text = inlineBody(label, ctx);
         if (/^https?:/i.test(href)) {
           return '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + text + '</a>';
         }
@@ -87,17 +115,15 @@
       s = s.replace(/(^|[^_\w])_([^_\n]+)_(?![_\w])/g, '$1<em>$2</em>');
       s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
 
-      return s.replace(/\u0000(\d+)\u0000/g, function (m, i) {
-        return '<code>' + codes[Number(i)] + '</code>';
-      });
+      return s;
     }
 
     function splitRow(line) {
-      var t = String(line).trim().replace(/\\\|/g, '\u0001');
+      var t = String(line).trim().replace(/\\\|/g, PIPE_MARK);
       if (t.charAt(0) === '|') t = t.slice(1);
       if (t.charAt(t.length - 1) === '|') t = t.slice(0, -1);
       return t.split('|').map(function (c) {
-        return c.replace(/\u0001/g, '|').trim();
+        return c.split(PIPE_MARK).join('|').trim();
       });
     }
 
@@ -318,6 +344,8 @@
 
     /* ============================== plumbing ============================== */
 
+    var IMG = window.IMG || {};
+
     var state = {
       view: 'today',
       data: null,
@@ -326,7 +354,11 @@
       docCache: {},
       libraryFilter: '',
       libraryFolder: 'All',
-      openProject: null
+      openProject: null,
+      editing: null,
+      modal: null,
+      palette: { open: false, query: '', results: [], cursor: 0 },
+      search: { query: '', result: null, busy: false }
     };
 
     /** Promise wrapper over google.script.run. The runner has to stay the receiver of the
@@ -348,13 +380,13 @@
 
     var toastTimer = null;
     function toast(message, isError) {
-      var el = document.getElementById('toast');
-      el.textContent = String(message && message.message ? message.message : message);
-      el.className = 'toast show' + (isError ? ' error' : '');
+      var el0 = el('toast');
+      el0.textContent = String(message && message.message ? message.message : message);
+      el0.className = 'toast show' + (isError ? ' error' : '');
       clearTimeout(toastTimer);
       toastTimer = setTimeout(function () {
-        el.className = 'toast';
-      }, isError ? 6000 : 1800);
+        el0.className = 'toast';
+      }, isError ? 6500 : 1700);
     }
 
     function el(id) {
@@ -363,10 +395,11 @@
 
     function chipFor(value) {
       var map = {
-        Done: 'green', Read: 'green', Answered: 'green', Independent: 'green',
-        'In progress': 'blue', Reading: 'blue',
-        'Ready for readout': 'amber', Developing: 'amber',
-        Blocked: 'red', Open: 'red', 'Not yet': 'red'
+        Done: 'green', Read: 'green', Answered: 'green', Independent: 'green', Granted: 'green',
+        Running: 'green', Held: 'green',
+        'In progress': 'blue', Reading: 'blue', Requested: 'blue', Draft: 'blue',
+        'Ready for readout': 'amber', Developing: 'amber', 'Came in under': 'amber',
+        Blocked: 'red', Open: 'red', 'Not yet': 'red', 'Ran over': 'red'
       };
       return 'chip ' + (map[value] || '');
     }
@@ -381,17 +414,189 @@
       return '<label class="field"><span>' + esc(label) + '</span>' + control + '</label>';
     }
 
-    /* ================================ views =============================== */
+    function nl2br(text) {
+      return esc(text).replace(/\n/g, '<br>');
+    }
 
-    var VIEWS = [
-      { id: 'today', label: 'Today' },
-      { id: 'library', label: 'Library' },
-      { id: 'ladder', label: 'The ladder' },
-      { id: 'questions', label: 'Questions' },
-      { id: 'wrong', label: 'What I got wrong' },
-      { id: 'notes', label: 'Notes' },
+    /**
+     * Copy text, three ways.
+     *
+     * The clipboard API is the good path but it is not always permitted inside the frame this
+     * app runs in, so there is a fallback, and behind that a dialog that simply shows the text
+     * selected and ready for a manual copy. Something always works.
+     */
+    function copyText(text, label) {
+      function fallback() {
+        var box = document.createElement('textarea');
+        box.value = text;
+        box.style.position = 'fixed';
+        box.style.opacity = '0';
+        document.body.appendChild(box);
+        box.focus();
+        box.select();
+        var worked = false;
+        try {
+          worked = document.execCommand('copy');
+        } catch (err) {
+          worked = false;
+        }
+        document.body.removeChild(box);
+        if (worked) toast((label || 'Copied') + ' to the clipboard');
+        else showCopyDialog(text, label);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(
+          function () {
+            toast((label || 'Copied') + ' to the clipboard');
+          },
+          fallback
+        );
+      } else {
+        fallback();
+      }
+    }
+
+    function showCopyDialog(text, label) {
+      openModal({
+        title: label || 'Copy this',
+        body: '<p class="lede" style="margin-bottom:12px">Select it and copy - this page could not reach the clipboard for you.</p>' +
+          '<pre class="copyable" id="copyBox">' + esc(text) + '</pre>',
+        footer: '<button class="btn quiet" data-close>Close</button>'
+      });
+      var box = el('copyBox');
+      if (box && window.getSelection) {
+        var range = document.createRange();
+        range.selectNodeContents(box);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    }
+
+    /* ============================== modal ============================== */
+
+    function openModal(spec) {
+      state.modal = spec;
+      var host = el('modalHost');
+      host.innerHTML =
+        '<div class="scrim" data-scrim>' +
+        '<div class="modal' + (spec.wide ? ' wide' : '') + '" role="dialog" aria-modal="true">' +
+        (spec.title
+          ? '<div class="mhead"><h3>' + esc(spec.title) + '</h3>' +
+            '<button class="btn quiet small push" data-close>Close</button></div>'
+          : '') +
+        '<div class="mbody">' + spec.body + '</div>' +
+        (spec.footer ? '<div class="mfoot">' + spec.footer + '</div>' : '') +
+        '</div></div>';
+      host.hidden = false;
+      if (spec.focus) {
+        var target = el(spec.focus);
+        if (target) target.focus();
+      }
+    }
+
+    function closeModal() {
+      state.modal = null;
+      state.palette.open = false;
+      var host = el('modalHost');
+      host.innerHTML = '';
+      host.hidden = true;
+    }
+
+    /* ============================== ramp calendar ============================== */
+
+    /**
+     * The week-by-week shape of the ramp, transcribed from the source. The bands overlap on
+     * purpose - more than one is usually true at once, which is exactly why "what am I doing
+     * this week" is not obvious from the project list alone.
+     */
+    var WEEK_BANDS = [
+      { from: 1, to: 2, phase: 'Learn', ladder: 'Onboarding, reading and shadowing, plus your first paired project (T1-1).', alongside: 'Start your questions list. Three lines in chat each evening.' },
+      { from: 3, to: 5, phase: 'Learn', ladder: 'Tier 1 - one-hour, read-only projects, about two a week.', alongside: 'Sit in on the weekly meetings. Keep working through the fundamentals.' },
+      { from: 4, to: 7, phase: 'Learn into Assist', ladder: 'Tier 2 - half-day projects, reviewed. Mecco begins (M-1 to M-3).', alongside: 'The daily keep/kill review becomes your one standing habit, around day 31.' },
+      { from: 7, to: 10, phase: 'Assist into Own', ladder: 'Tier 3 - one-to-two-day diagnosis work, and your first live experiment.', alongside: 'Mecco is yours. M-5 becomes a standing weekly line, around day 45.' },
+      { from: 11, to: 13, phase: 'Own', ladder: 'Week-long capstones - end-to-end work you own and present.', alongside: 'Own and present your PDC section of the monthly Deep Dive.' }
+    ];
+
+    var MEETINGS = [
+      ['Mon', '1:00', 'Meta Monday', "Stuart's digital team - SEO, Email and Paid in one room."],
+      ['Tue', '10:00', 'L10 Huddle', 'Your team’s weekly. Bring a segue item from week one.'],
+      ['Wed', '2:00', 'Seton / EMEDCO weekly', 'Contribution track - bring what your audits turn up.'],
+      ['Thu', '10:00', 'Search Deep Dive', 'The performance review working session.'],
+      ['Fri', '9:00', 'Development block', 'Two protected hours. It is the first thing that gets eaten.'],
+      ['Weekly', '', '1:1 with Alex', 'Yours to run - you bring the agenda.']
+    ];
+
+    function currentWeek() {
+      var p = state.data.position;
+      if (!p.started || p.day === null || p.day < 1) return null;
+      return Math.floor((p.day - 1) / 7) + 1;
+    }
+
+    function phaseArt() {
+      var p = state.data.position;
+      if (!p.started || p.day === null) return IMG.phaseLearn;
+      if (p.day <= 30) return IMG.phaseLearn;
+      if (p.day <= 60) return IMG.phaseAssist;
+      return IMG.phaseOwn;
+    }
+
+    function deepDiveExpectation() {
+      var p = state.data.position;
+      if (!p.started || p.day === null) return '';
+      if (p.day <= 30) return 'Watch how analysts pull the numbers and how the "why" gets written.';
+      if (p.day <= 60) return 'Co-author the PDC section - pull the numbers, draft the explanation.';
+      return 'Own the PDC section end to end, and present it.';
+    }
+
+    /* ============================== views ============================== */
+
+    /**
+     * The rail.
+     *
+     * The first two groups carry icons because the kit covers every item in them. Reference
+     * has no icons for Systems or Scripts, and three-quarters of a set reads as an oversight
+     * rather than a choice - so that group is text throughout, and its one icon is used on
+     * the Self-assessment page heading instead.
+     */
+    var NAV = [
+      { group: 'The ramp' },
+      { id: 'today', label: 'Today', icon: 'navToday' },
+      { id: 'library', label: 'Library', icon: 'navLibrary' },
+      { id: 'ladder', label: 'The ladder', icon: 'navLadder' },
+      { group: 'My log' },
+      { id: 'questions', label: 'Questions', icon: 'navQuestions' },
+      { id: 'wrong', label: 'What I got wrong', icon: 'navWrong' },
+      { id: 'notes', label: 'Notes', icon: 'navNotes' },
+      { id: 'daily', label: 'Daily lines', icon: 'navToday' },
+      { group: 'Reference' },
+      { id: 'systems', label: 'Systems' },
+      { id: 'scripts', label: 'Scripts' },
       { id: 'skills', label: 'Self-assessment' }
     ];
+
+    var FOLDER_ART = {
+      Overview: 'folderOverview',
+      'Start here': 'folderStartHere',
+      Learning: 'folderLearning',
+      Projects: 'folderProjects',
+      'My work': 'folderMyWork',
+      'Self-assessment': 'folderSelfAssess'
+    };
+
+    var MEETING_ART = [
+      'meetingMetaMonday', 'meetingL10', 'meetingSetonEmedco', 'meetingDeepDive', 'meetingOneOnOne'
+    ];
+
+    var STATUS_STAMP = {
+      Done: 'stampDone',
+      'In progress': 'stampInProgress',
+      'Ready for readout': 'stampReady',
+      Blocked: 'stampBlocked'
+    };
+
+    var ACCOUNT_ART = { 'PDC Healthcare': 'accountPdc', 'Seton US': 'accountSeton' };
 
     function counts() {
       var d = state.data;
@@ -400,30 +605,54 @@
         ladder: d.projects.filter(function (x) { return x.Status !== 'Done' && !x['Same as']; }).length,
         questions: d.questions.filter(function (x) { return x.Status === 'Open'; }).length,
         wrong: d.wrong.length,
-        notes: d.notes.length
+        notes: d.notes.length,
+        daily: d.daily.length,
+        systems: d.systems.filter(function (x) { return x.Status !== 'Granted'; }).length,
+        scripts: d.scripts.length
       };
     }
 
+    var HOT = { questions: true, systems: true };
+
     function renderNav() {
       var c = counts();
-      el('nav').innerHTML = VIEWS.map(function (v) {
-        var n = c[v.id];
+      el('nav').innerHTML = NAV.map(function (item) {
+        if (item.group) return '<div class="group">' + esc(item.group) + '</div>';
+        var n = c[item.id];
+        var hot = HOT[item.id] && n > 0 ? ' hot' : '';
         return (
-          '<button data-view="' + v.id + '" aria-current="' + (state.view === v.id) + '">' +
-          '<span>' + esc(v.label) + '</span>' +
-          (n === undefined ? '' : '<span class="count">' + n + '</span>') +
+          '<button data-view="' + item.id + '" aria-current="' + (state.view === item.id) + '">' +
+          (item.icon && IMG[item.icon] ? '<img class="navicon" src="' + IMG[item.icon] + '" alt="">' : '') +
+          '<span class="lbl">' + esc(item.label) + '</span>' +
+          (n === undefined ? '' : '<span class="count' + hot + '">' + n + '</span>') +
           '</button>'
         );
       }).join('');
     }
 
+    /** The masthead wordmark. Uses the real asset when it has been added to the kit, and a
+     *  plain text lockup until then - a hand-drawn approximation of a trademark would be
+     *  worse than no logo at all. */
+    function renderBrand() {
+      var host = el('brand');
+      if (!host) return;
+      host.innerHTML = IMG.logo
+        ? '<img class="logo" src="' + IMG.logo + '" alt="Brady"><span class="rule"></span>' +
+          '<span class="wordmark">The ramp</span>'
+        : '<span class="wordmark">The ramp</span><span class="sub">Brady Americas</span>';
+    }
+
     function renderHeader() {
       var p = state.data.position;
       var chip = el('daychip');
-      if (p.started && p.day !== null) {
+      if (p.started && p.day !== null && p.day >= 1) {
         chip.hidden = false;
         el('dayNumber').textContent = 'Day ' + p.day;
         el('dayPhase').textContent = p.phase;
+      } else if (p.started && p.day !== null && p.day < 1) {
+        chip.hidden = false;
+        el('dayNumber').textContent = 'Starts ' + p.startDate;
+        el('dayPhase').textContent = 'Not started yet';
       } else {
         chip.hidden = true;
       }
@@ -436,40 +665,122 @@
       var d = state.data;
       var p = d.position;
       var c = counts();
-      var html = '<h2 class="page">Today</h2>';
+      var tracked = d.projects.filter(function (x) { return !x['Same as']; });
+      var done = tracked.filter(function (x) { return x.Status === 'Done'; }).length;
+      var read = d.docs.filter(function (x) { return x.Status === 'Read'; }).length;
+
+      var html;
+
+      if (!p.started || p.day === null || p.day < 1) {
+        // Day zero. The artwork carries the welcome, and its counts are right because nothing
+        // has happened yet.
+        html = '<img class="welcomehero" src="' + IMG.welcomeHero + '" alt="Welcome. Paid Search Analyst, hired for how you think, not what you already know.">';
+      } else {
+        // Once it is running the same hero is used blank, with the numbers rendered live over
+        // it. Baked-in counts would start drifting the first time anything changed, and a
+        // stale number on the landing page is exactly the habit this whole thing argues against.
+        html =
+          '<div class="hero" style="background-image:url(' + IMG.welcomeHeroBlank + ')">' +
+          '<div class="hero-in">' +
+          '<img class="medallion" src="' + phaseArt() + '" alt="">' +
+          '<div class="hero-copy">' +
+          '<div class="eyebrow">Brady Americas &middot; the 90-day ramp</div>' +
+          '<h2>' + (d.displayName ? 'Welcome, ' + esc(d.displayName) + '.' : 'The ramp') + '</h2>' +
+          '<p>' + esc(p.phase) + '. Day ' + p.day + ' of 90, from ' + esc(p.startDate) + '.</p>' +
+          '<div class="hero-stats">' +
+          '<span><b>' + tracked.length + '</b> projects</span>' +
+          '<span><b>' + d.docs.length + '</b> documents</span>' +
+          '<span><b>' + done + '</b> done so far</span>' +
+          '</div></div></div></div>';
+      }
+
+      html += '<img class="rampstrip" src="' + IMG.rampStrip + '" alt="Learn, days 1 to 30, read-only. Assist, days 31 to 60, everything reviewed before it ships. Own, days 61 to 90, your accounts and your recommendations.">';
+
+      // The reassurance card is specifically about month one, and it says so on its face.
+      // It comes down when it stops being true.
+      if (!p.started || p.day === null || p.day <= 30) {
+        html += '<img class="welcomecard" src="' + IMG.welcomeCard + '" alt="Day one. Nobody expects you to know any of this yet. Month one is reading, watching and asking questions. You will not touch a live account in week one, and that is deliberate.">';
+      }
 
       if (!p.started) {
         html +=
-          '<div class="callout"><b>Set your start date.</b> Everything that counts days ' +
-          'works from it. You can change it later.</div>' +
+          '<div class="callout"><b>Set your start date.</b> Everything that counts days works ' +
+          'from it, and nothing else on this page works until it is set.</div>' +
           '<div class="card"><div class="row">' +
           '<input type="date" id="startDate" style="max-width:220px" value="' + esc(p.startDate || '') + '">' +
           '<button class="btn" data-act="save-start">Save</button>' +
           '</div></div>';
-      } else {
-        html +=
-          '<p class="lede">' + esc(p.phase) + '. Day ' + p.day + ' of 90, starting ' + esc(p.startDate) + '.</p>';
       }
 
+      html +=
+        '<div class="grid">' +
+        stat(IMG.statProjects, done + '<small> / ' + tracked.length + '</small>', 'Projects done', done / Math.max(tracked.length, 1)) +
+        stat(IMG.statDocs, read + '<small> / ' + d.docs.length + '</small>', 'Documents read', read / Math.max(d.docs.length, 1)) +
+        stat(IMG.statQuestions, c.questions, 'Questions open', null) +
+        stat(IMG.statWrong, d.wrong.length, 'Things I got wrong', null) +
+        '</div>';
+
+      // Phase medals, once each threshold is behind her.
+      var medals = [];
+      if (p.started && p.day !== null) {
+        if (p.day > 30) medals.push(['milestoneDay30', 'Day 30 - Learn complete']);
+        if (p.day > 60) medals.push(['milestoneDay60', 'Day 60 - Assist complete']);
+        if (p.day > 90) medals.push(['milestoneDay90', 'Day 90 - ramp complete']);
+      }
+      if (medals.length) {
+        html += '<h3 class="group">Behind you</h3><div class="medals">' +
+          medals.map(function (m) {
+            return '<img src="' + IMG[m[0]] + '" alt="' + esc(m[1]) + '">';
+          }).join('') + '</div>';
+      }
+
+      // This week
+      var week = currentWeek();
+      if (week) {
+        var bands = WEEK_BANDS.filter(function (b) {
+          return week >= b.from && week <= b.to;
+        });
+        html += '<h3 class="group">This week &middot; week ' + week + '</h3><div class="card">';
+        if (bands.length) {
+          html += '<dl class="week">' + bands.map(function (b) {
+            return '<dt>Weeks ' + b.from + '-' + b.to + '</dt><dd><b>' + esc(b.phase) + '.</b> ' +
+              esc(b.ladder) + ' <span style="color:var(--ink-3)">' + esc(b.alongside) + '</span></dd>';
+          }).join('') + '</dl>';
+        } else {
+          html += '<p style="margin:0;color:var(--ink-2)">Past the thirteen weeks the ladder covers. ' +
+            'What comes next is in the library under <b>After the ramp</b>.</p>';
+        }
+        var expect = deepDiveExpectation();
+        if (expect) {
+          html += '<div class="callout info" style="margin:16px 0 0"><b>At the Search Deep Dive right now:</b> ' + esc(expect) + '</div>';
+        }
+        html += '</div>';
+
+        html += '<div class="meetings">' +
+          MEETING_ART.map(function (key, i) {
+            return '<img src="' + IMG[key] + '" alt="' + esc(MEETINGS[i][2]) + ' - ' + esc(MEETINGS[i][3]) + '">';
+          }).join('') + '</div>' +
+          '<div class="card tight plain" style="margin-top:10px"><div class="row">' +
+          '<span class="chip blue">Fri 9:00</span><b style="font-weight:600">Professional development block</b>' +
+          '<span style="color:var(--ink-3);font-size:12.5px">Two protected hours, held for learning rather than ' +
+          'delivery. It is the first thing that gets eaten if you let it.</span></div></div>';
+      }
+
+      // The three lines
+      html += '<h3 class="group">The three lines</h3>' + dailyCard();
+
+      // In flight
       var inFlight = d.projects.filter(function (x) {
         return x.Status === 'In progress' || x.Status === 'Blocked' || x.Status === 'Ready for readout';
       });
-      var nextUp = d.projects.filter(function (x) {
-        return x.Status === 'Not started' && !x['Same as'];
-      }).slice(0, 3);
-
-      html += '<div class="grid">' +
-        stat(d.projects.filter(function (x) { return x.Status === 'Done'; }).length + ' / ' + d.projects.filter(function (x) { return !x['Same as']; }).length, 'Projects done') +
-        stat(d.docs.filter(function (x) { return x.Status === 'Read'; }).length + ' / ' + d.docs.length, 'Documents read') +
-        stat(c.questions, 'Questions open') +
-        stat(d.wrong.length, 'Things I got wrong') +
-        '</div>';
-
       html += '<h3 class="group">In flight</h3>';
       html += inFlight.length
         ? inFlight.map(projectSummary).join('')
-        : '<div class="empty">Nothing in progress. Pick the next one up from the ladder.</div>';
+        : emptyState(IMG.emptyInflight, 'Nothing in progress. Pick the next one up from the ladder.');
 
+      var nextUp = d.projects.filter(function (x) {
+        return x.Status === 'Not started' && !x['Same as'];
+      }).slice(0, 3);
       if (nextUp.length) {
         html += '<h3 class="group">Next up</h3>' + nextUp.map(projectSummary).join('');
       }
@@ -478,34 +789,68 @@
       if (open.length) {
         html += '<h3 class="group">Open questions</h3>' +
           open.map(function (q) {
-            return '<div class="card flat"><div class="row"><span class="chip">' + esc(q.ID) + '</span><b>' +
+            return '<div class="card tight plain"><div class="row">' +
+              '<span class="chip mono">' + esc(q.ID) + '</span><b style="font-weight:600">' +
               esc(q.Question) + '</b></div></div>';
           }).join('');
       }
 
-      html +=
-        '<h3 class="group">Every day, first month</h3>' +
-        '<div class="card flat"><ol style="margin:0;padding-left:20px">' +
-        '<li>What you worked on</li><li>One thing you learned</li><li>One thing that surprised you</li>' +
-        '</ol><p class="meta" style="margin:8px 0 0">Three lines in chat before you log off. It takes two minutes ' +
-        'and it is not a status report.</p></div>';
-
       return html;
     }
 
-    function stat(n, k) {
-      return '<div class="stat"><div class="n">' + esc(n) + '</div><div class="k">' + esc(k) + '</div></div>';
+    function stat(icon, value, label, ratio) {
+      return (
+        '<div class="stat"><div class="row" style="gap:12px;align-items:flex-start">' +
+        '<img src="' + icon + '" alt="" style="width:38px;height:38px;flex:0 0 auto">' +
+        '<div style="flex:1"><div class="n">' + value + '</div><div class="k">' + esc(label) + '</div></div>' +
+        '</div>' +
+        (ratio === null ? '' : '<div class="meter"><i style="width:' + Math.round(ratio * 100) + '%"></i></div>') +
+        '</div>'
+      );
+    }
+
+    function emptyState(image, message) {
+      return '<div class="empty"><img src="' + image + '" alt="" style="max-width:300px;width:100%;margin-bottom:6px">' +
+        '<div>' + esc(message) + '</div></div>';
     }
 
     function projectSummary(p) {
       return (
-        '<div class="card flat"><div class="row">' +
-        '<span class="chip blue">' + esc(p.ID) + '</span>' +
-        '<b>' + esc(p.Project) + '</b>' +
-        '<span class="meta">' + esc(p.Account) + '</span>' +
+        '<div class="card tight plain"><div class="row">' +
+        '<span class="idbadge">' + esc(p.ID) + '</span>' +
+        '<b style="font-weight:600">' + esc(p.Project) + '</b>' +
+        '<span style="color:var(--ink-3);font-size:12.5px">' + esc(p.Account) + '</span>' +
         '<span class="' + chipFor(p.Status) + ' push">' + esc(p.Status) + '</span>' +
+        '<button class="btn ghost small" data-goto-project="' + esc(p.ID) + '">Open</button>' +
         '</div></div>'
       );
+    }
+
+    /** Today's three lines, editable in place. One row per day - this edits today's rather
+     *  than stacking a second one. */
+    function dailyCard() {
+      var todayRow = state.data.daily.filter(function (r) {
+        return r.Date === state.data.today;
+      })[0];
+
+      var body =
+        '<div class="cols">' +
+        field('What you worked on', '<textarea id="dWorked" style="min-height:62px">' + esc(todayRow ? todayRow['Worked on'] : '') + '</textarea>') +
+        field('One thing you learned', '<textarea id="dLearned" style="min-height:62px">' + esc(todayRow ? todayRow.Learned : '') + '</textarea>') +
+        field('One thing that surprised you', '<textarea id="dSurprised" style="min-height:62px">' + esc(todayRow ? todayRow['Surprised me'] : '') + '</textarea>') +
+        '</div>' +
+        '<div class="row">' +
+        '<button class="btn" data-act="save-daily">' + (todayRow ? 'Update' : 'Save') + '</button>' +
+        '<button class="btn ghost" data-act="copy-daily">Copy for chat</button>' +
+        (todayRow ? '<span class="chip mono">' + esc(todayRow.ID) + '</span>' : '') +
+        '<label class="row tight push" style="font-size:12.5px;color:var(--ink-2)">' +
+        '<input type="checkbox" id="dKeepKill" style="width:auto"' +
+        (todayRow && todayRow['Keep/Kill done'] === 'Yes' ? ' checked' : '') + '> Keep/Kill review done</label>' +
+        '</div>' +
+        '<p style="margin:10px 0 0;color:var(--ink-3);font-size:12.5px">Two minutes, before you log off. ' +
+        'It is not a status report - the third line is the useful one.</p>';
+
+      return '<div class="card">' + body + '</div>';
     }
 
     /* ---- Library ---- */
@@ -526,29 +871,33 @@
 
     function libraryListHtml() {
       var shown = libraryDocs();
-      if (!shown.length) return '<div class="empty">Nothing matches that.</div>';
+      if (!shown.length) {
+        return '<div class="empty" style="margin:20px;border:0">Nothing matches that. ' +
+          '<button class="btn ghost small" data-act="search-full">Search inside the documents</button></div>';
+      }
 
       var html = '';
       var lastFolder = null;
       shown.forEach(function (d) {
         if (d.Folder !== lastFolder) {
-          html += '<div class="folder">' + esc(d.Folder) + '</div>';
+          var art = FOLDER_ART[d.Folder];
+          html += art && IMG[art]
+            ? '<img class="folderhead" src="' + IMG[art] + '" alt="' + esc(d.Folder) + '">'
+            : '<div class="folder">' + esc(d.Folder) + '</div>';
           lastFolder = d.Folder;
         }
         html +=
           '<button data-doc="' + esc(d.ID) + '" aria-current="' + (state.openDoc === d.ID) + '">' +
           '<span class="t">' + esc(d.Title) + '</span>' +
           '<span class="s">' + esc(d.Summary || d['Source file']) + '</span>' +
-          '<span class="row tight" style="margin-top:6px">' +
+          '<span class="row tight" style="margin-top:7px">' +
           '<span class="' + chipFor(d.Status) + '">' + esc(d.Status) + '</span>' +
-          '<span class="chip">' + esc(d.Words) + ' words</span>' +
+          '<span class="chip mono">' + esc(d.Words) + ' words</span>' +
           '</span></button>';
       });
       return html;
     }
 
-    /** Redraw the list on its own. Searching must not re-render the reader - re-parsing a
-     *  25,000-word document on every keystroke is slow, and it would throw away the caret. */
     function refreshLibraryList() {
       var node = el('liblist');
       if (node) node.innerHTML = libraryListHtml();
@@ -562,9 +911,10 @@
 
       return (
         '<div class="libnav">' +
-        '<div class="search"><input type="text" id="libSearch" placeholder="Search the library" value="' +
-        esc(state.libraryFilter) + '"></div>' +
-        '<div class="search"><select id="libFolder">' + options(folders, state.libraryFolder) + '</select></div>' +
+        '<div class="filters">' +
+        '<input type="search" id="libSearch" placeholder="Filter by title" value="' + esc(state.libraryFilter) + '">' +
+        '<select id="libFolder">' + options(folders, state.libraryFolder) + '</select>' +
+        '</div>' +
         '<div class="liblist" id="liblist">' + libraryListHtml() + '</div>' +
         '</div>' +
         '<div class="reader" id="reader">' + readerHtml() + '</div>'
@@ -573,7 +923,9 @@
 
     function readerHtml() {
       if (!state.openDoc) {
-        return '<div class="empty" style="margin:40px;border:0">Pick something from the list to read it.</div>';
+        return '<div class="empty" style="margin:60px;border:0;background:none">' +
+          'Pick something from the list to read it.<br><br>' +
+          '<span style="font-size:12.5px">Press <b>Ctrl</b> or <b>Cmd</b> + <b>K</b> to jump straight to anything.</span></div>';
       }
       var meta = state.index[state.openDoc];
       var doc = state.docCache[state.openDoc];
@@ -587,7 +939,11 @@
         '<div class="head">' +
         '<h3>' + esc(meta.Title) + '</h3>' +
         '<span class="chip">' + esc(meta.Folder) + '</span>' +
-        (linked.length ? '<span class="chip blue">' + linked.map(function (p) { return esc(p.ID); }).join(', ') + '</span>' : '') +
+        (linked.length
+          ? linked.map(function (p) {
+              return '<button class="chip blue" data-goto-project="' + esc(p.ID) + '" style="border:0">' + esc(p.ID) + '</button>';
+            }).join('')
+          : '') +
         '<div class="push row tight">' +
         '<select id="docStatus" style="width:auto">' + options(state.data.lists.DocStatus, meta.Status) + '</select>' +
         '</div></div>' +
@@ -601,6 +957,10 @@
 
     /* ---- The ladder ---- */
 
+    var TIER_ART = {
+      'Tier 1': 'tierT1', 'Tier 2': 'tierT2', 'Tier 3': 'tierT3', 'Tier 4': 'tierT4', Mecco: 'tierM'
+    };
+
     function viewLadder() {
       var d = state.data;
       var byTier = {};
@@ -611,17 +971,23 @@
       });
 
       var html =
-        '<h2 class="page">The ladder</h2>' +
+        '<div class="page-head"><h2 class="page">The ladder</h2>' +
         '<p class="lede">Thirty-three projects across five tiers. They start at about an hour and grow to ' +
-        'week-long by the end, and the length is part of the training.</p>';
+        'week-long by the end, and the length is part of what is being trained.</p></div>';
 
       ['Tier 1', 'Tier 2', 'Tier 3', 'Mecco', 'Tier 4'].forEach(function (tier) {
         var rows = byTier[tier] || [];
         if (!rows.length) return;
-        var done = rows.filter(function (p) { return p.Status === 'Done'; }).length;
+        var tracked = rows.filter(function (p) { return !p['Same as']; });
+        var done = tracked.filter(function (p) { return p.Status === 'Done'; }).length;
+
         html +=
-          '<h3 class="group">' + esc(tier) + ' &middot; ' + esc(rows[0].Window) + ' &middot; ' +
-          esc(rows[0].Safety) + ' &middot; ' + done + ' of ' + rows.length + ' done</h3>';
+          '<div class="tierhead">' +
+          '<img src="' + IMG[TIER_ART[tier]] + '" alt="">' +
+          '<div><b>' + esc(tier) + '</b>' +
+          '<span>' + esc(rows[0].Window) + ' &middot; ' + esc(rows[0].Safety) + '</span></div>' +
+          '<div class="push row tight"><span class="chip mono">' + done + ' of ' + tracked.length + ' done</span></div>' +
+          '</div>';
         html += rows.map(projectRow).join('');
       });
 
@@ -637,113 +1003,184 @@
         '<span class="idbadge">' + esc(p.ID) + '</span>' +
         '<span class="title"><b>' + esc(p.Project) + '</b>' +
         '<span class="meta">' + esc(p.Account) + ' &middot; ' + esc(p.Mode) + ' &middot; ' + esc(p['Time box']) +
-        (p['Goes live'] === 'Yes' ? ' &middot; <span class="chip live">goes live</span>' : '') +
+        (p['Goes live'] === 'Yes' ? '</span></span><span class="chip amber">goes live</span><span style="display:none">' : '') +
         '</span></span>' +
         (alias
           ? '<span class="chip">same as ' + esc(alias) + '</span>'
           : '<span class="' + chipFor(p.Status) + '">' + esc(p.Status) + '</span>') +
-        '<button class="btn ghost small" data-toggle-project="' + esc(p.ID) + '">' +
+        '<button class="btn quiet small" data-toggle-project="' + esc(p.ID) + '">' +
         (isOpen ? 'Close' : 'Open') + '</button>' +
         '</div>';
 
       if (!isOpen) return '<div class="proj' + (alias ? ' alias' : '') + '">' + head + '</div>';
 
-      var detail;
       if (alias) {
-        detail =
+        return '<div class="proj alias open">' + head +
           '<div class="detail"><p style="margin:0">This is the same project as <b>' + esc(alias) +
-          '</b>. It is listed here so the ladder reads correctly - track it on ' + esc(alias) + '.</p></div>';
-      } else {
-        detail =
-          '<div class="detail">' +
-          '<p style="margin:0 0 12px"><b>Deliverable:</b> ' + esc(p.Deliverable) + '</p>' +
-          '<div class="cols">' +
-          field('Status', '<select data-project="' + esc(p.ID) + '" data-f="Status">' + options(state.data.lists.ProjectStatus, p.Status) + '</select>') +
-          field('Started', '<input type="date" data-project="' + esc(p.ID) + '" data-f="Started" value="' + esc(p.Started) + '">') +
-          field('Finished', '<input type="date" data-project="' + esc(p.ID) + '" data-f="Finished" value="' + esc(p.Finished) + '">') +
-          field('Hours', '<input type="number" step="0.25" min="0" data-project="' + esc(p.ID) + '" data-f="Hours" value="' + esc(p.Hours) + '">') +
-          '</div>' +
-          field('Where the deliverable lives', '<input type="text" data-project="' + esc(p.ID) + '" data-f="Deliverable link" placeholder="A link, or where you filed it" value="' + esc(p['Deliverable link']) + '">') +
-          field('Notes', '<textarea data-project="' + esc(p.ID) + '" data-f="Notes">' + esc(p.Notes) + '</textarea>') +
-          (p['Doc ID'] ? '<div class="brief"><button class="btn ghost small" data-doc="' + esc(p['Doc ID']) + '">Read the brief</button></div>' : '') +
-          '</div>';
+          '</b>. It sits here so the ladder reads correctly - track it on ' + esc(alias) + '.</p></div></div>';
       }
 
-      return '<div class="proj' + (alias ? ' alias' : '') + '">' + head + detail + '</div>';
+      var linkedQ = state.data.questions.filter(function (q) { return q.Project === p.ID; });
+      var linkedW = state.data.wrong.filter(function (w) { return w.Project === p.ID; });
+      var linkedN = state.data.notes.filter(function (n) { return n.Project === p.ID; });
+
+      // The designed stamps and badges live here, in the detail panel, where there is room for
+      // them. List rows keep the compact CSS chips so twelve projects in a row stay one rhythm.
+      var stampKey = STATUS_STAMP[p.Status];
+      var accountKey = ACCOUNT_ART[p.Account];
+
+      var detail =
+        '<div class="detail">' +
+        '<div class="stamprow">' +
+        (stampKey ? '<img class="stamp" src="' + IMG[stampKey] + '" alt="' + esc(p.Status) + '">' : '') +
+        (p.Safety === 'Read-only' ? '<img class="stamp" src="' + IMG.badgeReadOnly + '" alt="Read-only">' : '') +
+        '<img class="stamp" src="' + IMG[p.Mode === 'Paired' ? 'badgePaired' : 'badgeSolo'] + '" alt="' + esc(p.Mode) + '">' +
+        '<img class="stamp" src="' + IMG.badgeTimebox + '" alt="Time-boxed">' +
+        '<span class="chip mono">' + esc(p['Time box']) + '</span>' +
+        '</div>' +
+        (accountKey ? '<img class="accountbadge" src="' + IMG[accountKey] + '" alt="' + esc(p.Account) + '">' : '') +
+        '<p style="margin:0 0 14px"><b>Deliverable:</b> ' + esc(p.Deliverable) + '</p>';
+
+      // The prediction. Written before anything is opened, or it is not a prediction.
+      if (p.Prediction) {
+        detail +=
+          '<div class="prediction"><div class="k">Predicted' +
+          (p['Predicted on'] ? ' on ' + esc(p['Predicted on']) : '') + '</div>' +
+          '<p>' + esc(p.Prediction) + '</p></div>';
+      } else {
+        detail +=
+          '<div class="prediction"><div class="k">Before you open anything</div>' +
+          '<p style="margin-bottom:10px">Write what you think the answer is. Thirty seconds, two or three lines. ' +
+          '"I have no idea" is a legitimate prediction - it makes the gap visible later, which is the point.</p>' +
+          '<textarea data-project="' + esc(p.ID) + '" data-f="Prediction" placeholder="What do you expect to find?"></textarea></div>';
+      }
+
+      detail +=
+        '<div class="cols">' +
+        field('Status', '<select data-project="' + esc(p.ID) + '" data-f="Status">' + options(state.data.lists.ProjectStatus, p.Status) + '</select>') +
+        field('Started', '<input type="date" data-project="' + esc(p.ID) + '" data-f="Started" value="' + esc(p.Started) + '">') +
+        field('Finished', '<input type="date" data-project="' + esc(p.ID) + '" data-f="Finished" value="' + esc(p.Finished) + '">') +
+        field('Hours', '<input type="number" step="0.25" min="0" data-project="' + esc(p.ID) + '" data-f="Hours" value="' + esc(p.Hours) + '">') +
+        field('Did the timebox hold?', '<select data-project="' + esc(p.ID) + '" data-f="Timebox held"><option value=""></option>' + options(state.data.lists.Timebox, p['Timebox held']) + '</select>') +
+        '</div>' +
+        field('Where the deliverable lives', '<input type="text" data-project="' + esc(p.ID) + '" data-f="Deliverable link" placeholder="A link, or where you filed it" value="' + esc(p['Deliverable link']) + '">') +
+        field('Notes', '<textarea data-project="' + esc(p.ID) + '" data-f="Notes">' + esc(p.Notes) + '</textarea>') +
+        '<div class="row">' +
+        (p['Doc ID'] ? '<button class="btn ghost small" data-doc="' + esc(p['Doc ID']) + '">Read the brief</button>' : '') +
+        '<button class="btn ghost small" data-readout="' + esc(p.ID) + '">Build the readout</button>' +
+        '<button class="btn ghost small" data-logwrong="' + esc(p.ID) + '">Log what I got wrong</button>' +
+        '</div>';
+
+      if (linkedQ.length || linkedW.length || linkedN.length) {
+        detail += '<div class="linked"><div class="k" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-3);margin-bottom:8px">Filed against this project</div><div class="row tight">' +
+          linkedQ.map(function (q) { return '<span class="chip red">' + esc(q.ID) + ' question</span>'; }).join('') +
+          linkedW.map(function (w) { return '<span class="chip amber">' + esc(w.ID) + ' got wrong</span>'; }).join('') +
+          linkedN.map(function (n) { return '<span class="chip">' + esc(n.ID) + ' note</span>'; }).join('') +
+          '</div></div>';
+      }
+
+      detail += '</div>';
+      return '<div class="proj open">' + head + detail + '</div>';
     }
 
-    /* ---- Questions ---- */
+    /* ---- log tables ---- */
+
+    function entryHead(id, chips, date, section) {
+      return '<div class="head"><span class="chip mono">' + esc(id) + '</span>' + chips +
+        '<span style="color:var(--ink-3);font-size:12px">' + esc(date) + '</span>' +
+        '<div class="push row tight">' +
+        '<button class="btn quiet small" data-edit="' + section + '|' + esc(id) + '">Edit</button>' +
+        '<button class="btn danger small" data-del="' + section + '" data-id="' + esc(id) + '">Delete</button>' +
+        '</div></div>';
+    }
 
     function viewQuestions() {
       var rows = state.data.questions.slice().reverse();
       var html =
-        '<h2 class="page">Questions</h2>' +
+        '<div class="page-head"><h2 class="page">Questions</h2>' +
         '<p class="lede">Your running list of things you do not understand yet. It is meant to get long. ' +
-        'When you can answer one, write the answer in rather than deleting the question.</p>' +
+        'When you can answer one, write the answer in rather than deleting the question.</p></div>' +
         '<div class="card">' +
         field('Ask something', '<textarea id="qNew" placeholder="What do you not understand yet?"></textarea>') +
+        '<div class="cols">' +
         field('Context, if it helps', '<input type="text" id="qContext" placeholder="Where it came up">') +
-        '<div class="row"><input type="text" id="qProject" placeholder="Project, e.g. T1-4" style="max-width:160px">' +
-        '<button class="btn" data-act="add-question">Add it</button></div>' +
+        field('Project', projectSelect('qProject', '')) +
+        '</div>' +
+        '<button class="btn" data-act="add-question">Add it</button>' +
         '</div>';
 
-      if (!rows.length) return html + '<div class="empty">Nothing yet. Start this on day one.</div>';
+      if (!rows.length) return html + emptyState(IMG.emptyQuestions, 'Nothing yet. Start this on day one.');
 
       html += rows.map(function (q) {
+        if (state.editing === 'questions|' + q.ID) return editQuestion(q);
         return (
           '<div class="entry">' +
-          '<div class="head"><span class="chip">' + esc(q.ID) + '</span>' +
-          '<span class="' + chipFor(q.Status) + '">' + esc(q.Status) + '</span>' +
-          (q.Project ? '<span class="chip blue">' + esc(q.Project) + '</span>' : '') +
-          '<span class="meta">' + esc(q['Asked on']) + '</span>' +
-          '<button class="btn danger small push" data-del="questions" data-id="' + esc(q.ID) + '">Delete</button></div>' +
-          '<div class="q">' + esc(q.Question) + '</div>' +
-          (q.Context ? '<p class="meta">' + esc(q.Context) + '</p>' : '') +
-          field('Answer', '<textarea data-section="questions" data-id="' + esc(q.ID) + '" data-f="Answer" placeholder="Write it when you have it, with the date">' + esc(q.Answer) + '</textarea>') +
-          '<div class="row"><select data-section="questions" data-id="' + esc(q.ID) + '" data-f="Status" style="max-width:160px">' +
-          options(state.data.lists.QuestionStatus, q.Status) + '</select>' +
-          (q['Answered on'] ? '<span class="meta">answered ' + esc(q['Answered on']) + '</span>' : '') +
-          '</div></div>'
+          entryHead(q.ID, '<span class="' + chipFor(q.Status) + '">' + esc(q.Status) + '</span>' +
+            (q.Project ? '<span class="chip blue">' + esc(q.Project) + '</span>' : ''), q['Asked on'], 'questions') +
+          '<div class="q">' + nl2br(q.Question) + '</div>' +
+          (q.Context ? '<p style="color:var(--ink-3);font-size:12.5px;margin:6px 0 0">' + esc(q.Context) + '</p>' : '') +
+          (q.Answer
+            ? '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--hairline-soft)">' +
+              '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.085em;color:var(--ink-3);margin-bottom:4px">Answer' +
+              (q['Answered on'] ? ' &middot; ' + esc(q['Answered on']) : '') + '</div>' +
+              '<div>' + nl2br(q.Answer) + '</div></div>'
+            : '<div class="row" style="margin-top:12px">' +
+              '<button class="btn ghost small" data-edit="questions|' + esc(q.ID) + '">Answer it</button></div>') +
+          '</div>'
         );
       }).join('');
 
       return html;
     }
 
-    /* ---- What I got wrong ---- */
+    function editQuestion(q) {
+      return (
+        '<div class="entry">' +
+        '<div class="head"><span class="chip mono">' + esc(q.ID) + '</span><b>Editing</b></div>' +
+        field('Question', '<textarea data-e="Question">' + esc(q.Question) + '</textarea>') +
+        field('Context', '<input type="text" data-e="Context" value="' + esc(q.Context) + '">') +
+        field('Answer', '<textarea data-e="Answer" placeholder="Write it when you have it">' + esc(q.Answer) + '</textarea>') +
+        '<div class="cols">' +
+        field('Status', '<select data-e="Status">' + options(state.data.lists.QuestionStatus, q.Status) + '</select>') +
+        field('Project', projectSelect(null, q.Project, 'Project')) +
+        field('Answered by', '<input type="text" data-e="Answered by" value="' + esc(q['Answered by']) + '">') +
+        '</div>' +
+        '<div class="row"><button class="btn" data-save="questions|' + esc(q.ID) + '">Save</button>' +
+        '<button class="btn quiet" data-act="cancel-edit">Cancel</button></div>' +
+        '</div>'
+      );
+    }
 
     function viewWrong() {
       var rows = state.data.wrong.slice().reverse();
       var html =
-        '<h2 class="page">What I got wrong</h2>' +
-        '<p class="lede">One line per surprise, all ninety days. Nobody reads this but you, and the blunter it ' +
-        'is the more it is worth. The last box is the one that earns its place: the gap is data, the habit ' +
-        'behind it is the lesson.</p>' +
+        '<div class="page-head"><h2 class="page">What I got wrong</h2>' +
+        '<p class="lede">One line per surprise, all ninety days. Nobody reads this but you, and the blunter ' +
+        'it is the more it is worth. The last box earns its place: the gap is data, the habit behind it is ' +
+        'the lesson.</p></div>' +
         '<div class="card">' +
-        '<div class="row"><input type="text" id="wProject" placeholder="Project, e.g. T1-1" style="max-width:160px"></div>' +
+        field('Project', projectSelect('wProject', '')) +
         field('I predicted', '<textarea id="wPredicted"></textarea>') +
         field('What actually happened', '<textarea id="wActual"></textarea>') +
         field('Why I was off', '<textarea id="wWhy"></textarea>') +
-        field('The habit to watch', '<textarea id="wHabit"></textarea>') +
+        field('The habit to watch', '<textarea id="wHabit" placeholder="The pattern behind it, not just this one"></textarea>') +
         '<button class="btn" data-act="add-wrong">Add it</button>' +
         '</div>';
 
       if (!rows.length) {
-        return html + '<div class="empty">Nothing yet. A long list here at day 90 is a good outcome.</div>';
+        return html + emptyState(IMG.emptyWrong, 'Nothing yet. A long list here at day 90 is a good outcome.');
       }
 
       html += rows.map(function (w) {
+        if (state.editing === 'wrong|' + w.ID) return editWrong(w);
         return (
           '<div class="entry">' +
-          '<div class="head"><span class="chip">' + esc(w.ID) + '</span>' +
-          (w.Project ? '<span class="chip blue">' + esc(w.Project) + '</span>' : '') +
-          '<span class="meta">' + esc(w.Date) + '</span>' +
-          '<button class="btn danger small push" data-del="wrong" data-id="' + esc(w.ID) + '">Delete</button></div>' +
+          entryHead(w.ID, w.Project ? '<span class="chip blue">' + esc(w.Project) + '</span>' : '', w.Date, 'wrong') +
           '<dl>' +
-          '<dt>Predicted</dt><dd>' + esc(w['I predicted']) + '</dd>' +
-          '<dt>Actually</dt><dd>' + esc(w['What actually happened']) + '</dd>' +
-          '<dt>Why</dt><dd>' + esc(w['Why I was off']) + '</dd>' +
-          '<dt>Habit</dt><dd><b>' + esc(w['Habit to watch']) + '</b></dd>' +
+          '<dt>Predicted</dt><dd>' + nl2br(w['I predicted']) + '</dd>' +
+          '<dt>Actually</dt><dd>' + nl2br(w['What actually happened']) + '</dd>' +
+          (w['Why I was off'] ? '<dt>Why</dt><dd>' + nl2br(w['Why I was off']) + '</dd>' : '') +
+          (w['Habit to watch'] ? '<dt>Habit</dt><dd class="habit">' + nl2br(w['Habit to watch']) + '</dd>' : '') +
           '</dl></div>'
         );
       }).join('');
@@ -751,41 +1188,54 @@
       return html;
     }
 
-    /* ---- Notes ---- */
+    function editWrong(w) {
+      return (
+        '<div class="entry">' +
+        '<div class="head"><span class="chip mono">' + esc(w.ID) + '</span><b>Editing</b></div>' +
+        field('Project', projectSelect(null, w.Project, 'Project')) +
+        field('I predicted', '<textarea data-e="I predicted">' + esc(w['I predicted']) + '</textarea>') +
+        field('What actually happened', '<textarea data-e="What actually happened">' + esc(w['What actually happened']) + '</textarea>') +
+        field('Why I was off', '<textarea data-e="Why I was off">' + esc(w['Why I was off']) + '</textarea>') +
+        field('The habit to watch', '<textarea data-e="Habit to watch">' + esc(w['Habit to watch']) + '</textarea>') +
+        '<div class="row"><button class="btn" data-save="wrong|' + esc(w.ID) + '">Save</button>' +
+        '<button class="btn quiet" data-act="cancel-edit">Cancel</button></div>' +
+        '</div>'
+      );
+    }
 
     function viewNotes() {
       var rows = state.data.notes.slice().reverse();
       var html =
-        '<h2 class="page">Notes</h2>' +
-        '<p class="lede">Meeting notes, capture sessions, things people told you. Write them down the same ' +
-        'day - especially in the first three weeks, when a lot of what you are told only exists in ' +
-        'someone\'s head.</p>' +
+        '<div class="page-head"><h2 class="page">Notes</h2>' +
+        '<p class="lede">Meetings, capture sessions, things people told you. Write them down the same day - ' +
+        'especially in the first three weeks, when a lot of what you are told only exists in someone’s ' +
+        'head.</p></div>' +
         '<div class="card">' +
-        '<div class="row">' +
-        '<select id="nKind" style="max-width:150px">' + options(state.data.lists.NoteKind, 'Capture') + '</select>' +
-        '<input type="text" id="nTitle" placeholder="Title" style="flex:1;min-width:200px">' +
-        '<input type="text" id="nWho" placeholder="Who" style="max-width:170px">' +
-        '<input type="text" id="nProject" placeholder="Project" style="max-width:130px">' +
+        '<div class="cols">' +
+        field('Kind', '<select id="nKind">' + options(state.data.lists.NoteKind, 'Capture') + '</select>') +
+        field('Title', '<input type="text" id="nTitle" placeholder="What it was">') +
+        field('Who', '<input type="text" id="nWho" placeholder="Who was there">') +
+        field('Project', projectSelect('nProject', '')) +
         '</div>' +
         field('The note', '<textarea id="nBody"></textarea>') +
         field('Follow-up, if any', '<input type="text" id="nFollow" placeholder="What you owe someone, or what to chase">') +
         '<button class="btn" data-act="add-note">Add it</button>' +
         '</div>';
 
-      if (!rows.length) return html + '<div class="empty">Nothing yet.</div>';
+      if (!rows.length) return html + emptyState(IMG.emptyNotes, 'Nothing yet.');
 
       html += rows.map(function (n) {
+        if (state.editing === 'notes|' + n.ID) return editNote(n);
         return (
           '<div class="entry">' +
-          '<div class="head"><span class="chip">' + esc(n.ID) + '</span>' +
-          '<span class="chip blue">' + esc(n.Kind) + '</span>' +
-          '<b>' + esc(n.Title) + '</b>' +
-          (n.Who ? '<span class="meta">' + esc(n.Who) + '</span>' : '') +
-          '<span class="meta">' + esc(n.Date) + '</span>' +
-          '<button class="btn danger small push" data-del="notes" data-id="' + esc(n.ID) + '">Delete</button></div>' +
-          (n.Body ? '<p style="white-space:pre-wrap;margin:0 0 8px">' + esc(n.Body) + '</p>' : '') +
+          entryHead(n.ID, '<span class="chip blue">' + esc(n.Kind) + '</span>' +
+            (n.Project ? '<span class="chip">' + esc(n.Project) + '</span>' : ''), n.Date, 'notes') +
+          '<div class="q">' + esc(n.Title) + '</div>' +
+          (n.Who ? '<p style="color:var(--ink-3);font-size:12.5px;margin:4px 0 0">' + esc(n.Who) + '</p>' : '') +
+          (n.Body ? '<p style="margin:10px 0 0">' + nl2br(n.Body) + '</p>' : '') +
           (n['Follow-up']
-            ? '<div class="row"><span class="chip amber">follow-up</span><span>' + esc(n['Follow-up']) + '</span>' +
+            ? '<div class="row" style="margin-top:12px"><span class="chip amber">follow-up</span>' +
+              '<span style="flex:1">' + esc(n['Follow-up']) + '</span>' +
               '<select data-section="notes" data-id="' + esc(n.ID) + '" data-f="Done" style="max-width:110px">' +
               options(state.data.lists.YesNo, n.Done) + '</select></div>'
             : '') +
@@ -796,7 +1246,147 @@
       return html;
     }
 
+    function editNote(n) {
+      return (
+        '<div class="entry">' +
+        '<div class="head"><span class="chip mono">' + esc(n.ID) + '</span><b>Editing</b></div>' +
+        '<div class="cols">' +
+        field('Kind', '<select data-e="Kind">' + options(state.data.lists.NoteKind, n.Kind) + '</select>') +
+        field('Title', '<input type="text" data-e="Title" value="' + esc(n.Title) + '">') +
+        field('Who', '<input type="text" data-e="Who" value="' + esc(n.Who) + '">') +
+        field('Project', projectSelect(null, n.Project, 'Project')) +
+        '</div>' +
+        field('The note', '<textarea data-e="Body">' + esc(n.Body) + '</textarea>') +
+        field('Follow-up', '<input type="text" data-e="Follow-up" value="' + esc(n['Follow-up']) + '">') +
+        '<div class="row"><button class="btn" data-save="notes|' + esc(n.ID) + '">Save</button>' +
+        '<button class="btn quiet" data-act="cancel-edit">Cancel</button></div>' +
+        '</div>'
+      );
+    }
+
+    function viewDaily() {
+      var rows = state.data.daily.slice().sort(function (a, b) {
+        return String(b.Date).localeCompare(String(a.Date));
+      });
+
+      var html =
+        '<div class="page-head"><h2 class="page">Daily lines</h2>' +
+        '<p class="lede">Three lines in chat before you log off, for the first month. It takes two minutes ' +
+        'and it is not a status report - writing down what you learned is what makes it stick. Nobody is ' +
+        'grading these.</p></div>' + dailyCard();
+
+      if (!rows.length) return html;
+
+      html += '<h3 class="group">' + rows.length + ' logged</h3>';
+      html += rows.map(function (r) {
+        if (state.editing === 'daily|' + r.ID) return editDaily(r);
+        return (
+          '<div class="entry">' +
+          entryHead(r.ID, (r['Keep/Kill done'] === 'Yes' ? '<span class="chip green">keep/kill done</span>' : '') +
+            (r.Posted === 'Yes' ? '<span class="chip green">posted</span>' : ''), r.Date, 'daily') +
+          '<dl>' +
+          '<dt>Worked on</dt><dd>' + nl2br(r['Worked on']) + '</dd>' +
+          (r.Learned ? '<dt>Learned</dt><dd>' + nl2br(r.Learned) + '</dd>' : '') +
+          (r['Surprised me'] ? '<dt>Surprised</dt><dd class="habit">' + nl2br(r['Surprised me']) + '</dd>' : '') +
+          '</dl>' +
+          '<div class="row" style="margin-top:12px">' +
+          '<button class="btn ghost small" data-copy-daily="' + esc(r.ID) + '">Copy for chat</button>' +
+          (r['Surprised me'] ? '<button class="btn ghost small" data-daily-to-wrong="' + esc(r.ID) + '">Log this as something I got wrong</button>' : '') +
+          '</div></div>'
+        );
+      }).join('');
+
+      return html;
+    }
+
+    function editDaily(r) {
+      return (
+        '<div class="entry">' +
+        '<div class="head"><span class="chip mono">' + esc(r.ID) + '</span><b>Editing</b></div>' +
+        field('Date', '<input type="date" data-e="Date" value="' + esc(r.Date) + '">') +
+        field('Worked on', '<textarea data-e="Worked on">' + esc(r['Worked on']) + '</textarea>') +
+        field('Learned', '<textarea data-e="Learned">' + esc(r.Learned) + '</textarea>') +
+        field('Surprised me', '<textarea data-e="Surprised me">' + esc(r['Surprised me']) + '</textarea>') +
+        '<div class="cols">' +
+        field('Keep/Kill done', '<select data-e="Keep/Kill done">' + options(state.data.lists.YesNo, r['Keep/Kill done']) + '</select>') +
+        field('Posted in chat', '<select data-e="Posted">' + options(state.data.lists.YesNo, r.Posted) + '</select>') +
+        '</div>' +
+        '<div class="row"><button class="btn" data-save="daily|' + esc(r.ID) + '">Save</button>' +
+        '<button class="btn quiet" data-act="cancel-edit">Cancel</button></div>' +
+        '</div>'
+      );
+    }
+
+    /* ---- Systems and Scripts ---- */
+
+    function viewSystems() {
+      var rows = state.data.systems;
+      var html =
+        '<div class="page-head"><h2 class="page">Systems</h2>' +
+        '<p class="lede">Which tool owns which number, the one gotcha attached to each, and where your ' +
+        'access request has got to. Access is not automatic and some of it goes through another team, so ' +
+        'the slow ones are worth asking for in week one even if you will not touch them for a month.</p></div>' +
+        '<div class="callout info"><b>The tool is the source, not the truth.</b> Before you quote any ' +
+        'number you should be able to name the tool it came from, its date range and its timezone - and ' +
+        'expect a second tool to say something different, because they measure differently.</div>';
+
+      html += '<table class="data"><thead><tr>' +
+        '<th>Tool</th><th class="wide">What it owns, and the gotcha</th><th>Access by</th>' +
+        '<th>Status</th><th>Link</th></tr></thead><tbody>' +
+        rows.map(function (s) {
+          return '<tr>' +
+            '<td><b>' + esc(s.Tool) + '</b><div style="color:var(--ink-3);font-size:12px;margin-top:3px">' + esc(s['What it is']) + '</div></td>' +
+            '<td><div style="font-weight:600;font-size:12.5px">' + esc(s['What it owns']) + '</div>' +
+            '<div style="color:var(--amber);font-size:12px;margin-top:5px">' + esc(s['The gotcha']) + '</div></td>' +
+            '<td style="font-size:12.5px">' + esc(s['Access by']) + '</td>' +
+            '<td><select data-system="' + esc(s.Tool) + '" data-f="Status">' + options(state.data.lists.Access, s.Status) + '</select></td>' +
+            '<td><input type="text" data-system="' + esc(s.Tool) + '" data-f="Link" value="' + esc(s.Link) + '" placeholder="Paste the URL"></td>' +
+            '</tr>';
+        }).join('') + '</tbody></table>';
+
+      return html;
+    }
+
+    function viewScripts() {
+      var rows = state.data.scripts;
+      var html =
+        '<div class="page-head"><h2 class="page">Scripts</h2>' +
+        '<p class="lede">Google Ads scripts that pull numbers into this workbook. All three shipped ones ' +
+        'are read-only - they run queries and write to a sheet, and none of them changes anything in an ' +
+        'account. That is what makes them usable during the read-only phase rather than after it.</p></div>' +
+        '<div class="callout"><b>Every export stamps its own provenance.</b> Account, timezone, currency, ' +
+        'date range and run time go across the top of each tab, and the conversions column is labelled as ' +
+        'the platform number - because it is not reported revenue.</div>';
+
+      html += rows.map(function (s) {
+        return (
+          '<div class="entry">' +
+          '<div class="head"><span class="chip mono">' + esc(s.ID) + '</span>' +
+          '<b style="font-size:14.5px">' + esc(s.Name) + '</b>' +
+          '<span class="chip green">' + esc(s['Reads or writes']) + '</span>' +
+          '<span class="' + chipFor(s.Status) + ' push">' + esc(s.Status) + '</span></div>' +
+          '<p style="margin:0 0 12px">' + esc(s['What it does']) + '</p>' +
+          '<div class="row tight" style="margin-bottom:12px"><span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.085em;color:var(--ink-3)">Feeds</span>' +
+          s.Feeds.split(',').map(function (f) {
+            return '<span class="chip blue">' + esc(f.trim()) + '</span>';
+          }).join('') + '</div>' +
+          '<div class="cols">' +
+          field('Account', '<input type="text" data-script="' + esc(s.ID) + '" data-f="Account" value="' + esc(s.Account) + '" placeholder="Which account you run it on">') +
+          field('Status', '<select data-script="' + esc(s.ID) + '" data-f="Status">' + options(state.data.lists.ScriptStatus, s.Status) + '</select>') +
+          field('Schedule', '<select data-script="' + esc(s.ID) + '" data-f="Schedule">' + options(state.data.lists.Schedule, s.Schedule) + '</select>') +
+          field('Last run', '<input type="date" data-script="' + esc(s.ID) + '" data-f="Last run" value="' + esc(s['Last run']) + '">') +
+          '</div>' +
+          '<p style="margin:0;color:var(--ink-3);font-size:12.5px">Source file: <code>' + esc(s['Source file']) + '</code></p>' +
+          '</div>'
+        );
+      }).join('');
+
+      return html;
+    }
+
     /* ---- Self-assessment ---- */
+
+    var SCORE_RANK = { 'Not yet': 0, Developing: 1, Independent: 2 };
 
     function viewSkills() {
       var rows = state.data.skills.slice().sort(function (a, b) {
@@ -804,10 +1394,23 @@
       });
 
       var html =
-        '<h2 class="page">Self-assessment</h2>' +
-        '<p class="lede">Rate yourself before any training starts, then again at day 30 and day 90. It is not ' +
-        'a test and nobody else scores it. Expect some scores to go <em>down</em> at day 30 - that means you ' +
-        'have found out what you did not know, which is the training working.</p>';
+        '<div class="page-head"><h2 class="page">Self-assessment</h2>' +
+        '<p class="lede">Rate yourself before any training starts, then again at day 30 and day 90. It is ' +
+        'not a test and nobody else scores it - its only job is to show you how far you moved.</p></div>' +
+        '<div class="callout"><b>Some scores will go down at day 30, and that is the training working.</b> ' +
+        'On things you have not learned yet, a day-one rating is usually too high - you cannot see the shape ' +
+        'of something you have not learned. Measurement and attribution is where this hits hardest.</div>';
+
+      var scored = rows.filter(function (s) { return s['Day 1'] && s['Day 90']; });
+      if (scored.length) {
+        var up = scored.filter(function (s) { return SCORE_RANK[s['Day 90']] > SCORE_RANK[s['Day 1']]; }).length;
+        var down = scored.filter(function (s) { return SCORE_RANK[s['Day 90']] < SCORE_RANK[s['Day 1']]; }).length;
+        html += '<div class="grid" style="margin-bottom:24px">' +
+          stat(IMG.statSelfAssess, up, 'Moved up by day 90', null) +
+          stat(IMG.statSelfAssess, scored.length - up - down, 'Held', null) +
+          stat(IMG.statSelfAssess, down, 'Moved down', null) +
+          '</div>';
+      }
 
       var lastSection = null;
       var open = false;
@@ -816,17 +1419,18 @@
           if (open) html += '</tbody></table>';
           html +=
             '<h3 class="group">' + esc(s.Section) + '</h3>' +
-            '<table class="skills"><thead><tr><th class="skill">Skill</th><th>Day 1</th><th>Day 30</th>' +
-            '<th>Day 90</th><th>Evidence</th></tr></thead><tbody>';
+            '<table class="data"><thead><tr><th class="wide">Skill</th><th>Day 1</th><th>Day 30</th>' +
+            '<th>Day 90</th><th>Movement</th><th>Evidence</th></tr></thead><tbody>';
           lastSection = s.Section;
           open = true;
         }
         html +=
-          '<tr><td class="skill">' + esc(s.Skill) + '</td>' +
+          '<tr><td>' + esc(s.Skill) + '</td>' +
           ['Day 1', 'Day 30', 'Day 90'].map(function (f) {
             return '<td><select data-skill="' + esc(s.ID) + '" data-f="' + f + '">' +
               '<option value=""></option>' + options(state.data.lists.Score, s[f]) + '</select></td>';
           }).join('') +
+          '<td>' + movement(s) + '</td>' +
           '<td><input type="text" data-skill="' + esc(s.ID) + '" data-f="Evidence" value="' + esc(s.Evidence) + '" placeholder="What proves it"></td></tr>';
       });
       if (open) html += '</tbody></table>';
@@ -834,34 +1438,105 @@
       return html;
     }
 
+    function movement(s) {
+      var from = s['Day 1'];
+      var to = s['Day 90'] || s['Day 30'];
+      if (!from || !to) return '<span class="movement flat">-</span>';
+      var delta = SCORE_RANK[to] - SCORE_RANK[from];
+      if (delta > 0) return '<span class="movement up">up ' + delta + '</span>';
+      if (delta < 0) return '<span class="movement down">down ' + Math.abs(delta) + '</span>';
+      return '<span class="movement flat">held</span>';
+    }
+
+    /* ---- Search ---- */
+
+    function viewSearch() {
+      var r = state.search.result;
+      var html =
+        '<div class="page-head"><h2 class="page">Search</h2>' +
+        '<p class="lede">Everything: the whole library, and everything you have written.</p></div>' +
+        '<div class="card"><div class="row">' +
+        '<input type="search" id="fullSearch" placeholder="Search the material and your own notes" value="' + esc(state.search.query) + '" style="flex:1">' +
+        '<button class="btn" data-act="run-search">Search</button></div></div>';
+
+      if (state.search.busy) return html + '<div class="loading">Searching...</div>';
+      if (!r) return html;
+
+      if (!r.documents.length && !r.entries.length) {
+        return html + '<div class="empty">Nothing matched "' + esc(r.query) + '".</div>';
+      }
+
+      if (r.documents.length) {
+        html += '<h3 class="group">In the material &middot; ' + r.documents.length + '</h3>';
+        html += r.documents.map(function (d) {
+          return '<div class="card tight"><div class="row" style="margin-bottom:5px">' +
+            '<button class="btn quiet small" data-doc="' + esc(d.id) + '" style="font-weight:700;color:var(--navy);padding-left:0">' + esc(d.title) + '</button>' +
+            '<span class="chip">' + esc(d.folder) + '</span>' +
+            '<span class="chip mono">' + d.hits + ' hit' + (d.hits === 1 ? '' : 's') + '</span></div>' +
+            '<div style="color:var(--ink-2);font-size:12.5px">' + highlight(d.snippet, r.query) + '</div></div>';
+        }).join('');
+      }
+
+      if (r.entries.length) {
+        html += '<h3 class="group">In your own writing &middot; ' + r.entries.length + '</h3>';
+        html += r.entries.map(function (e) {
+          return '<div class="card tight"><div class="row" style="margin-bottom:5px">' +
+            '<span class="chip mono">' + esc(e.id) + '</span>' +
+            '<span class="chip blue">' + esc(e.label) + '</span>' +
+            '<span style="color:var(--ink-3);font-size:11.5px">' + esc(e.field) + '</span>' +
+            '<button class="btn quiet small push" data-view="' + esc(e.section === 'projects' ? 'ladder' : e.section) + '">Go</button></div>' +
+            '<div style="color:var(--ink-2);font-size:12.5px">' + highlight(e.snippet, r.query) + '</div></div>';
+        }).join('');
+      }
+
+      return html;
+    }
+
+    function highlight(text, needle) {
+      var safe = esc(text);
+      if (!needle) return safe;
+      var pattern = esc(needle).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return safe.replace(new RegExp('(' + pattern + ')', 'ig'), '<mark>$1</mark>');
+    }
+
+    /* ============================== helpers ============================== */
+
+    function projectSelect(id, selected, dataE) {
+      var list = state.data.projects.filter(function (p) { return !p['Same as']; });
+      return '<select' + (id ? ' id="' + id + '"' : '') + (dataE ? ' data-e="' + dataE + '"' : '') + '>' +
+        '<option value="">No project</option>' +
+        list.map(function (p) {
+          return '<option value="' + esc(p.ID) + '"' + (p.ID === selected ? ' selected' : '') + '>' +
+            esc(p.ID) + ' - ' + esc(p.Project) + '</option>';
+        }).join('') + '</select>';
+    }
+
+    function projectById(id) {
+      return state.data.projects.filter(function (p) { return p.ID === id; })[0];
+    }
+
     /* ============================== rendering ============================== */
+
+    var VIEW_FNS = {
+      today: viewToday, library: viewLibrary, ladder: viewLadder,
+      questions: viewQuestions, wrong: viewWrong, notes: viewNotes, daily: viewDaily,
+      systems: viewSystems, scripts: viewScripts, skills: viewSkills, search: viewSearch
+    };
 
     function render() {
       var main = el('main');
-      main.className = 'main' + (state.view === 'library' ? ' split' : '');
-
-      var map = {
-        today: viewToday,
-        library: viewLibrary,
-        ladder: viewLadder,
-        questions: viewQuestions,
-        wrong: viewWrong,
-        notes: viewNotes,
-        skills: viewSkills
-      };
-
-      main.innerHTML = (map[state.view] || viewToday)();
+      var split = state.view === 'library';
+      main.className = 'main' + (split ? ' split' : '');
+      var body = (VIEW_FNS[state.view] || viewToday)();
+      main.innerHTML = split ? body : '<div class="wrap">' + body + '</div>';
       renderNav();
       renderHeader();
-      main.scrollTop = state.view === 'library' ? main.scrollTop : 0;
+      if (!split) main.scrollTop = 0;
     }
 
     function refreshDoc(id) {
-      if (state.docCache[id]) {
-        render();
-        return;
-      }
       render();
+      if (state.docCache[id]) return;
       call('apiGetDoc', id)
         .then(function (doc) {
           state.docCache[id] = doc;
@@ -877,9 +1552,19 @@
         toast('That document is not in the library.', true);
         return;
       }
+      closeModal();
       state.view = 'library';
       state.openDoc = id;
       refreshDoc(id);
+    }
+
+    function gotoProject(id) {
+      closeModal();
+      state.view = 'ladder';
+      state.openProject = id;
+      render();
+      var node = document.querySelector('[data-toggle-project="' + id + '"]');
+      if (node && node.scrollIntoView) node.scrollIntoView({ block: 'center' });
     }
 
     function replaceRow(list, row, key) {
@@ -892,15 +1577,267 @@
       list.push(row);
     }
 
-    /* =============================== events =============================== */
+    function reload(section, then) {
+      return call('apiReload', section).then(function (rows) {
+        state.data[section] = rows;
+        if (then) then();
+        render();
+      });
+    }
+
+    /* ============================== command palette ============================== */
+
+    function paletteItems() {
+      var items = [];
+      NAV.forEach(function (n) {
+        if (n.group) return;
+        items.push({ kind: 'View', label: n.label, run: function () { closeModal(); state.view = n.id; render(); } });
+      });
+      state.data.projects.forEach(function (p) {
+        items.push({
+          kind: p.Tier, label: p.ID + ' - ' + p.Project, hint: p.Account,
+          run: function () { gotoProject(p.ID); }
+        });
+      });
+      state.data.docs.forEach(function (d) {
+        items.push({
+          kind: d.Folder, label: d.Title, hint: d.Summary,
+          run: function () { openDoc(d.ID); }
+        });
+      });
+      return items;
+    }
+
+    function openPalette() {
+      state.palette = { open: true, query: '', results: [], cursor: 0 };
+      openModal({
+        body:
+          '<input type="text" class="palette" id="paletteInput" placeholder="Jump to a document, a project or a page..." autocomplete="off">',
+        footer: '<span style="color:var(--ink-3);font-size:12px">Type to filter &middot; arrows to move &middot; Enter to open &middot; Esc to close</span>' +
+          '<button class="btn ghost small push" data-act="search-full">Search inside documents</button>',
+        focus: 'paletteInput'
+      });
+      var host = el('modalHost').querySelector('.mbody');
+      host.insertAdjacentHTML('beforeend', '<ul class="hits" id="paletteHits" style="margin-top:12px"></ul>');
+      updatePalette('');
+    }
+
+    function updatePalette(query) {
+      state.palette.query = query;
+      var needle = query.toLowerCase().trim();
+      var all = paletteItems();
+      var hits = needle
+        ? all.filter(function (i) {
+            return (i.label + ' ' + (i.hint || '')).toLowerCase().indexOf(needle) !== -1;
+          })
+        : all.slice(0, 12);
+      state.palette.results = hits.slice(0, 40);
+      state.palette.cursor = 0;
+      drawPalette();
+    }
+
+    function drawPalette() {
+      var list = el('paletteHits');
+      if (!list) return;
+      if (!state.palette.results.length) {
+        list.innerHTML = '<li><div style="padding:14px 22px;color:var(--ink-3)">Nothing matches.</div></li>';
+        return;
+      }
+      list.innerHTML = state.palette.results.map(function (item, i) {
+        return '<li><button data-pal="' + i + '" class="' + (i === state.palette.cursor ? 'active' : '') + '">' +
+          '<span class="t">' + esc(item.label) + '</span>' +
+          '<span class="s">' + esc(item.kind) + (item.hint ? ' &middot; ' + esc(item.hint).slice(0, 90) : '') + '</span>' +
+          '</button></li>';
+      }).join('');
+    }
+
+    /* ============================== 1:1 prep ============================== */
+
+    /**
+     * The 1:1 is analyst-led - she brings the agenda and Alex does not prepare one. That
+     * makes assembling it from what she has already written the single most useful thing
+     * this app can do for her once a week.
+     */
+    function oneOnOnePrep() {
+      var d = state.data;
+      var lines = [];
+
+      var inFlight = d.projects.filter(function (p) {
+        return p.Status === 'In progress' || p.Status === 'Ready for readout' || p.Status === 'Blocked';
+      });
+      var doneRecently = d.projects.filter(function (p) { return p.Status === 'Done' && p.Finished; })
+        .sort(function (a, b) { return String(b.Finished).localeCompare(String(a.Finished)); })
+        .slice(0, 4);
+      var openQ = d.questions.filter(function (q) { return q.Status === 'Open'; });
+      var recentWrong = d.wrong.slice(-4).reverse();
+      var followUps = d.notes.filter(function (n) { return n['Follow-up'] && n.Done !== 'Yes'; });
+      var blockedAccess = d.systems.filter(function (s) { return s.Status === 'Requested' || s.Status === 'Blocked'; });
+
+      lines.push('1:1 agenda' + (d.position.started ? ' - day ' + d.position.day : ''));
+      lines.push('');
+
+      if (doneRecently.length) {
+        lines.push('Finished since we last spoke');
+        doneRecently.forEach(function (p) {
+          lines.push('  - ' + p.ID + ' ' + p.Project + (p.Finished ? ' (' + p.Finished + ')' : '') +
+            (p['Timebox held'] && p['Timebox held'] !== 'Held' ? ' - timebox ' + p['Timebox held'].toLowerCase() : ''));
+        });
+        lines.push('');
+      }
+
+      if (inFlight.length) {
+        lines.push('In flight');
+        inFlight.forEach(function (p) {
+          lines.push('  - ' + p.ID + ' ' + p.Project + ' - ' + p.Status);
+          if (p.Notes) lines.push('      ' + p.Notes.replace(/\n/g, ' '));
+        });
+        lines.push('');
+      }
+
+      if (recentWrong.length) {
+        lines.push('What I got wrong, and the habit behind it');
+        recentWrong.forEach(function (w) {
+          lines.push('  - ' + (w.Project ? w.Project + ': ' : '') + (w['Habit to watch'] || w['Why I was off'] || w['What actually happened']));
+        });
+        lines.push('');
+      }
+
+      if (openQ.length) {
+        lines.push('Questions I have not been able to answer');
+        openQ.slice(0, 8).forEach(function (q) {
+          lines.push('  - ' + q.Question.replace(/\n/g, ' ') + (q.Project ? ' (' + q.Project + ')' : ''));
+        });
+        if (openQ.length > 8) lines.push('  - ...and ' + (openQ.length - 8) + ' more');
+        lines.push('');
+      }
+
+      if (followUps.length) {
+        lines.push('Follow-ups I owe');
+        followUps.forEach(function (n) {
+          lines.push('  - ' + n['Follow-up'] + (n.Who ? ' (' + n.Who + ')' : ''));
+        });
+        lines.push('');
+      }
+
+      if (blockedAccess.length) {
+        lines.push('Access still outstanding');
+        blockedAccess.forEach(function (s) {
+          lines.push('  - ' + s.Tool + ' - ' + s.Status.toLowerCase() +
+            (s.Requested ? ', asked ' + s.Requested : '') + ' (' + s['Access by'] + ')');
+        });
+        lines.push('');
+      }
+
+      lines.push('What I want to be better at');
+      lines.push('  - ');
+
+      return lines.join('\n');
+    }
+
+    function showOneOnOne() {
+      var text = oneOnOnePrep();
+      openModal({
+        title: 'Your 1:1 agenda',
+        wide: true,
+        body:
+          '<p class="lede" style="margin-bottom:14px">Assembled from what you have already written. ' +
+          'The 1:1 is yours to run - this is a starting point, not the whole thing. Blockers should have ' +
+          'gone to chat on the day rather than waiting for this.</p>' +
+          '<pre class="copyable">' + esc(text) + '</pre>',
+        footer: '<button class="btn" data-copy-oneonone>Copy it</button>' +
+          '<button class="btn quiet" data-close>Close</button>'
+      });
+    }
+
+    /* ============================== readout ============================== */
+
+    /** The three-part readout: what I found, what I was wrong about, what I would do next.
+     *  The middle part is the one people leave out and the one worth hearing. */
+    function readoutFor(id) {
+      var p = projectById(id);
+      if (!p) return '';
+      var wrong = state.data.wrong.filter(function (w) { return w.Project === id; });
+
+      var lines = [
+        p.ID + ' - ' + p.Project,
+        p.Account + ' - ' + p['Time box'] + (p.Hours ? ' - ' + p.Hours + 'h actual' : ''),
+        '',
+        'What I found',
+        '  ',
+        '',
+        'What I was wrong about'
+      ];
+
+      if (p.Prediction) {
+        lines.push('  I predicted: ' + p.Prediction.replace(/\n/g, ' '));
+      }
+      if (wrong.length) {
+        wrong.forEach(function (w) {
+          if (w['What actually happened']) lines.push('  Actually: ' + w['What actually happened'].replace(/\n/g, ' '));
+          if (w['Why I was off']) lines.push('  Why: ' + w['Why I was off'].replace(/\n/g, ' '));
+          if (w['Habit to watch']) lines.push('  The habit: ' + w['Habit to watch'].replace(/\n/g, ' '));
+        });
+      } else {
+        lines.push('  ');
+      }
+
+      lines.push('');
+      lines.push('What I would do next');
+      lines.push('  ');
+      lines.push('');
+      lines.push('Did the timebox hold?');
+      lines.push('  ' + (p['Timebox held'] || '') +
+        (p['Timebox held'] === 'Ran over' || p['Timebox held'] === 'Came in under'
+          ? ' - worth saying so, the ladder gets fixed with that feedback'
+          : ''));
+
+      return lines.join('\n');
+    }
+
+    function showReadout(id) {
+      var text = readoutFor(id);
+      openModal({
+        title: 'Readout - ' + id,
+        wide: true,
+        body:
+          '<p class="lede" style="margin-bottom:14px">Three parts, ten minutes. The conclusion first, not ' +
+          'the method - nobody needs the walkthrough. Your prediction and anything you logged as wrong are ' +
+          'already filled in.</p>' +
+          '<pre class="copyable">' + esc(text) + '</pre>',
+        footer: '<button class="btn" data-copy-readout="' + esc(id) + '">Copy it</button>' +
+          '<button class="btn quiet" data-close>Close</button>'
+      });
+    }
+
+    /* ============================== events ============================== */
 
     document.addEventListener('click', function (e) {
       var t = e.target;
+      if (!t || !t.closest) return;
+
+      if (t.closest('[data-scrim]') === t || t.closest('[data-close]')) {
+        closeModal();
+        return;
+      }
+
+      var pal = t.closest('[data-pal]');
+      if (pal) {
+        var item = state.palette.results[Number(pal.getAttribute('data-pal'))];
+        if (item) item.run();
+        return;
+      }
 
       var navBtn = t.closest('[data-view]');
       if (navBtn) {
+        closeModal();
         state.view = navBtn.getAttribute('data-view');
         render();
+        return;
+      }
+
+      var goProj = t.closest('[data-goto-project]');
+      if (goProj) {
+        gotoProject(goProj.getAttribute('data-goto-project'));
         return;
       }
 
@@ -913,9 +1850,78 @@
 
       var toggle = t.closest('[data-toggle-project]');
       if (toggle) {
-        var id = toggle.getAttribute('data-toggle-project');
-        state.openProject = state.openProject === id ? null : id;
+        var pid = toggle.getAttribute('data-toggle-project');
+        state.openProject = state.openProject === pid ? null : pid;
         render();
+        return;
+      }
+
+      var readout = t.closest('[data-readout]');
+      if (readout) {
+        showReadout(readout.getAttribute('data-readout'));
+        return;
+      }
+
+      var copyReadout = t.closest('[data-copy-readout]');
+      if (copyReadout) {
+        copyText(readoutFor(copyReadout.getAttribute('data-copy-readout')), 'Readout');
+        return;
+      }
+
+      if (t.closest('[data-copy-oneonone]')) {
+        copyText(oneOnOnePrep(), 'Agenda');
+        return;
+      }
+
+      var logWrong = t.closest('[data-logwrong]');
+      if (logWrong) {
+        var lp = projectById(logWrong.getAttribute('data-logwrong'));
+        closeModal();
+        state.view = 'wrong';
+        render();
+        if (lp) {
+          var sel = el('wProject');
+          if (sel) sel.value = lp.ID;
+          var pred = el('wPredicted');
+          if (pred && lp.Prediction) pred.value = lp.Prediction;
+          var actual = el('wActual');
+          if (actual) actual.focus();
+        }
+        return;
+      }
+
+      var d2w = t.closest('[data-daily-to-wrong]');
+      if (d2w) {
+        var row = state.data.daily.filter(function (r) { return r.ID === d2w.getAttribute('data-daily-to-wrong'); })[0];
+        state.view = 'wrong';
+        render();
+        if (row) {
+          var box = el('wActual');
+          if (box) {
+            box.value = row['Surprised me'];
+            box.focus();
+          }
+        }
+        return;
+      }
+
+      var copyDaily = t.closest('[data-copy-daily]');
+      if (copyDaily) {
+        var dr = state.data.daily.filter(function (r) { return r.ID === copyDaily.getAttribute('data-copy-daily'); })[0];
+        if (dr) copyText(dailyText(dr), 'Your three lines');
+        return;
+      }
+
+      var edit = t.closest('[data-edit]');
+      if (edit) {
+        state.editing = edit.getAttribute('data-edit');
+        render();
+        return;
+      }
+
+      var save = t.closest('[data-save]');
+      if (save) {
+        saveEdit(save.getAttribute('data-save'));
         return;
       }
 
@@ -925,16 +1931,9 @@
         if (!window.confirm('Delete ' + del.getAttribute('data-id') + '? This cannot be undone.')) return;
         call('apiDelete', section, del.getAttribute('data-id'))
           .then(function () {
-            return call('apiReload', section);
+            return reload(section, function () { toast('Deleted'); });
           })
-          .then(function (rows) {
-            state.data[section] = rows;
-            toast('Deleted');
-            render();
-          })
-          .catch(function (err) {
-            toast(err, true);
-          });
+          .catch(function (err) { toast(err, true); });
         return;
       }
 
@@ -942,7 +1941,38 @@
       if (act) handleAction(act.getAttribute('data-act'));
     });
 
+    function dailyText(row) {
+      return [
+        '1. ' + (row['Worked on'] || ''),
+        '2. ' + (row.Learned || ''),
+        '3. ' + (row['Surprised me'] || '')
+      ].join('\n');
+    }
+
+    function saveEdit(key) {
+      var parts = key.split('|');
+      var section = parts[0];
+      var id = parts[1];
+      var scope = document.querySelector('[data-save="' + key + '"]').closest('.entry');
+      var patch = {};
+      scope.querySelectorAll('[data-e]').forEach(function (node) {
+        patch[node.getAttribute('data-e')] = node.value;
+      });
+      call('apiUpdate', section, id, patch)
+        .then(function () {
+          state.editing = null;
+          return reload(section, function () { toast('Saved'); });
+        })
+        .catch(function (err) { toast(err, true); });
+    }
+
     function handleAction(action) {
+      if (action === 'cancel-edit') {
+        state.editing = null;
+        render();
+        return;
+      }
+
       if (action === 'save-start') {
         var value = el('startDate').value;
         if (!value) {
@@ -955,9 +1985,35 @@
             toast('Saved');
             render();
           })
-          .catch(function (err) {
-            toast(err, true);
-          });
+          .catch(function (err) { toast(err, true); });
+        return;
+      }
+
+      if (action === 'save-daily' || action === 'copy-daily') {
+        var payload = {
+          'Worked on': el('dWorked').value.trim(),
+          Learned: el('dLearned').value.trim(),
+          'Surprised me': el('dSurprised').value.trim(),
+          'Keep/Kill done': el('dKeepKill') && el('dKeepKill').checked ? 'Yes' : 'No'
+        };
+
+        if (action === 'copy-daily') {
+          copyText(dailyText(payload), 'Your three lines');
+          return;
+        }
+        if (!payload['Worked on'] && !payload.Learned && !payload['Surprised me']) {
+          toast('Write at least one line first.', true);
+          return;
+        }
+
+        var existing = state.data.daily.filter(function (r) { return r.Date === state.data.today; })[0];
+        var promise = existing
+          ? call('apiUpdate', 'daily', existing.ID, payload)
+          : call('apiCreate', 'daily', payload);
+
+        promise
+          .then(function () { return reload('daily', function () { toast('Saved'); }); })
+          .catch(function (err) { toast(err, true); });
         return;
       }
 
@@ -970,7 +2026,7 @@
         create('questions', {
           Question: text,
           Context: el('qContext').value.trim(),
-          Project: el('qProject').value.trim().toUpperCase()
+          Project: el('qProject').value
         });
         return;
       }
@@ -983,7 +2039,7 @@
           return;
         }
         create('wrong', {
-          Project: el('wProject').value.trim().toUpperCase(),
+          Project: el('wProject').value,
           'I predicted': predicted,
           'What actually happened': actual,
           'Why I was off': el('wWhy').value.trim(),
@@ -1002,26 +2058,65 @@
           Kind: el('nKind').value,
           Title: title,
           Who: el('nWho').value.trim(),
-          Project: el('nProject').value.trim().toUpperCase(),
+          Project: el('nProject').value,
           Body: el('nBody').value.trim(),
           'Follow-up': el('nFollow').value.trim()
         });
+        return;
       }
+
+      if (action === 'palette') {
+        openPalette();
+        return;
+      }
+
+      if (action === 'oneonone') {
+        showOneOnOne();
+        return;
+      }
+
+      if (action === 'search-full') {
+        var seed = state.palette.query || state.libraryFilter || '';
+        closeModal();
+        state.view = 'search';
+        state.search.query = seed;
+        render();
+        var box = el('fullSearch');
+        if (box) box.focus();
+        if (seed) runSearch();
+        return;
+      }
+
+      if (action === 'run-search') runSearch();
+    }
+
+    function runSearch() {
+      var box = el('fullSearch');
+      var query = box ? box.value.trim() : state.search.query;
+      if (query.length < 2) {
+        toast('Type at least two characters.', true);
+        return;
+      }
+      state.search.query = query;
+      state.search.busy = true;
+      render();
+      call('apiSearch', query)
+        .then(function (result) {
+          state.search.result = result;
+          state.search.busy = false;
+          render();
+        })
+        .catch(function (err) {
+          state.search.busy = false;
+          toast(err, true);
+          render();
+        });
     }
 
     function create(section, record) {
       call('apiCreate', section, record)
-        .then(function () {
-          return call('apiReload', section);
-        })
-        .then(function (rows) {
-          state.data[section] = rows;
-          toast('Added');
-          render();
-        })
-        .catch(function (err) {
-          toast(err, true);
-        });
+        .then(function () { return reload(section, function () { toast('Added'); }); })
+        .catch(function (err) { toast(err, true); });
     }
 
     document.addEventListener('change', function (e) {
@@ -1032,7 +2127,6 @@
         refreshLibraryList();
         return;
       }
-
       if (t.id === 'docStatus') {
         saveDoc({ Status: t.value });
         return;
@@ -1052,9 +2146,7 @@
             toast('Saved');
             render();
           })
-          .catch(function (err) {
-            toast(err, true);
-          });
+          .catch(function (err) { toast(err, true); });
         return;
       }
 
@@ -1066,10 +2158,36 @@
           .then(function (row) {
             replaceRow(state.data.skills, row, 'ID');
             toast('Saved');
+            if (t.tagName === 'SELECT') render();
           })
-          .catch(function (err) {
-            toast(err, true);
-          });
+          .catch(function (err) { toast(err, true); });
+        return;
+      }
+
+      var system = t.getAttribute('data-system');
+      if (system) {
+        var yp = {};
+        yp[t.getAttribute('data-f')] = t.value;
+        call('apiSaveSystem', system, yp)
+          .then(function (row) {
+            replaceRow(state.data.systems, row, 'Tool');
+            toast('Saved');
+            renderNav();
+          })
+          .catch(function (err) { toast(err, true); });
+        return;
+      }
+
+      var script = t.getAttribute('data-script');
+      if (script) {
+        var cp = {};
+        cp[t.getAttribute('data-f')] = t.value;
+        call('apiSaveScript', script, cp)
+          .then(function (row) {
+            replaceRow(state.data.scripts, row, 'ID');
+            toast('Saved');
+          })
+          .catch(function (err) { toast(err, true); });
         return;
       }
 
@@ -1078,17 +2196,8 @@
         var lp = {};
         lp[t.getAttribute('data-f')] = t.value;
         call('apiUpdate', section, t.getAttribute('data-id'), lp)
-          .then(function () {
-            return call('apiReload', section);
-          })
-          .then(function (rows) {
-            state.data[section] = rows;
-            toast('Saved');
-            render();
-          })
-          .catch(function (err) {
-            toast(err, true);
-          });
+          .then(function () { return reload(section, function () { toast('Saved'); }); })
+          .catch(function (err) { toast(err, true); });
       }
     });
 
@@ -1102,28 +2211,60 @@
           Object.keys(row).forEach(function (k) {
             if (k !== 'Body') light[k] = row[k];
           });
-
           replaceRow(state.data.docs, light, 'ID');
           state.index[id] = light;
           toast('Saved');
-
-          // Only the list and the nav counts can have changed. Redrawing the reader would
-          // re-parse the document and scroll her back to the top mid-sentence.
           refreshLibraryList();
           renderNav();
         })
-        .catch(function (err) {
-          toast(err, true);
-        });
+        .catch(function (err) { toast(err, true); });
     }
 
     document.addEventListener('input', function (e) {
-      if (e.target.id !== 'libSearch') return;
-      state.libraryFilter = e.target.value;
-      refreshLibraryList();
+      if (e.target.id === 'libSearch') {
+        state.libraryFilter = e.target.value;
+        refreshLibraryList();
+        return;
+      }
+      if (e.target.id === 'paletteInput') updatePalette(e.target.value);
     });
 
-    /* ================================ boot ================================ */
+    document.addEventListener('keydown', function (e) {
+      var key = e.key;
+
+      if ((e.metaKey || e.ctrlKey) && (key === 'k' || key === 'K')) {
+        e.preventDefault();
+        if (state.palette.open) closeModal();
+        else openPalette();
+        return;
+      }
+
+      if (key === 'Escape' && state.modal) {
+        closeModal();
+        return;
+      }
+
+      if (!state.palette.open) return;
+
+      if (key === 'ArrowDown' || key === 'ArrowUp') {
+        e.preventDefault();
+        var n = state.palette.results.length;
+        if (!n) return;
+        state.palette.cursor = (state.palette.cursor + (key === 'ArrowDown' ? 1 : n - 1)) % n;
+        drawPalette();
+        var active = document.querySelector('.hits button.active');
+        if (active && active.scrollIntoView) active.scrollIntoView({ block: 'nearest' });
+        return;
+      }
+
+      if (key === 'Enter') {
+        e.preventDefault();
+        var item = state.palette.results[state.palette.cursor];
+        if (item) item.run();
+      }
+    });
+
+    /* ============================== boot ============================== */
 
     call('apiBootstrap')
       .then(function (data) {
@@ -1131,13 +2272,15 @@
         data.docs.forEach(function (d) {
           state.index[d.ID] = d;
         });
+        renderBrand();
         render();
       })
       .catch(function (err) {
         el('main').innerHTML =
-          '<div class="card"><h4>Could not load the workbook</h4><p>' + esc(err.message || err) + '</p>' +
-          '<p class="meta">If this is the first time, run <b>Ramp workbook &gt; Set up workbook</b> from the ' +
-          'menu in the spreadsheet, then reload.</p></div>';
+          '<div class="wrap"><div class="card"><h4>Could not load the workbook</h4><p>' +
+          esc(err.message || err) + '</p>' +
+          '<p style="color:var(--ink-3)">If this is the first time, run <b>Ramp workbook &gt; Set up workbook</b> ' +
+          'from the menu in the spreadsheet, then reload.</p></div></div>';
       });
 
     // Exposed so the test harness can exercise the renderer against the real documents.

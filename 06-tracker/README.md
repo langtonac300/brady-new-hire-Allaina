@@ -3,9 +3,9 @@
 Everything in this repo, as a Google Sheet you can work in.
 
 The Sheet is the database — each document becomes a row, alongside the project ladder, your
-questions, your notes and your self-assessment. The Apps Script web app on top of it is how
-you actually read and update all of that, without ever having to scroll a spreadsheet cell
-containing 25,000 words.
+questions, your notes, the tools map and your self-assessment. The Apps Script web app on top
+of it is how you actually read and update all of that, without ever having to scroll a
+spreadsheet cell containing 25,000 words.
 
 **Nothing here replaces the repo.** The Markdown files stay the source; the workbook is a
 copy you can annotate. If the source changes, you re-import and your notes survive.
@@ -16,15 +16,34 @@ copy you can annotate. If the source changes, you re-import and your notes survi
 
 | Sheet | What it holds |
 |-------|---------------|
-| `Dashboard` | Which day and phase you're on, ladder progress by tier, and everything counted in one place. All live formulas |
-| `Library` | All 63 documents — the orientation material, the learning files, every project brief. One row each, body included |
-| `Ladder` | The 33 projects, with status, dates, hours, where the deliverable went, and notes |
+| `Dashboard` | Which day and phase you're on, ladder progress by tier, everything counted. Live formulas |
+| `Library` | All 63 documents — orientation, learning material, every project brief. One row each, body included |
+| `Ladder` | The 33 projects: your prediction, status, dates, hours, whether the timebox held, where the deliverable went |
 | `Questions` | Your running list, with the answer and the date you got it |
-| `What I got wrong` | Predicted / actually / why / the habit behind it — the four boxes, one row per surprise |
-| `Notes` | Meetings, capture sessions, things people told you, and what you owe someone |
-| `Self-assessment` | The 31 skills, scored at Day 1, Day 30 and Day 90 side by side |
-| `Settings` | Your start date and display name |
-| `Lists` | The dropdown options, hidden. Edit an option here and every dropdown follows |
+| `What I got wrong` | Predicted / actually / why / the habit behind it |
+| `Notes` | Meetings, capture sessions, and what you owe someone |
+| `Daily lines` | The three lines you post in chat each evening, one row per day |
+| `Self-assessment` | The 31 skills at Day 1, Day 30 and Day 90, side by side |
+| `Systems` | Which tool owns which number, its one gotcha, and where your access request has got to |
+| `Scripts` | The Google Ads scripts, what they feed, and when they last ran |
+| `Settings` · `Lists` | Your start date; the dropdown options |
+
+---
+
+## What the app does that the Sheet doesn't
+
+| | |
+|---|---|
+| **Ctrl/Cmd + K** | Jump to any document, project or page by typing a few letters |
+| **Search** | Full text, across all 63 documents *and* everything you have written |
+| **Today** | Which week you're in, what that week expects, the five recurring meetings, and your three lines |
+| **The prediction** | Writing one stamps the date. That date is what makes it a prediction rather than a recollection, and it is never overwritten |
+| **Readout builder** | The three-part readout, pre-filled with your prediction and anything you logged as wrong |
+| **1:1 prep** | Your agenda assembled from what you have already written — finished work, what's in flight, the habits behind your misses, open questions, follow-ups you owe, access still outstanding. Copy it and go |
+| **Reading** | Mark a document read and it dates itself. Internal links between documents work |
+
+> The 1:1 is analyst-led — you bring the agenda and Alex doesn't prepare one. That's the one
+> this app earns its keep on.
 
 ---
 
@@ -38,58 +57,52 @@ About ten minutes, and you only do it once.
 4. **Add each file from [`apps-script/`](./apps-script/).** The **+** next to *Files* adds one.
    - `.gs` files → choose **Script**, name it without the extension (`Code`, `Db`, `Setup`…)
    - `.html` files → choose **HTML**, name it without the extension (`Index`, `Stylesheet`,
-     `JavaScript`)
-   - Paste the contents in, and save.
+     `JavaScript`, `Images`)
 5. **Replace the manifest.** Click the gear (*Project Settings*), tick **Show `appsscript.json`**,
    then paste in [`apps-script/appsscript.json`](./apps-script/appsscript.json).
 6. **Go back to the Sheet and reload the tab.** A **Ramp workbook** menu appears next to Help.
-7. **Ramp workbook → Set up workbook.** Authorise it when Google asks — it's your own script
-   asking for your own spreadsheet. It takes a minute or two; it's writing 350 KB of text.
+7. **Ramp workbook → Set up workbook.** Authorise it when Google asks. It takes a minute or
+   two; it's writing 350 KB of text.
 8. **Put your start date on the `Settings` sheet**, or set it on the Today screen in the app.
 
 > ⚠️ **The "unverified app" screen is expected.** Google shows it for any script that isn't
 > published to their marketplace, which includes every script anyone writes for themselves.
-> Click **Advanced → Go to (your project)**. You're granting your own script access to your
-> own Sheet.
+> Click **Advanced → Go to (your project)**.
 
-**Step 4 is thirteen files pasted by hand, and it is the dullest part of this.** If you'd
+**Step 4 is fourteen files pasted by hand, and it is the dullest part of this.** If you'd
 rather not: Google's `clasp` tool pushes the whole folder in one command. It needs Node and a
 one-time `clasp login`, then `clasp clone <script id>` in `apps-script/` and `clasp push`.
-Worth it if you expect to change the code more than once; not worth it for a single setup.
 
 ### Opening the app
 
 **Ramp workbook → Open the app** works straight away, in a window over the Sheet.
 
-For a real URL you can bookmark and open on your phone, deploy it:
+For a URL you can bookmark and open on your phone, deploy it: **Deploy → New deployment →
+Web app**, execute as **Me**, access **Only myself**.
 
-1. In the script editor: **Deploy → New deployment**.
-2. Type: **Web app**. Execute as **Me**. Who has access: **Only myself**.
-3. **Deploy**, then copy the URL. **Ramp workbook → Show the web app link** gets it back later.
-
-> ⚠️ **Editing the code doesn't change a deployment.** Apps Script serves the version you
-> deployed, not the one in the editor. After a change: **Deploy → Manage deployments → the
-> pencil → Version: New version → Deploy.** Same URL, new code. This catches everyone once.
+> ⚠️ **Editing the code doesn't change a deployment.** After a change: **Deploy → Manage
+> deployments → the pencil → Version: New version → Deploy.** This catches everyone once.
 
 ---
 
-## Using it
+## The Google Ads scripts
 
-| Screen | What it's for |
-|--------|---------------|
-| **Today** | Where you are, what's in flight, what's next, and your open questions |
-| **Library** | Read anything in the repo. Mark it Read, and keep notes per document |
-| **The ladder** | Open a project, set its status, log hours, record where the deliverable went. Statuses fill in the dates for you |
-| **Questions** | Add one in two seconds. Writing an answer marks it answered and dates it |
-| **What I got wrong** | The four boxes. The last one — the habit — is the one that earns its place |
-| **Notes** | Meetings and capture sessions, with a follow-up flag |
-| **Self-assessment** | Score all 31, three columns, side by side |
+[`google-ads-scripts/`](./google-ads-scripts/) holds three scripts that pull numbers out of an
+account and into your workbook. **All three are read-only** — they run queries and write to a
+Sheet, and none of them changes anything in an account. That's what makes them usable from day
+one rather than after day 30.
 
-Links between documents work — clicking one in a brief opens that document.
+| Script | What it does | Feeds |
+|--------|--------------|-------|
+| `search-terms-export.js` | Search terms with impressions, clicks, cost and conversions | The daily Keep/Kill review, T2-1, T2-2, T3-2 |
+| `account-structure-snapshot.js` | Every campaign with its type, bidding strategy, budget and 30-day spend | T1-1, T1-2, T1-9 |
+| `budget-pacing-check.js` | Month-to-date spend against budget, per business day | T2-4, T3-3 |
 
-**You can also just edit the Sheet.** The app and the spreadsheet are the same data; a
-dropdown changed on the `Ladder` sheet shows up in the app next time it loads. Use whichever
-you feel like.
+Each one stamps the account, its **timezone**, the currency, the date range and the run time
+across the top of its tab, and labels the conversions column as the **platform** number. Both
+of those are deliberate: they're the two things most likely to turn a correct number into a
+wrong statement in a meeting. Setup instructions are in
+[`google-ads-scripts/_shared-notes.md`](./google-ads-scripts/_shared-notes.md).
 
 ---
 
@@ -105,14 +118,19 @@ That rewrites the `Data*.gs` files. Paste the changed ones back into the script 
 **Ramp workbook → Re-import content**.
 
 **Re-import keeps everything you've recorded** — reading status, per-document notes, project
-status, dates, hours, links and project notes. It replaces the document text and rebuilds the
-ladder. Your questions, wrong-log, notes and scores aren't touched at all.
+status, predictions, dates, hours, links and notes. Your questions, wrong-log, notes, daily
+lines and scores aren't touched at all.
 
-Two other menu items:
+When the graphics change:
 
-- **Repair workbook** — rebuilds headers, widths, dropdowns and the dashboard from the schema.
-  Data is untouched. Use it after changing `Schema.gs`, or if a sheet gets mangled.
-- **Set up workbook** — safe to run again. It only seeds tables that are still empty.
+```
+python3 06-tracker/tools/build-images.py     # needs: pip install pillow
+```
+
+That rewrites `apps-script/Images.html`. The 54 images in
+[`graphics/`](./graphics/) get resized to the largest size the interface actually renders them
+at and recompressed — 2.5 MB of source becomes about 400 KB inlined, because Apps Script has
+no way to serve a file and every image has to travel inside the page.
 
 ### Checking it still works
 
@@ -120,10 +138,19 @@ Two other menu items:
 node 06-tracker/tools/test.mjs
 ```
 
-Runs the whole thing against a stand-in for Google's runtime: builds the workbook, drives
-every call the browser can make, then renders all 63 documents and checks the output is well
-formed and that every internal link resolves. It's how the renderer gets verified against the
-real material rather than by eye.
+Builds the workbook against a stand-in for Google's runtime, drives every call the browser can
+make, checks setup and re-import are idempotent, then renders all 63 documents and verifies the
+output is well formed, that every internal link resolves, and that nothing rendered as
+`undefined`. **148 checks.**
+
+### Looking at it
+
+```
+node 06-tracker/tools/preview.mjs /tmp/preview.html
+```
+
+Writes a single self-contained HTML file with the data mocked out, so you can open the whole
+interface in a browser without deploying anything.
 
 ---
 
@@ -136,24 +163,27 @@ real material rather than by eye.
 | `Schema.gs` | **Every table and column is defined here.** Add a column here, run Repair |
 | `Db.gs` | Reads and writes sheets as tables, by column name, with a lock on every write |
 | `Setup.gs` | Builds the workbook: sheets, formatting, dropdowns, the dashboard, the import |
-| `Seed.gs` | The 33 projects and 31 skills, transcribed from the source |
+| `Seed.gs` | The 33 projects, 31 skills, 12 systems and 3 scripts, transcribed from the source |
 | `Api.gs` | The only functions the browser is allowed to call |
-| `Data01…Data06.gs` | The document text. **Generated — don't edit these by hand** |
+| `Data01…Data06.gs` | The document text. **Generated — don't edit by hand** |
+| `Images.html` | The graphics, inlined. **Generated — don't edit by hand** |
 | `Index.html` · `Stylesheet.html` · `JavaScript.html` | The interface |
 
-Two things in the code are deliberate and worth not "fixing":
+Three things in here are deliberate and worth not "fixing":
 
-- **`T2-7` is a pointer, not a project.** It's the same work as `M-1`, and the ladder carries
-  it as a pointer so the numbering reads correctly.
-- **There is no `M-4`.** The gap is intentional, and `M-5` keeps its number.
+- **`T2-7` is a pointer, not a project.** It's the same work as `M-1`.
+- **There is no `M-4`.** The gap is intentional and `M-5` keeps its number.
+- **The `Systems` sheet ships with every `Link` blank.** No URL for any of those tools is
+  recorded anywhere in the source material, and a plausible-looking guess would be worse than
+  an empty cell. You fill them in the first time you open each one.
 
 ---
 
 ## Two house rules this has to keep
 
-**Nothing in `apps-script/` references any AI tool, and it shouldn't start to.** Gemini is
-Brady's sanctioned tool, and this code goes into a corporate Google account. The same goes
-for links back to this repo — the document rows carry a relative source path and nothing more.
+**Nothing in `apps-script/` or `google-ads-scripts/` references any AI tool, and it shouldn't
+start to.** Gemini is Brady's sanctioned tool, and this code goes into a corporate Google
+account. The same goes for links back to this repo.
 
 **`CLAUDE.md` is deliberately not imported.** It's the only file the build script excludes by
 name. It carries the boundary rule, and the terms quoted in it have no business being copied
@@ -164,8 +194,15 @@ into a corporate system. `tools/test.mjs` checks it stayed out.
 ## Known limits
 
 - **The renderer covers what the source uses** — headings, tables, lists, task lists, quotes,
-  code, links and emphasis. It isn't a full Markdown implementation, and it doesn't need to be.
+  code, links and emphasis. It isn't a full Markdown implementation and doesn't need to be.
 - **Re-import replaces the `Body` column.** If you type into it directly on the `Library`
   sheet, that's the one thing you'll lose. Per-document notes go in `My notes`, which survives.
-- **Setup takes a minute or two.** It's applying formatting column by column across nine
-  sheets. It only happens once.
+- **Two colours in the graphics don't match the brand standard exactly.** The kit is built on
+  navy `#003087` and uses an orange accent; the binding Brady Blue is `#002D72`. The interface
+  chrome uses `#002D72` and the artwork keeps its own. Worth a decision from Alex.
+- **There is no logo.** `graphics/brady-logo.png` is picked up automatically by the image
+  build if you drop the real asset in — until then the masthead is a text lockup. Nothing here
+  draws a trademark from memory.
+- **Nobody has run this in a real Sheet yet.** The tests verify the logic against a fake
+  spreadsheet; the actual formatting and dropdown calls need one real **Set up workbook** run
+  to confirm.

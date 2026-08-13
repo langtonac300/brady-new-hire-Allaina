@@ -161,6 +161,73 @@ function SEED_SKILLS() {
   return out;
 }
 
+/**
+ * The tools, what each one owns, and its single gotcha.
+ *
+ * Every row here is transcribed from the source material. The Link column is deliberately
+ * left blank: no URL for any of these is recorded anywhere in the source, and a
+ * plausible-looking guess is the single most damaging thing this could contain. She fills
+ * them in the first time she opens each one.
+ */
+function SEED_SYSTEMS() {
+  var rows = [
+    ['Google Ads', 'The platform. Standard access from day one - this is the one you operate.', 'Live spend and in-platform metrics, per account', 'Its Conversions column is not reported revenue. Live in-platform metrics only.', 'Day 1'],
+    ['MTD Spend dashboard', "The team's spend and pacing view. A real internal dashboard - Alex shows you where.", 'Pacing against budget, blended spend', 'It is the pacing source, but reconcile a surprising figure against the platform before repeating it.', 'Day 1'],
+    ['L10 Huddle app', 'Lives in the same workbook as the MTD Spend dashboard.', 'The weekly scorecard, to-dos, rocks, and your 1:1 page', 'Every number carries its caveat, and the caveat gets read out with it.', 'Day 1'],
+    ['Google Chat', 'Where you ask questions and get unblocked.', 'Nothing - it is the route, not a source', 'Asking the moment you are stuck is expected rather than tolerated. Do not save it for the 1:1.', 'Day 1'],
+    ['Calendar', 'The standing meetings.', 'Nothing - it is the schedule', 'Your invites are the authority. Any written schedule is the shape of a normal week, not the truth.', 'Day 1'],
+    ['Google Sheets', 'A lot of Brady reporting is Sheets. Beyond basics means pivot tables, QUERY and FILTER.', 'The pacing note and the budget math', 'A pasted CSV can be silently truncated - what you are looking at may not be the whole table.', 'Day 1'],
+    ['Microsoft/Bing Ads', 'The other search platform. Genuinely different from Google in ways that matter.', 'Bing spend and performance', 'Do not assume a Google habit transfers. BNG in a name means Bing.', 'End of week 2'],
+    ['Power BI', 'The trend and reporting layer, owned by the analytics team.', 'Trends and the monthly story', 'Not the source. Every number in it is computed somewhere upstream - stay able to name where.', 'End of week 2'],
+    ['Adobe Analytics', 'On-site behavior, and part of the reported-revenue picture.', 'On-site sessions and behavior', 'On-site sessions are not ad-platform clicks. Different questions, different tool.', 'End of week 2'],
+    ['Jira', 'The department uses it, but day-to-day work with Alex runs through Chat and 1:1s.', 'Nothing you depend on', 'It is not the queue your work flows through - do not wait on a ticket to start.', 'End of week 2'],
+    ['BigQuery / SQL', 'Where the reported first-touch numbers actually live. The biggest single unlock on the list.', 'Reported revenue, first-touch and 180-day', 'Never trust an invented table or column name, and reconcile any pull to a number you already believe.', 'Ask week 1 - via the analytics team, arrives late'],
+    ['GTM', 'Google Tag Manager - the conversion-tracking layer, where the tags live. Introduced, not owned.', 'Whether a conversion fires correctly', 'The widest blast radius of anything you can touch. You learn to read it; a senior changes it.', 'Introduced, not owned']
+  ];
+
+  return rows.map(function (r) {
+    return {
+      Tool: r[0],
+      'What it is': r[1],
+      'What it owns': r[2],
+      'The gotcha': r[3],
+      'Access by': r[4],
+      Status: 'Not requested',
+      Link: ''
+    };
+  });
+}
+
+/**
+ * The Google Ads scripts shipped alongside this workbook.
+ *
+ * All three are read-only - they run selectors and queries and write the results into a
+ * sheet. None of them changes anything in an account, which is what makes them usable during
+ * the read-only phase rather than after it.
+ */
+function SEED_SCRIPTS() {
+  var rows = [
+    ['GAS-1', 'Search terms export', 'Pulls search terms with impressions, clicks, cost and conversions into a tab in this workbook, stamped with the account timezone and a note that Conversions is the platform number.', 'Daily', 'The daily Keep/Kill review, T2-1, T2-2, T3-2', 'search-terms-export.js'],
+    ['GAS-2', 'Account structure snapshot', 'Lists every campaign with its type, bidding strategy, daily budget and 30-day spend - the map you would otherwise build by hand on an account tour.', 'Weekly', 'T1-1, T1-2, T1-9', 'account-structure-snapshot.js'],
+    ['GAS-3', 'Budget pacing check', 'Month-to-date spend against budget, normalized per business day, with the days elapsed and days remaining spelled out.', 'Daily', 'T2-4, T3-3', 'budget-pacing-check.js']
+  ];
+
+  return rows.map(function (r) {
+    return {
+      ID: r[0],
+      Name: r[1],
+      'What it does': r[2],
+      'Reads or writes': 'Reads only',
+      Account: '',
+      Feeds: r[4],
+      Status: 'Draft',
+      Schedule: r[3],
+      'Source file': r[5],
+      Notes: ''
+    };
+  });
+}
+
 /** Every generated content module, concatenated. */
 function SEED_DOCS() {
   return []
