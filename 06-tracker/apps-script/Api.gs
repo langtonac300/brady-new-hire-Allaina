@@ -21,7 +21,8 @@ function SECTIONS() {
   return {
     questions: { table: T.QUESTIONS, prefix: 'Q', dateField: 'Asked on', defaults: { Status: 'Open' } },
     wrong: { table: T.WRONG, prefix: 'W', dateField: 'Date', defaults: {} },
-    notes: { table: T.NOTES, prefix: 'N', dateField: 'Date', defaults: { Kind: 'Capture', Done: 'No' } }
+    notes: { table: T.NOTES, prefix: 'N', dateField: 'Date', defaults: { Kind: 'Capture', Done: 'No' } },
+    daily: { table: T.DAILY, prefix: 'D', dateField: 'Date', defaults: { Posted: 'No', 'Keep/Kill done': 'No' } }
   };
 }
 
@@ -88,7 +89,10 @@ function apiBootstrap() {
       skills: dbSelect(T.SKILLS),
       questions: dbSelect(T.QUESTIONS),
       wrong: dbSelect(T.WRONG),
-      notes: dbSelect(T.NOTES)
+      notes: dbSelect(T.NOTES),
+      daily: dbSelect(T.DAILY),
+      systems: dbSelect(T.SYSTEMS),
+      scripts: dbSelect(T.SCRIPTS)
     });
   } catch (err) {
     return fail(err);
@@ -134,11 +138,22 @@ function apiSaveDoc(id, patch) {
 /** Update a project. Starting one stamps Started; finishing one stamps Finished. */
 function apiSaveProject(id, patch) {
   try {
-    var allowed = ['Status', 'Started', 'Finished', 'Hours', 'Deliverable link', 'Notes'];
+    var allowed = [
+      'Status', 'Started', 'Finished', 'Hours', 'Deliverable link', 'Notes',
+      'Prediction', 'Predicted on', 'Timebox held'
+    ];
     var clean = {};
     allowed.forEach(function (f) {
       if (patch[f] !== undefined) clean[f] = patch[f];
     });
+
+    // Writing a prediction stamps the day it was written. That date is what makes it a
+    // prediction rather than a recollection, so it is set here rather than trusted from the
+    // browser, and it is never overwritten once set.
+    if (clean.Prediction !== undefined && String(clean.Prediction).trim()) {
+      var before = dbGet(T.PROJECTS, id);
+      if (before && !before['Predicted on']) clean['Predicted on'] = today();
+    }
 
     if (clean.Status !== undefined) {
       var current = dbGet(T.PROJECTS, id);
@@ -229,6 +244,129 @@ function apiReload(section) {
   } catch (err) {
     return fail(err);
   }
+}
+
+/** Update one row on the Systems or Scripts sheet. */
+function apiSaveSystem(tool, patch) {
+  try {
+    var clean = {};
+    ['Status', 'Requested', 'Granted', 'Link', 'Notes'].forEach(function (f) {
+      if (patch[f] !== undefined) clean[f] = patch[f];
+    });
+    if (clean.Status === 'Requested') {
+      var current = dbGet(T.SYSTEMS, tool);
+      if (current && !current.Requested && clean.Requested === undefined) clean.Requested = today();
+    }
+    if (clean.Status === 'Granted') {
+      var row = dbGet(T.SYSTEMS, tool);
+      if (row && !row.Granted && clean.Granted === undefined) clean.Granted = today();
+    }
+    return ok(dbUpdate(T.SYSTEMS, tool, clean));
+  } catch (err) {
+    return fail(err);
+  }
+}
+
+function apiSaveScript(id, patch) {
+  try {
+    var clean = {};
+    ['Account', 'Status', 'Schedule', 'Last run', 'Notes'].forEach(function (f) {
+      if (patch[f] !== undefined) clean[f] = patch[f];
+    });
+    return ok(dbUpdate(T.SCRIPTS, id, clean));
+  } catch (err) {
+    return fail(err);
+  }
+}
+
+/**
+ * Search everything.
+ *
+ * Document bodies are not held in the browser - they are 350 KB and they are only fetched one
+ * at a time - so full-text search over them has to happen here. Her own writing is searched
+ * too, because "what did I say about attribution" is at least as common a question as "where
+ * does the material cover it".
+ */
+function apiSearch(query) {
+  try {
+    var needle = String(query || '').trim().toLowerCase();
+    if (needle.length < 2) return ok({ query: needle, documents: [], entries: [] });
+
+    var documents = [];
+    dbSelect(T.DOCS, { heavy: true }).forEach(function (doc) {
+      var body = String(doc.Body || '');
+      var hay = body.toLowerCase();
+      var at = hay.indexOf(needle);
+      var inTitle = String(doc.Title || '').toLowerCase().indexOf(needle) !== -1;
+      if (at === -1 && !inTitle) return;
+
+      var hits = 0;
+      var from = 0;
+      while (from !== -1 && hits < 99) {
+        from = hay.indexOf(needle, from);
+        if (from === -1) break;
+        hits++;
+        from += needle.length;
+      }
+
+      documents.push({
+        id: doc.ID,
+        title: doc.Title,
+        folder: doc.Folder,
+        status: doc.Status,
+        hits: hits,
+        inTitle: inTitle,
+        snippet: at === -1 ? String(doc.Summary || '') : snippet_(body, at, needle.length)
+      });
+    });
+
+    documents.sort(function (a, b) {
+      if (a.inTitle !== b.inTitle) return a.inTitle ? -1 : 1;
+      return b.hits - a.hits;
+    });
+
+    // Her own writing, across every table that holds prose.
+    var entries = [];
+    var searchable = [
+      { section: 'questions', table: T.QUESTIONS, label: 'Question', fields: ['Question', 'Context', 'Answer'] },
+      { section: 'wrong', table: T.WRONG, label: 'What I got wrong', fields: ['I predicted', 'What actually happened', 'Why I was off', 'Habit to watch'] },
+      { section: 'notes', table: T.NOTES, label: 'Note', fields: ['Title', 'Who', 'Body', 'Follow-up'] },
+      { section: 'daily', table: T.DAILY, label: 'Daily line', fields: ['Worked on', 'Learned', 'Surprised me'] },
+      { section: 'projects', table: T.PROJECTS, label: 'Project', fields: ['Project', 'Prediction', 'Notes'] }
+    ];
+
+    searchable.forEach(function (spec) {
+      dbSelect(spec.table).forEach(function (row) {
+        for (var i = 0; i < spec.fields.length; i++) {
+          var text = String(row[spec.fields[i]] || '');
+          var at = text.toLowerCase().indexOf(needle);
+          if (at === -1) continue;
+          entries.push({
+            section: spec.section,
+            label: spec.label,
+            id: row.ID || row.Tool,
+            field: spec.fields[i],
+            snippet: snippet_(text, at, needle.length)
+          });
+          return;
+        }
+      });
+    });
+
+    return ok({ query: needle, documents: documents.slice(0, 40), entries: entries.slice(0, 60) });
+  } catch (err) {
+    return fail(err);
+  }
+}
+
+/** A window of text around a hit, cut at word boundaries so it reads as a phrase. */
+function snippet_(text, at, length) {
+  var start = Math.max(0, at - 70);
+  var end = Math.min(text.length, at + length + 90);
+  var out = text.slice(start, end).replace(/\s+/g, ' ').trim();
+  if (start > 0) out = '...' + out;
+  if (end < text.length) out = out + '...';
+  return out;
 }
 
 function apiSetSetting(key, value) {

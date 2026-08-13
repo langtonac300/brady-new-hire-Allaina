@@ -5,6 +5,7 @@
     <base target="_top" />
     <meta charset="utf-8" />
     <title>The ramp</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400&display=swap"
       rel="stylesheet"
@@ -15,11 +16,18 @@
   <body>
     <div class="app">
       <header class="topbar">
-        <h1>The ramp</h1>
+        <h1 class="brand" id="brand"></h1>
+
         <div class="daychip" id="daychip" hidden>
           <b id="dayNumber">-</b><span id="dayPhase"></span>
         </div>
+
         <div class="spacer"></div>
+
+        <button class="searchcue" data-act="palette" aria-label="Jump to anything">
+          <span>Jump to anything</span><kbd>Ctrl K</kbd>
+        </button>
+        <button class="ghost-light" data-act="oneonone">1:1 prep</button>
         <div class="who" id="whoami"></div>
       </header>
 
@@ -31,8 +39,10 @@
       </div>
     </div>
 
+    <div id="modalHost" hidden></div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+    <?!= include('Images'); ?>
     <?!= include('JavaScript'); ?>
   </body>
 </html>
