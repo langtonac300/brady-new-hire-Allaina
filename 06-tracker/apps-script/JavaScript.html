@@ -352,11 +352,14 @@
       index: {},
       openDoc: null,
       docCache: {},
+      diagrams: {},
+      diagramsAsked: {},
       libraryFilter: '',
       libraryFolder: 'All',
       openProject: null,
       editing: null,
       modal: null,
+      trailOpen: false,
       palette: { open: false, query: '', results: [], cursor: 0 },
       search: { query: '', result: null, busy: false }
     };
@@ -603,14 +606,54 @@
      *
      * A diagram can serve more than one document - the guardrail one is the same idea whether
      * it is met on the drill or on the pacing note - so the map is many-to-one on purpose.
+     *
+     * These are the only images not inlined into the page: each is a slide of about 70 KB, and
+     * they are fetched one at a time by diagramFor() below.
      */
     var DOC_DIAGRAM = {
       '02-learning/how-brady-measures': 'diagramAttribution',
       '02-learning/ppc-fundamentals': 'diagramKeywordSearchTerm',
       '03-projects/t1-03-keyword-vs-search-term': 'diagramKeywordSearchTerm',
       '03-projects/t1-06-guardrail-drill': 'diagramGuardrail',
-      '03-projects/t2-04-the-pacing-note': 'diagramGuardrail'
+      '03-projects/t2-04-the-pacing-note': 'diagramGuardrail',
+      '02-learning/the-l10-huddle': 'diagramL10',
+      '02-learning/how-to-run-a-project': 'diagramProjectLoop',
+      '02-learning/what-a-deliverable-looks-like': 'diagramDeliverable',
+      '03-projects/t1-01-account-tour': 'diagramDeliverable',
+      '02-learning/who-else-is-searching': 'diagramArchetypes',
+      '03-projects/t2-01-sqr-predict-then-compare': 'diagramArchetypes',
+      '02-learning/before-it-ships': 'diagramPreship',
+      '02-learning/running-a-real-test': 'diagramTestModes',
+      '03-projects/t3-05-your-first-experiment': 'diagramTestModes',
+      '02-learning/pdc-primer': 'diagramPdc',
+      '03-projects/t1-04-conversion-action-inventory': 'diagramPdc',
+      '02-learning/seton-emedco-primer': 'diagramSetonEmedco',
+      '02-learning/cheat-sheet': 'diagramKeepKill'
     };
+
+    /**
+     * The diagram for a document, if it has one and it has arrived. Asking for one that has not
+     * arrived starts the fetch and returns nothing; the reader redraws when it lands, the same
+     * way it does for a document body.
+     */
+    function diagramFor(docId) {
+      var key = DOC_DIAGRAM[docId];
+      if (!key) return '';
+      if (state.diagrams[key]) return state.diagrams[key];
+      if (state.diagramsAsked[key]) return '';
+      state.diagramsAsked[key] = true;
+      call('apiGetDiagram', key)
+        .then(function (uri) {
+          state.diagrams[key] = uri;
+          if (DOC_DIAGRAM[state.openDoc] === key) render();
+        })
+        .catch(function () {
+          // Not worth a toast. The document is the point; the picture is an aid, and a
+          // missing one should not put an error in front of her.
+          state.diagramsAsked[key] = false;
+        });
+      return '';
+    }
 
     function counts() {
       var d = state.data;
@@ -671,6 +714,400 @@
         chip.hidden = true;
       }
       el('whoami').textContent = state.data.displayName || '';
+    }
+
+    /* ====================== where you are, where you were ======================
+     *
+     * Three pieces answer "where was I?", and all three read from one small stack:
+     *
+     *   the breadcrumb     where you are now         topbar, after the day chip
+     *   the trail chips    where you were            topbar, right
+     *   the resume banner  what you left unfinished  under the topbar
+     *
+     * The head of the stack IS the current location. Everything on offer therefore starts at
+     * index 1: the top of the stack is already on screen as the breadcrumb, and a button that
+     * jumps to where you are standing is noise.
+     *
+     * The stack is written to localStorage so it survives a reload - and it survives
+     * localStorage not being there at all, which does happen. This runs in a sandboxed iframe,
+     * and both the window over the Sheet and a browser with third-party storage turned off can
+     * make the object throw on access rather than politely return null.
+     */
+
+    var TRAIL_KEY = 'ramp.trail';
+    var TRAIL_KEEP = 8;                 // stops offered back...
+    var TRAIL_MAX = TRAIL_KEEP + 1;     // ...plus the one being stood on
+    var RESUME_MIN = 0.04;              // below this it was never really started
+    var RESUME_DONE = 0.9;              // above this it is finished, and offering it back nags
+
+    var memoryStore = { local: {}, session: {} };
+
+    function readStore(which, key) {
+      try {
+        var value = window[which + 'Storage'].getItem(key);
+        if (value !== null && value !== undefined) return value;
+      } catch (err) {
+        /* no storage here - the in-memory copy is all there is */
+      }
+      return memoryStore[which][key];
+    }
+
+    function writeStore(which, key, value) {
+      memoryStore[which][key] = value;
+      try {
+        window[which + 'Storage'].setItem(key, value);
+      } catch (err) {
+        /* memory only, which is fine - none of this is worth an error message */
+      }
+    }
+
+    var trail = loadTrail();
+    var pendingScroll = null;
+    var scrollNoteTimer = null;
+
+    function loadTrail() {
+      var raw = readStore('local', TRAIL_KEY);
+      if (!raw) return [];
+      try {
+        var rows = JSON.parse(raw);
+        if (!rows || !rows.length) return [];
+        return rows
+          .filter(function (row) { return row && row.key && row.label; })
+          .slice(0, TRAIL_MAX);
+      } catch (err) {
+        return [];                      // a half-written stack is not worth recovering
+      }
+    }
+
+    function saveTrail() {
+      writeStore('local', TRAIL_KEY, JSON.stringify(trail));
+    }
+
+    function now() {
+      return new Date().getTime();
+    }
+
+    /** Relative time at the grain a trail actually needs: minutes for the first hour, then
+     *  hours, then days. */
+    function ago(ts, from) {
+      var mins = Math.floor(((from || now()) - Number(ts || 0)) / 60000);
+      if (!(mins >= 0)) return '';
+      if (mins < 1) return 'just now';
+      if (mins < 60) return mins + ' min ago';
+      var hours = Math.floor(mins / 60);
+      if (hours < 24) return hours === 1 ? 'an hour ago' : hours + ' hours ago';
+      var days = Math.floor(hours / 24);
+      return days === 1 ? 'yesterday' : days + ' days ago';
+    }
+
+    function navItem(view) {
+      for (var i = 0; i < NAV.length; i++) {
+        if (NAV[i].id === view) return NAV[i];
+      }
+      return null;
+    }
+
+    /** The location on screen, described the way the trail records it. */
+    function here() {
+      var item = navItem(state.view);
+      var spot = {
+        key: state.view,
+        view: state.view,
+        doc: '',
+        project: '',
+        label: item ? item.label : (state.view === 'search' ? 'Search' : 'The ramp'),
+        sub: '',
+        icon: (item && item.icon) || 'navToday'
+      };
+      spot.crumbs = [spot.label];
+
+      if (state.view === 'library' && state.openDoc && state.index[state.openDoc]) {
+        var meta = state.index[state.openDoc];
+        spot.key = 'library:' + state.openDoc;
+        spot.doc = state.openDoc;
+        spot.label = meta.Title;
+        spot.sub = 'Library · ' + meta.Folder;
+        spot.crumbs = ['Library', meta.Folder, meta.Title];
+      } else if (state.view === 'ladder' && state.openProject) {
+        var project = projectById(state.openProject);
+        if (project) {
+          spot.key = 'ladder:' + project.ID;
+          spot.project = project.ID;
+          spot.label = project.ID + ' · ' + project.Project;
+          spot.sub = 'The ladder';
+          spot.crumbs = ['The ladder', spot.label];
+        }
+      } else if (state.view === 'search' && state.search.query) {
+        spot.crumbs = ['Search', '"' + state.search.query + '"'];
+      }
+
+      return spot;
+    }
+
+    /**
+     * Put a location on top of the stack. Three rules, and the second is the one that keeps a
+     * trail readable rather than a log of every toggle:
+     *
+     *   standing still is not a move   the same key twice running updates rather than stacks
+     *   revisiting moves, not copies   an older entry for the same place is lifted out, and its
+     *                                  reading position comes up with it
+     *   the stack is capped            oldest off the bottom
+     *
+     * Kept free of the DOM and of the clock so the test harness can drive it.
+     */
+    function trailPush(stack, spot, ts) {
+      var head = stack[0];
+      if (head && head.key === spot.key) {
+        head.label = spot.label;        // a title can be edited underneath it
+        head.sub = spot.sub;
+        return stack;
+      }
+
+      var carried = null;
+      var rest = stack.filter(function (row) {
+        if (row.key !== spot.key) return true;
+        carried = row;
+        return false;
+      });
+
+      rest.unshift({
+        key: spot.key, view: spot.view, doc: spot.doc, project: spot.project,
+        label: spot.label, sub: spot.sub, icon: spot.icon, ts: ts,
+        scroll: carried ? carried.scroll : 0,
+        mark: carried ? carried.mark : ''
+      });
+      return rest.slice(0, TRAIL_MAX);
+    }
+
+    function pushTrail() {
+      if (!state.data) return;
+      trail = trailPush(trail, here(), now());
+      saveTrail();
+    }
+
+    /** The most recent document that was started and not finished. Index 0 is where she is
+     *  standing, so it is never a candidate. */
+    function resumeFrom(stack, allowed) {
+      for (var i = 1; i < stack.length; i++) {
+        var row = stack[i];
+        if (!row.doc) continue;
+        if (!(row.scroll > RESUME_MIN && row.scroll < RESUME_DONE)) continue;
+        if (allowed && !allowed(row)) continue;
+        return row;
+      }
+      return null;
+    }
+
+    function resumeCandidate() {
+      if (!state.data) return null;
+      return resumeFrom(trail, function (row) {
+        return !!state.index[row.doc] && readStore('session', 'ramp.resume.' + row.doc) !== 'off';
+      });
+    }
+
+    /** The reader pane, but only once the document is actually in it. While it still says
+     *  Loading the pane is one screen tall, and measuring it would record "read to the end". */
+    function readerBox() {
+      var box = document.querySelector('.reader .scroll');
+      return box && box.querySelector('.md') ? box : null;
+    }
+
+    /** How far down the open document the reading has got. Called on scroll, throttled, and
+     *  once more on the way out - the last few pixels before a click would otherwise be lost. */
+    function noteScroll() {
+      var head = trail[0];
+      if (!head || !head.doc) return;
+      var box = readerBox();
+      if (!box) return;
+      var span = box.scrollHeight - box.clientHeight;
+      head.scroll = span > 24 ? Math.max(0, Math.min(1, box.scrollTop / span)) : 1;
+      head.mark = headingAbove(box);
+      saveTrail();
+    }
+
+    /** The heading last scrolled past, so the resume line can name a place rather than only a
+     *  percentage. Measured against the pane rather than the page: the pane is not a positioned
+     *  ancestor, so offsetTop here belongs to something else entirely. */
+    function headingAbove(box) {
+      var heads = box.querySelectorAll('.md h1, .md h2, .md h3');
+      var edge = box.getBoundingClientRect().top + 90;
+      var found = '';
+      for (var i = 0; i < heads.length; i++) {
+        if (heads[i].getBoundingClientRect().top > edge) break;
+        found = heads[i].textContent || '';
+      }
+      return clip(found.replace(/\s+/g, ' '), 52);
+    }
+
+    /** A title dropped into the middle of a sentence has to be short enough that the sentence
+     *  still reads. The reader head and the library list carry the whole one. */
+    function clip(text, limit) {
+      var s = String(text == null ? '' : text).trim();
+      return s.length > limit ? s.slice(0, limit - 1).replace(/[\s,;:.-]+$/, '') + '...' : s;
+    }
+
+    /** Go back to a stop. A document also restores where it was left. */
+    function jumpTo(row) {
+      if (!row) return;
+      closeTrailMenu();
+      if (row.doc) {
+        if (!state.index[row.doc]) {
+          toast('That document is not in the library.', true);
+          return;
+        }
+        pendingScroll = { doc: row.doc, frac: Number(row.scroll) || 0 };
+        openDoc(row.doc);
+        return;
+      }
+      if (row.project) {
+        gotoProject(row.project);
+        return;
+      }
+      closeModal();
+      state.view = row.view;
+      // A bare Library or ladder stop is that page with nothing open on it, which is what it
+      // looked like when she was last there.
+      if (row.view === 'library') state.openDoc = null;
+      if (row.view === 'ladder') state.openProject = null;
+      render();
+    }
+
+    /**
+     * Put the reader back where she left off. The folder banner and any concept diagram are
+     * data URIs that decode a frame or two after this runs and change the height underneath the
+     * position just set, so it is applied again - but only while the position is still the one
+     * that was set, so a reader who has already started scrolling is never yanked.
+     */
+    function restoreScroll() {
+      if (!pendingScroll) return;
+      if (state.openDoc !== pendingScroll.doc) {
+        pendingScroll = null;
+        return;
+      }
+      var box = readerBox();
+      if (!box) return;                 // body still on its way; the next render will do it
+      var frac = pendingScroll.frac;
+      pendingScroll = null;
+      if (!(frac > 0)) return;
+
+      var placed = -1;
+      var put = function () {
+        if (placed >= 0 && Math.abs(box.scrollTop - placed) > 3) return;
+        var span = box.scrollHeight - box.clientHeight;
+        if (span <= 0) return;
+        placed = Math.round(span * frac);
+        box.scrollTop = placed;
+      };
+      put();
+      setTimeout(put, 90);
+      setTimeout(put, 320);
+    }
+
+    /* ---- drawing it ---- */
+
+    /* Drawn rather than lettered: there is no icon font on this page, the house rule is no
+       emoji in the interface, and nothing may be fetched from outside the payload. */
+    var ICON = {
+      pin: '<svg class="pin" viewBox="0 0 16 16" aria-hidden="true" focusable="false">' +
+        '<path fill="currentColor" d="M8 .9a4.7 4.7 0 0 0-4.7 4.7c0 3.4 4.1 9.1 4.3 9.3a.5.5 0 0 0 .8 0c.2-.2 4.3-5.9 4.3-9.3A4.7 4.7 0 0 0 8 .9z"/></svg>',
+      back: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" ' +
+        'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+        '<path d="M2.6 8a5.4 5.4 0 1 0 1.7-3.9"/><path d="M2.2 2.5v2.9h2.9"/><path d="M8 5.2V8l2 1.5"/></svg>',
+      caret: '<svg class="caret" viewBox="0 0 16 16" fill="none" stroke="currentColor" ' +
+        'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ' +
+        'focusable="false"><path d="M4 6.5 8 10.5 12 6.5"/></svg>',
+      bookmark: '<svg class="mark" viewBox="0 0 16 16" aria-hidden="true" focusable="false">' +
+        '<path fill="currentColor" d="M3.5 1.6h9a.6.6 0 0 1 .6.6v12.1a.4.4 0 0 1-.65.32L8 11.1l-4.45 3.52a.4.4 0 0 1-.65-.32V2.2a.6.6 0 0 1 .6-.6z"/></svg>'
+    };
+
+    function renderCrumbs() {
+      var host = el('crumbs');
+      if (!host) return;
+      if (!state.data) {
+        host.innerHTML = '';
+        return;
+      }
+      var html = ICON.pin;
+      var parts = here().crumbs;
+      parts.forEach(function (part, i) {
+        if (i) html += '<span class="sep" aria-hidden="true">&rsaquo;</span>';
+        html += i === parts.length - 1
+          ? '<span class="seg now" aria-current="page">' + esc(part) + '</span>'
+          : '<span class="seg">' + esc(part) + '</span>';
+      });
+      host.innerHTML = html;
+    }
+
+    function trailChip(row, index, cls) {
+      return '<button class="tchip ' + cls + '" data-trail="' + index + '" ' +
+        'title="' + esc('Back to ' + row.label) + '">' +
+        (cls === 'back' ? ICON.back : '') +
+        '<span class="t">' + esc(row.label) + '</span></button>';
+    }
+
+    function trailMenu(stops) {
+      var rows = stops.slice(0, TRAIL_KEEP).map(function (row, i) {
+        return '<li><button data-trail="' + (i + 1) + '">' +
+          (IMG[row.icon] ? '<img class="navicon" src="' + IMG[row.icon] + '" alt="">' : '') +
+          '<span class="rowcopy">' +
+          '<span class="t">' + esc(row.label) + '</span>' +
+          '<span class="s">' + esc([row.sub, ago(row.ts)].filter(Boolean).join(' · ')) + '</span>' +
+          '</span><span class="jump">Jump back</span></button></li>';
+      }).join('');
+
+      return '<div class="trailmenu">' +
+        '<div class="tmhead">Your trail &middot; newest first</div>' +
+        '<ul>' + rows + '</ul>' +
+        '<div class="tmfoot">The trail keeps your last ' + TRAIL_KEEP +
+        ' stops. Click any of them to jump back.</div></div>';
+    }
+
+    function renderTrail() {
+      var host = el('trail');
+      if (!host) return;
+      var stops = state.data ? trail.slice(1) : [];
+      if (!stops.length) {
+        // Nothing to go back to yet. An empty History pill would only be furniture.
+        host.innerHTML = '';
+        state.trailOpen = false;
+        return;
+      }
+
+      host.innerHTML =
+        '<span class="lbl">Where you were</span>' +
+        trailChip(stops[0], 1, 'back') +
+        (stops[1] ? trailChip(stops[1], 2, 'two') : '') +
+        '<div class="hwrap">' +
+        '<button class="tchip hist" data-act="history" aria-expanded="' +
+        (state.trailOpen ? 'true' : 'false') + '">' +
+        ICON.back + '<span class="t">History</span>' + ICON.caret + '</button>' +
+        (state.trailOpen ? trailMenu(stops) : '') +
+        '</div>';
+    }
+
+    function closeTrailMenu() {
+      if (!state.trailOpen) return;
+      state.trailOpen = false;
+      renderTrail();
+    }
+
+    function renderResume() {
+      var host = el('resume');
+      if (!host) return;
+      var row = resumeCandidate();
+      if (!row) {
+        host.hidden = true;
+        host.innerHTML = '';
+        return;
+      }
+      host.hidden = false;
+      host.innerHTML =
+        ICON.bookmark +
+        '<p><b>Pick up where you left off:</b> <span class="doc">' + esc(clip(row.label, 46)) + '</span>' +
+        ' - you were ' + Math.round(row.scroll * 100) + '% through' +
+        (row.mark ? ', at ' + esc(row.mark) : '') + '.</p>' +
+        '<button class="btn small" data-resume="' + esc(row.doc) + '">Resume reading</button>' +
+        '<button class="btn ghost small" data-resume-off="' + esc(row.doc) + '">Dismiss</button>';
     }
 
     /* ---- Today ---- */
@@ -948,6 +1385,7 @@
       var linked = state.data.projects.filter(function (p) {
         return p['Doc ID'] === state.openDoc;
       });
+      var diagram = diagramFor(state.openDoc);
 
       return (
         '<div class="head">' +
@@ -966,8 +1404,8 @@
         (FOLDER_ART[meta.Folder] && IMG[FOLDER_ART[meta.Folder]]
           ? '<img class="folderbanner" src="' + IMG[FOLDER_ART[meta.Folder]] + '" alt="' + esc(meta.Folder) + '">'
           : '') +
-        (DOC_DIAGRAM[state.openDoc] && IMG[DOC_DIAGRAM[state.openDoc]]
-          ? '<img class="diagram" src="' + IMG[DOC_DIAGRAM[state.openDoc]] + '" alt="Concept diagram for ' + esc(meta.Title) + '">'
+        (diagram
+          ? '<img class="diagram" src="' + diagram + '" alt="Concept diagram for ' + esc(meta.Title) + '">'
           : '') +
         '<div class="md">' + renderMarkdown(doc.Body, { docId: state.openDoc, index: state.index }) + '</div>' +
         '<hr>' +
@@ -1549,6 +1987,12 @@
     };
 
     function render() {
+      // Where the outgoing document had got to, read while it is still on screen. The state
+      // has already moved on by now, but the stack has not - its head is still the place being
+      // left, which is exactly the row the position belongs to.
+      noteScroll();
+      pushTrail();
+
       var main = el('main');
       var split = state.view === 'library';
       main.className = 'main' + (split ? ' split' : '');
@@ -1556,7 +2000,11 @@
       main.innerHTML = split ? body : '<div class="wrap">' + body + '</div>';
       renderNav();
       renderHeader();
+      renderCrumbs();
+      renderTrail();
+      renderResume();
       if (!split) main.scrollTop = 0;
+      restoreScroll();
     }
 
     function refreshDoc(id) {
@@ -1840,6 +2288,38 @@
       var t = e.target;
       if (!t || !t.closest) return;
 
+      // Resolved before the dropdown is closed: closing redraws the bar, and a chip that has
+      // been clicked is easier to read off the event than off the DOM that replaced it.
+      var trailBtn = t.closest('[data-trail]');
+      if (state.trailOpen && !t.closest('.hwrap')) closeTrailMenu();
+
+      if (trailBtn) {
+        jumpTo(trail[Number(trailBtn.getAttribute('data-trail'))]);
+        return;
+      }
+
+      var resumeBtn = t.closest('[data-resume]');
+      if (resumeBtn) {
+        var resumeId = resumeBtn.getAttribute('data-resume');
+        var stop = null;
+        for (var ri = 0; ri < trail.length; ri++) {
+          if (trail[ri].doc === resumeId) {
+            stop = trail[ri];
+            break;
+          }
+        }
+        jumpTo(stop || { doc: resumeId, scroll: 0 });
+        return;
+      }
+
+      var dismissBtn = t.closest('[data-resume-off]');
+      if (dismissBtn) {
+        // Per document and per session: dismissing this one is not a vote against the feature.
+        writeStore('session', 'ramp.resume.' + dismissBtn.getAttribute('data-resume-off'), 'off');
+        renderResume();
+        return;
+      }
+
       if (t.closest('[data-scrim]') === t || t.closest('[data-close]')) {
         closeModal();
         return;
@@ -2090,6 +2570,12 @@
         return;
       }
 
+      if (action === 'history') {
+        state.trailOpen = !state.trailOpen;
+        renderTrail();
+        return;
+      }
+
       if (action === 'palette') {
         openPalette();
         return;
@@ -2245,6 +2731,15 @@
         .catch(function (err) { toast(err, true); });
     }
 
+    /** Scroll events do not bubble, so this listens in the capture phase - that is the only way
+     *  one listener on the document sees the reader pane scrolling inside it. */
+    document.addEventListener('scroll', function (e) {
+      var box = e.target;
+      if (!box || !box.classList || !box.classList.contains('scroll')) return;
+      clearTimeout(scrollNoteTimer);
+      scrollNoteTimer = setTimeout(noteScroll, 180);
+    }, true);
+
     document.addEventListener('input', function (e) {
       if (e.target.id === 'libSearch') {
         state.libraryFilter = e.target.value;
@@ -2266,6 +2761,11 @@
 
       if (key === 'Escape' && state.modal) {
         closeModal();
+        return;
+      }
+
+      if (key === 'Escape' && state.trailOpen) {
+        closeTrailMenu();
         return;
       }
 
@@ -2310,5 +2810,11 @@
 
     // Exposed so the test harness can exercise the renderer against the real documents.
     window.MD = { render: renderMarkdown, resolveDocId: resolveDocId, esc: esc };
+
+    // ...and so it can drive the trail's stack algebra without a browser around it.
+    window.TRAIL = {
+      push: trailPush, resume: resumeFrom, ago: ago, read: loadTrail,
+      max: TRAIL_MAX, keep: TRAIL_KEEP
+    };
   })();
 </script>

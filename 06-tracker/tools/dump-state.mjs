@@ -207,4 +207,7 @@ const bodies = {};
   bodies[id] = api('apiGetDoc', id).data;
 });
 
-process.stdout.write(JSON.stringify({ boot, bodies }));
+/* The diagrams, which the real app fetches one at a time rather than inlining. */
+const diagrams = run('DATA_DIAGRAMS()');
+
+process.stdout.write(JSON.stringify({ boot, bodies, diagrams }));

@@ -110,6 +110,24 @@ function apiGetDoc(id) {
   }
 }
 
+/**
+ * One concept diagram, as a data URI.
+ *
+ * The diagrams are the only images not inlined into the page. Each is a full slide of about
+ * 70 KB and each belongs to one or two of the 63 documents, so they are fetched the way
+ * document bodies are - when something needs one - rather than loaded on every screen by
+ * everyone. See DataDiagrams.gs.
+ */
+function apiGetDiagram(key) {
+  try {
+    var uri = DATA_DIAGRAMS()[key];
+    if (!uri) throw new Error('No diagram called "' + key + '".');
+    return ok(uri);
+  } catch (err) {
+    return fail(err);
+  }
+}
+
 /** Update a document's reading status or notes. Marking something Read stamps the date if
  *  it does not already have one; un-reading it clears the date again. */
 function apiSaveDoc(id, patch) {

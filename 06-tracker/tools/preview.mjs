@@ -50,14 +50,19 @@ const page = [
             var runner = {};
             runner.withSuccessHandler = function (fn) { handlers.ok = fn; return runner; };
             runner.withFailureHandler = function (fn) { handlers.fail = fn; return runner; };
-            ['apiBootstrap','apiGetDoc','apiSaveDoc','apiSaveProject','apiSaveSkill','apiCreate',
-             'apiUpdate','apiDelete','apiReload','apiSetSetting','apiSaveSystem','apiSaveScript',
-             'apiSearch'].forEach(function (name) {
+            ['apiBootstrap','apiGetDoc','apiGetDiagram','apiSaveDoc','apiSaveProject','apiSaveSkill',
+             'apiCreate','apiUpdate','apiDelete','apiReload','apiSetSetting','apiSaveSystem',
+             'apiSaveScript','apiSearch'].forEach(function (name) {
               runner[name] = function () {
                 var args = arguments;
                 setTimeout(function () {
                   if (name === 'apiBootstrap') return handlers.ok({ ok: true, data: SNAPSHOT.boot });
                   if (name === 'apiGetDoc') return handlers.ok({ ok: true, data: SNAPSHOT.bodies[args[0]] || { Body: '# Not in the snapshot' } });
+                  if (name === 'apiGetDiagram') {
+                    var uri = SNAPSHOT.diagrams[args[0]];
+                    return uri ? handlers.ok({ ok: true, data: uri })
+                               : handlers.ok({ ok: false, error: 'No diagram called "' + args[0] + '".' });
+                  }
                   if (name === 'apiReload') return handlers.ok({ ok: true, data: SNAPSHOT.boot[args[0]] || [] });
                   if (name === 'apiSearch') return handlers.ok({ ok: true, data: { query: args[0], documents: [], entries: [] } });
                   handlers.ok({ ok: true, data: {} });
