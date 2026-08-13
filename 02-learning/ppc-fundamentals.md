@@ -387,6 +387,209 @@ Conversions"** (an action can be one without the other).
 
 ---
 
+---
+
+## Part 11 — Finding new keywords (how to look, not just what to look at)
+
+The rest of this doc teaches you how keywords work. This part teaches you how to find ones
+you don't already have — the difference between maintaining an account and growing it.
+
+### Keyword Planner (your first tool)
+
+Google Ads has a built-in tool called **Keyword Planner** (under Tools & Settings → Planning).
+It does two things:
+
+1. **Discover new keywords.** Enter a product, a URL or a seed keyword and it returns
+   related terms with monthly search volume, competition level and estimated CPC.
+2. **Get forecasts.** Enter a list of keywords and it estimates impressions, clicks, spend
+   and conversions at various bid levels.
+
+**What to trust:** the *relative* differences between terms (Term A has 10x the volume of
+Term B). **What not to trust:** the *absolute* numbers (monthly volume is a wide range, not
+a point estimate, and "competition" is a 0–1 index that mixes many things together).
+
+### Where else to look
+
+| Source | What it gives you | Watch for |
+|--------|------------------|-----------|
+| **Search terms report** (your own account) | Real queries that matched your existing keywords but that you don't have as keywords yet | The best source for expansion — these are searches that already found you. Look for patterns, not individual terms |
+| **Competitor ads** (Auction Insights + ad preview) | What competitors are bidding on and how they position | Don't copy-paste competitor keywords — they have different products and margins. Use it for category ideas |
+| **The site itself** | Product categories, spec pages, use cases | Walk the site like a buyer. What would they search for to find each page? |
+| **Customer questions** (sales team, chat logs, support tickets) | The language buyers actually use, which is often different from product names | "Cable tags" vs "wire markers" vs "cable identification labels" — the customer's word matters more than the catalog's word |
+
+### How to evaluate a keyword opportunity
+
+Before adding a keyword to an account, ask four things:
+
+1. **Is there real volume?** Keyword Planner gives a range. If it says "10–100 monthly
+   searches," that's not zero — but it's not going to move the needle on spend either.
+2. **Is the intent B2B?** A term like `labels` has enormous volume and almost no B2B
+   concentration. `thermal transfer labels` has less volume and much higher B2B intent. See
+   the gray-zone section in [`who-else-is-searching.md`](./who-else-is-searching.md).
+3. **Do we sell what they're looking for?** Check the site. If Brady doesn't make it or
+   can't ship it, the keyword is a waste regardless of volume.
+4. **Is something already catching it?** A broad-match keyword might already be serving on
+   this query. Check the search terms report first — if the traffic is already arriving
+   through an existing keyword, adding a new one changes routing, not reach.
+
+---
+
+## Part 12 — Match types on low-volume B2B terms
+
+Part 2 taught you the mechanics of broad, phrase and exact. This part teaches the **choice**
+— and the choice is different in B2B than in any consumer guide you'll read.
+
+### The low-volume problem
+
+Most PPC advice says "go broad with smart bidding." That advice is written for
+e-commerce accounts with thousands of conversions per month. **Brady's non-brand B2B terms
+often have tiny volume:**
+
+- A keyword like `pipe marking labels osha` might get 50 searches a month.
+- A campaign targeting PDC Healthcare non-brand might get 15–20 conversions a month total.
+- Smart bidding needs roughly 30 conversions per month to learn effectively (and ideally
+  50+).
+
+When your conversion volume is that thin, smart bidding is flying partly blind. That changes
+the match-type calculus:
+
+### The tradeoff on low-volume terms
+
+| Approach | Upside | Downside |
+|----------|--------|----------|
+| **Broad match** (with smart bidding) | Reaches searches you'd never have listed; gives the algorithm more data to learn from | On low volume, the algorithm has little signal — it may spend on queries that look related but aren't. Waste risk is higher |
+| **Phrase match** | Tighter control; the queries it catches are more predictable | Misses legitimate demand you didn't think of. Smaller pool makes conversion data even thinner |
+| **Exact match** | Most predictable; every query was essentially handpicked | Tiny reach. And "exact" isn't exact — close variants still fire, so you're not as precise as you think |
+
+### What this means in practice
+
+There is no universal right answer. But there are patterns that work at Brady:
+
+- **Brand campaigns: exact or phrase.** Brand queries are high-intent and well-defined. You
+  don't need broad to find them.
+- **Non-brand, high-volume categories (signs, labels, wristbands): broad + smart bidding +
+  tight negatives.** There's enough volume for the model to learn, and broad finds the
+  long-tail queries you'd never list.
+- **Non-brand, low-volume niche terms: phrase is often the right default.** It captures
+  meaning-based variants without the wild swings that broad match produces when the model
+  has thin data. Supplement with exact match on the highest-value, most-specific terms.
+- **When in doubt, start tighter and open up.** You can always widen a phrase keyword to
+  broad later. Going the other direction — after broad has been spending for weeks —
+  requires resetting the algorithm's learning.
+
+⚠️ **Don't change match types on a whim.** A match-type change is a bidding change — the
+algorithm restarts learning. Batch them, and keep the search terms report tight for the
+first two weeks after any change.
+
+---
+
+## Part 13 — Audiences on Search campaigns
+
+Most people associate audiences with Display or YouTube. But **audiences work on Search
+campaigns too**, and on B2B non-brand, they're an underused lever.
+
+### Two modes: observation vs. targeting
+
+| Mode | What it does | When to use |
+|------|-------------|-------------|
+| **Observation** (the default — start here) | Google collects data on how an audience performs, but ads still show to everyone. You can layer bid adjustments on top | When you want to *learn* which audiences convert before changing anything |
+| **Targeting** | Ads *only* show to people in the audience | Rarely on Search. You'd use this if you only wanted to show to, say, past site visitors — but on Search, restricting reach is usually a bad trade |
+
+**Start with observation, always.** Add audiences, let them run, look at the data after 30
+days. *Then* decide if a bid adjustment is worth it.
+
+### The audiences that matter for B2B Search
+
+| Audience type | What it is | B2B use case |
+|---------------|-----------|--------------|
+| **Remarketing lists (RLSA)** | People who've visited your site before | The strongest B2B Search audience. Someone who visited Brady's pipe markers page last week and is now searching "pipe markers" is far more likely to convert than a cold searcher. Bid up on them |
+| **Customer match** | Upload a list of customer emails; Google matches them | Re-engage existing customers searching for products they've bought before. Also useful as an *exclusion* — stop paying for clicks from people who are already customers if the goal is new acquisition |
+| **In-market audiences** | Google's signals that someone is actively researching a product category | Google has B2B-relevant segments like "Business & Industrial" and sub-segments for specific categories. Hit rate is lower than remarketing, but reach is much wider |
+| **Similar audiences** | People who behave like your existing converters | ⚠️ Google has been sunsetting these in favor of AI-driven targeting. Check current availability before building around them |
+
+### The practical play for Brady non-brand
+
+The highest-value move is usually:
+
+1. Add a **remarketing audience** (all site visitors, 30-day window) to your non-brand
+   Search campaigns in **observation mode**.
+2. After 30 days, look at the data. Compare conversion rate and ROAS for "in audience" vs.
+   "not in audience."
+3. If remarketing visitors convert at 2x+ the rate of cold traffic (which is typical for
+   B2B), apply a positive bid adjustment (start at +20–30% and let smart bidding incorporate
+   it — though remember from Part 5 that smart bidding on tCPA/tROAS largely overrides
+   manual bid adjustments, so the real value is in the *data* more than the modifier).
+
+⚠️ **Smart bidding already factors in some of this.** If you're on tCPA or tROAS, Google's
+model is already considering remarketing signals per auction. Adding an observation audience
+doesn't change the bidding — it gives *you* visibility into what the model is doing. That
+visibility is still valuable, because it tells you where to focus your landing page and copy
+work.
+
+---
+
+## Part 14 — The competitive landscape (ongoing, not one-time)
+
+[T1-10](../03-projects/t1-10-competitor-outrank-teardown.md) teaches you to do a competitor
+teardown. This part teaches the **ongoing discipline** — how to read competition as a
+background signal rather than a one-off exercise.
+
+### Auction Insights (the tool)
+
+Google Ads provides an **Auction Insights** report for Search and Shopping campaigns. It
+shows you, for a given date range:
+
+| Metric | What it tells you |
+|--------|-------------------|
+| **Impression share** | What % of eligible auctions you showed in |
+| **Overlap rate** | How often a competitor appeared in the same auctions |
+| **Outranking share** | How often your ad ranked above theirs (or showed when theirs didn't) |
+| **Position above rate** | How often their ad was directly above yours |
+| **Top-of-page rate** | How often each of you appeared above organic results |
+
+### What to watch (and how often)
+
+**Monthly, during your account review:** pull Auction Insights at the campaign level for
+your largest non-brand campaigns and look for:
+
+- **A new competitor entering.** A domain that wasn't in the report last month and is now
+  showing 30%+ overlap rate is worth noting — it means someone new is bidding on your terms
+  and your auction economics just changed.
+- **A competitor's impression share climbing steadily.** This can signal a budget increase
+  on their side, which will push up your CPCs even if you change nothing.
+- **Your own impression share declining.** If your budget is flat but IS is dropping, either
+  competition increased or your Ad Rank slipped (Quality Score, bid levels, or ad relevance).
+
+### Impression share: the budget vs. rank split
+
+When you lose impression share, Google tells you *why*. This distinction matters:
+
+| Lost to | What it means | What to do |
+|---------|---------------|-----------|
+| **Budget** | You ran out of daily budget before the day ended. Eligible auctions happened; you weren't in them because the money was gone | If efficiency is inside guardrails and pacing is behind → give it more budget. This is the "push spend" instinct from Part 7 |
+| **Rank** | You were eligible but your Ad Rank wasn't high enough to show. Budget was available; the competitor outbid you or had better Quality Score | Fix the Quality Score components (ad relevance, landing page, expected CTR) or raise bids — but raising bids on a rank problem without fixing quality is just paying more for the same slot |
+
+### What *not* to do with competitive data
+
+- **Don't react to every move.** A competitor showing up for one month and disappearing is
+  noise. A competitor steadily gaining share over three months is a signal.
+- **Don't match competitor bids reflexively.** If their CPA math works at a higher bid, it
+  doesn't mean yours does. Different margins, different conversion rates, different
+  attribution.
+- **Don't bid on competitor brand names without asking Alex.** Some teams do this
+  strategically; it's also expensive, often retaliatory, and sometimes a trademark issue.
+  It's a team decision, not a solo one.
+- **Don't ignore it either.** Competition is the main external driver of CPC inflation,
+  and CPC inflation is one of the biggest drivers of year-over-year cost growth. If CPCs
+  are rising and nobody can say why, Auction Insights is the first place to look.
+
+**Check yourself:** name the two causes of lost impression share and say which one means
+"give it money" vs. "fix quality"; and explain why a new competitor in Auction Insights
+should change how you read CPC trends. →
+[T1-10](../03-projects/t1-10-competitor-outrank-teardown.md).
+
+---
+
 > **Next:** the [PDC primer](./pdc-primer.md) for the accounts you'll own, and
 > [`how-brady-measures.md`](./how-brady-measures.md) for the attribution model in full — the two
 > files this crash course most points back to.

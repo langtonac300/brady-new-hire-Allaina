@@ -98,6 +98,86 @@ actually sells.** The archetype is a hypothesis, not a verdict.
 
 ---
 
+## ⚠️ The B2B gray zone — not junk, just not your buyer
+
+Everything above covers searches that are clearly *wrong* — name collisions, job seekers,
+template hunters. This section is about the harder call: **searches that are commercially
+legitimate but the person behind them is almost certainly not a B2B buyer.**
+
+This is the biggest waste category on accounts like PDC and BradyCorp non-brand, and it's
+the hardest one to see because the search terms look fine.
+
+### The problem
+
+Someone types `safety signs`. That's a real product Brady sells. But who typed it?
+
+| Who they might be | What they'd buy | Brady's fit |
+|---|---|---|
+| A facility manager outfitting a warehouse | 500 custom OSHA signs, $3,000+ order | **Exactly our buyer** |
+| A small business owner who needs one "Employees Only" sign | 1 sign, $8, from Amazon | **Not our buyer** — our minimum order, lead time and price point don't work for them |
+| A teacher making a classroom display | Nothing | **Not our buyer** |
+| A homeowner who wants a "No Trespassing" sign for their yard | 1 sign, hardware store | **Not our buyer** |
+
+All four typed the same thing. The first one is worth $3,000. The other three cost you a
+click each and will never convert — not because your ad was bad, but because **you don't
+sell the way they buy.**
+
+### Why this is different from the junk archetypes
+
+The junk archetypes (job seekers, template hunters) are easy: the *search term itself* tells
+you the intent is wrong. "Safety sign template" — kill it, no judgment call needed.
+
+The B2B gray zone is harder because **the search term is exactly right.** `Safety signs` is
+what you sell. The problem isn't the term, it's the *person* — and you can't see the person
+in a search terms report.
+
+### Signals that a search is probably consumer, not B2B
+
+You can't know for sure, but patterns help:
+
+| Signal | What it suggests | Example |
+|---|---|---|
+| **"for home," "for my," "personal," "small"** | Individual buyer, not procurement | `small no smoking sign for home` |
+| **A modifier that implies one unit** | Not a commercial order | `custom name badge` (vs. `custom name badges bulk`) |
+| **"near me" on a product we ship** | Looking for a retail store, not a manufacturer | `safety signs near me` |
+| **"Amazon," "Walmart," "Home Depot"** | Shopping for a retail channel we don't own (or compete on differently) | `safety signs home depot` |
+| **"cheap," "affordable," "under $10"** | Price point below our minimum viable order | `cheap caution signs` |
+| **A very generic, high-volume term** | Broad audience, low B2B concentration | `signs` (800K monthly searches, almost none B2B) |
+
+### What to do about it
+
+This is **not** a "kill them all" situation. You can't negative-match your way out of the
+gray zone without also blocking the facility manager who types the same words. Instead:
+
+1. **Negative the clear consumer modifiers** — `for home`, `near me`, `cheap`, `diy`,
+   specific retail competitors. These are safe to block.
+2. **Use the search terms report to size the problem.** What share of non-brand spend goes
+   to broad, generic terms where the B2B/consumer mix is likely unfavorable? That's a
+   structural question about whether those terms are worth running, not a per-term
+   Keep/Kill.
+3. **Watch match types.** Broad match on a term like `safety signs` will pull in consumer
+   queries that phrase or exact won't. If the gray zone is big on a particular term,
+   tightening match type is a lever — at the cost of volume. This is a real tradeoff, not a
+   clear answer.
+4. **Landing pages and pricing do the final filtering.** Someone who lands on a page that
+   says "Minimum order: 50 units" self-selects out if they wanted one sign. That's not a
+   paid-search fix, but it's worth knowing it's there.
+5. **Audience signals can help on PMax.** If the campaign has audience signals pointing at
+   B2B in-market segments, Google is more likely to serve to the facility manager and less
+   likely to serve to the homeowner. This doesn't guarantee it — signals are hints, not
+   targeting.
+
+### The mindset shift
+
+On a consumer account, every click from a real shopper is potentially a conversion. On a
+B2B account like PDC or BradyCorp non-brand, **a meaningful share of commercially
+legitimate-looking clicks will never convert because the business model doesn't serve that
+buyer.** That's not waste you can eliminate — it's a structural cost of advertising on
+shared search terms. The job is to minimize it without killing the real demand that uses the
+same words.
+
+---
+
 ## Using this on a real report
 
 1. **Sort the junk into groups before you judge any of it.** Naming the group first is

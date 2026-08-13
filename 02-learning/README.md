@@ -14,15 +14,17 @@ Reference you'll come back to.
 
 | File | What it is | When |
 |------|-----------|------|
-| `ppc-fundamentals.md` | Paid search from zero — account structure, match types, bidding, feeds, conversion tracking | Day 2–3 |
+| `ppc-fundamentals.md` | Paid search from zero — account structure, match types, bidding, feeds, conversion tracking, keyword research, audiences on Search and competitive landscape | Day 2–3 |
 | `cheat-sheet.md` | The ~30 terms you'll actually use, in plain English. Keep it open | From day 1, ongoing |
 | `pdc-primer.md` | Your accounts: what PDC is, how the two accounts work, and the quirks that will trip you up | Weeks 2–3, right before you open the accounts |
 | `seton-emedco-primer.md` | The second account group you'll work on | Week 3–4 |
-| `how-brady-measures.md` | Attribution, guardrails, and which numbers to trust | Week 2 — **the important one** |
+| `how-brady-measures.md` | Attribution, guardrails, which numbers to trust and the long B2B buying cycle | Week 2 — **the important one** |
 | `the-l10-huddle.md` | The team's weekly meeting in depth — the seven segments, the rules that aren't obvious, and what's expected of you | Skim before your first huddle; read properly week 2 |
 | `how-to-run-a-project.md` | The wrapper around every brief — what to sort out before you start, and what happens after the deliverable exists | Day 4, before T1-1 |
 | `what-a-deliverable-looks-like.md` | A finished project write-up, annotated — plus the weak version of the same thing for contrast | Day 5, before you write up T1-1 |
-| `who-else-is-searching.md` | The groups that bad search terms fall into — and the ones that look bad and aren't | Week 4, before your first search-terms round |
+| `ad-copy-and-assets.md` | Writing RSAs, B2B ad copy principles, copy testing, PMax asset groups and ad extensions | Week 3–4, before T2-6 |
+| `landing-pages.md` | What makes a landing page good or bad, message match, Quality Score connection and how to audit a page | Weeks 5–6, before T4-1 and T4-3 |
+| `who-else-is-searching.md` | The groups that bad search terms fall into, the ones that look bad and aren't, and the B2B gray zone (not junk, just not your buyer) | Week 4, before your first search-terms round |
 | `before-it-ships.md` | The checklist to run on your own work before you post a change for review | Week 4 onward — every time you change something |
 | `running-a-real-test.md` | Control vs treatment, the three test modes and what they're worth, and the rules that void a result | Before you propose your first experiment (Phase 2) |
 
