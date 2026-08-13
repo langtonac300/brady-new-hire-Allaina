@@ -22,7 +22,11 @@
           <b id="dayNumber">-</b><span id="dayPhase"></span>
         </div>
 
-        <div class="spacer"></div>
+        <!-- Where you are. Takes the slack in the bar, and truncates before anything else does. -->
+        <nav class="crumbs" id="crumbs" aria-label="You are here"></nav>
+
+        <!-- Where you were: the last two stops, and the History dropdown behind them. -->
+        <div class="trail" id="trail"></div>
 
         <button class="searchcue" data-act="palette" aria-label="Jump to anything">
           <span>Jump to anything</span><kbd>Ctrl K</kbd>
@@ -30,6 +34,9 @@
         <button class="ghost-light" data-act="oneonone">1:1 prep</button>
         <div class="who" id="whoami"></div>
       </header>
+
+      <!-- What you left unfinished. Empty and hidden unless there is something to come back to. -->
+      <div class="resume" id="resume" role="region" aria-label="Resume reading" hidden></div>
 
       <div class="body">
         <nav class="nav" id="nav" aria-label="Sections"></nav>

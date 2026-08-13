@@ -599,7 +599,25 @@ const clientSrc = readFileSync(join(SRC, 'JavaScript.html'), 'utf8')
   .replace(/^[\s\S]*?<script>/, '')
   .replace(/<\/script>[\s\S]*$/, '');
 
-const win = {};
+/** Web storage, near enough for the trail: the real one can be missing or throw on access, and
+ *  the client has to survive both, so the harness supplies a working one and the fallback gets
+ *  exercised wherever it is genuinely absent. */
+function makeStorage() {
+  const cells = {};
+  return {
+    cells,
+    getItem: (k) => (k in cells ? cells[k] : null),
+    setItem: (k, v) => {
+      cells[k] = String(v);
+    },
+    removeItem: (k) => {
+      delete cells[k];
+    }
+  };
+}
+
+const store = { local: makeStorage(), session: makeStorage() };
+const win = { localStorage: store.local, sessionStorage: store.session };
 const clientSandbox = {
   window: win,
   document: {
@@ -608,6 +626,7 @@ const clientSandbox = {
       return { style: {}, setAttribute() {}, focus() {}, setSelectionRange() {} };
     }
   },
+  Date,
   google: {
     script: {
       run: new Proxy({}, {
@@ -775,6 +794,78 @@ if (win.MD) {
   check('a wrapped list item is still one item',
     (render('- one line\n  wrapped here\n- two').match(/<li/g) || []).length === 2,
     'the wrapped line became its own item');
+}
+
+/* ================================== the trail ============================== */
+
+/**
+ * The stack behind the breadcrumb, the trail chips and the resume banner. The drawing needs a
+ * browser, but the part that can be wrong quietly - what gets remembered, what gets offered
+ * back, and what gets dropped - is plain data, and that is what is checked here.
+ */
+console.log('\nDriving the trail...');
+
+if (!win.TRAIL) {
+  failures.push('the trail hook is missing from the client script');
+} else {
+  const stop = (key, extra = {}) => ({
+    key, view: key.split(':')[0], doc: '', project: '',
+    label: key, sub: '', icon: 'navToday', scroll: 0, mark: '', ...extra
+  });
+  const aDoc = (extra = {}) => stop('library:a', { view: 'library', doc: 'a', ...extra });
+
+  let stack = win.TRAIL.push([], stop('today'), 1000);
+  stack = win.TRAIL.push(stack, aDoc(), 2000);
+  eq('a new place goes on top of the trail', stack[0].key, 'library:a');
+  eq('...and the one before it is kept', stack[1].key, 'today');
+
+  const redrawn = win.TRAIL.push(stack, aDoc(), 3000);
+  eq('redrawing the same place does not stack it twice', redrawn.length, 2);
+  eq('...and does not restamp when she arrived', redrawn[0].ts, 2000);
+
+  stack[0].scroll = 0.6;
+  stack[0].mark = 'Part 5 - Bidding';
+  let revisited = win.TRAIL.push(stack, stop('ladder'), 4000);
+  revisited = win.TRAIL.push(revisited, aDoc(), 5000);
+  eq('coming back moves the entry rather than copying it',
+    revisited.filter((r) => r.key === 'library:a').length, 1);
+  eq('...and the reading position comes back with it', revisited[0].scroll, 0.6);
+  eq('...along with where in the document that was', revisited[0].mark, 'Part 5 - Bidding');
+
+  let deep = [];
+  for (let i = 0; i < 20; i++) deep = win.TRAIL.push(deep, stop('stop-' + i), i);
+  eq(`the trail caps at ${win.TRAIL.max} entries`, deep.length, win.TRAIL.max);
+  eq('the cap drops the oldest', deep[deep.length - 1].key, `stop-${20 - win.TRAIL.max}`);
+  eq('one of them is where she is standing, so the rest are what is offered back',
+    win.TRAIL.max - 1, win.TRAIL.keep);
+
+  const yes = () => true;
+  const started = [stop('today'), aDoc({ scroll: 0.6 })];
+  eq('a half-read document is offered back', win.TRAIL.resume(started, yes).doc, 'a');
+  eq('a document read to the end is not',
+    win.TRAIL.resume([stop('today'), aDoc({ scroll: 0.95 })], yes), null);
+  eq('a document opened and never scrolled is not',
+    win.TRAIL.resume([stop('today'), aDoc({ scroll: 0 })], yes), null);
+  eq('the document she is reading right now is not',
+    win.TRAIL.resume([aDoc({ scroll: 0.6 })], yes), null);
+  eq('one she has waved away is not', win.TRAIL.resume(started, () => false), null);
+  eq('a stop that is not a document is not',
+    win.TRAIL.resume([stop('today'), stop('ladder', { scroll: 0.5 })], yes), null);
+
+  eq('a stop from two minutes ago reads as minutes', win.TRAIL.ago(0, 2 * 60000), '2 min ago');
+  eq('...from earlier today, as hours', win.TRAIL.ago(0, 3 * 3600000), '3 hours ago');
+  eq('...from yesterday, as yesterday', win.TRAIL.ago(0, 30 * 3600000), 'yesterday');
+
+  // What is on disk is a year of other sessions' writing, and none of it is trusted.
+  store.local.cells['ramp.trail'] = 'not json {';
+  eq('a corrupt saved trail is dropped, not thrown', win.TRAIL.read().length, 0);
+  store.local.cells['ramp.trail'] = JSON.stringify([{ key: 'today', label: 'Today' }, { junk: 1 }]);
+  eq('a saved trail keeps only the entries that name a place', win.TRAIL.read().length, 1);
+  store.local.cells['ramp.trail'] = JSON.stringify(
+    Array.from({ length: 30 }, (_, i) => ({ key: 'k' + i, label: 'L' + i }))
+  );
+  eq('an over-long saved trail is trimmed on the way in', win.TRAIL.read().length, win.TRAIL.max);
+  delete store.local.cells['ramp.trail'];
 }
 
 /* ================================= report ================================= */

@@ -36,6 +36,9 @@ copy you can annotate. If the source changes, you re-import and your notes survi
 |---|---|
 | **Ctrl/Cmd + K** | Jump to any document, project or page by typing a few letters |
 | **Search** | Full text, across all 63 documents *and* everything you have written |
+| **Where you are** | A breadcrumb in the top bar - `Library > Learning > PPC fundamentals`, or `The ladder > T1-3` - so a document opened from three clicks away still says where it sits |
+| **Where you were** | Your last stops as chips next to it. The orange one is where you just came from, one click back. **History** opens the last eight, newest first |
+| **Pick up where you left off** | Leave a document half-read and a banner offers it back, with how far in you were and the heading you had reached. Clicking it returns you to that scroll position |
 | **Today** | Which week you're in, what that week expects, the five recurring meetings, and your three lines |
 | **The prediction** | Writing one stamps the date. That date is what makes it a prediction rather than a recollection, and it is never overwritten |
 | **Readout builder** | The three-part readout, pre-filled with your prediction and anything you logged as wrong |
@@ -45,6 +48,10 @@ copy you can annotate. If the source changes, you re-import and your notes survi
 
 > The 1:1 is analyst-led — you bring the agenda and Alex doesn't prepare one. That's the one
 > this app earns its keep on.
+
+> ⚠️ **The trail is stored in your browser, not in the Sheet.** It's per browser and per
+> device, and clearing site data clears it. Nothing you've *recorded* lives there — only where
+> you have been — so losing it costs you nothing but the way back.
 
 ---
 
