@@ -104,6 +104,13 @@ PLAN = [
     # match exactly and the rest stay as text.
     ("account-pdc.png", "accountPdc", 560, "jpeg"),
     ("account-seton.png", "accountSeton", 560, "jpeg"),
+
+    # Concept diagrams, shown at the top of the document that teaches each concept. These
+    # are 2800px slides and by far the heaviest things in the kit, so they are cut harder
+    # than the rest - they render around 700px and the text still holds at 1400.
+    ("diagram-attribution.png", "diagramAttribution", 1400, "jpeg"),
+    ("diagram-keyword-vs-search-term.png", "diagramKeywordSearchTerm", 1400, "jpeg"),
+    ("diagram-guardrail.png", "diagramGuardrail", 1400, "jpeg"),
 ]
 
 # Optional. Drop the real asset in as graphics/brady-logo.png and re-run - it is picked up

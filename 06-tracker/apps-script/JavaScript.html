@@ -598,6 +598,20 @@
 
     var ACCOUNT_ART = { 'PDC Healthcare': 'accountPdc', 'Seton US': 'accountSeton' };
 
+    /**
+     * Concept diagrams, pinned to the documents that teach each concept.
+     *
+     * A diagram can serve more than one document - the guardrail one is the same idea whether
+     * it is met on the drill or on the pacing note - so the map is many-to-one on purpose.
+     */
+    var DOC_DIAGRAM = {
+      '02-learning/how-brady-measures': 'diagramAttribution',
+      '02-learning/ppc-fundamentals': 'diagramKeywordSearchTerm',
+      '03-projects/t1-03-keyword-vs-search-term': 'diagramKeywordSearchTerm',
+      '03-projects/t1-06-guardrail-drill': 'diagramGuardrail',
+      '03-projects/t2-04-the-pacing-note': 'diagramGuardrail'
+    };
+
     function counts() {
       var d = state.data;
       return {
@@ -880,10 +894,10 @@
       var lastFolder = null;
       shown.forEach(function (d) {
         if (d.Folder !== lastFolder) {
-          var art = FOLDER_ART[d.Folder];
-          html += art && IMG[art]
-            ? '<img class="folderhead" src="' + IMG[art] + '" alt="' + esc(d.Folder) + '">'
-            : '<div class="folder">' + esc(d.Folder) + '</div>';
+          // Text, not the folder artwork. Those banners are 1386px wide with type set for it;
+          // in a 336px column they scale to a quarter size and stop being readable. They are
+          // used in the reader instead, where there is room for them.
+          html += '<div class="folder">' + esc(d.Folder) + '</div>';
           lastFolder = d.Folder;
         }
         html +=
@@ -948,6 +962,12 @@
         '<select id="docStatus" style="width:auto">' + options(state.data.lists.DocStatus, meta.Status) + '</select>' +
         '</div></div>' +
         '<div class="scroll">' +
+        (FOLDER_ART[meta.Folder] && IMG[FOLDER_ART[meta.Folder]]
+          ? '<img class="folderbanner" src="' + IMG[FOLDER_ART[meta.Folder]] + '" alt="' + esc(meta.Folder) + '">'
+          : '') +
+        (DOC_DIAGRAM[state.openDoc] && IMG[DOC_DIAGRAM[state.openDoc]]
+          ? '<img class="diagram" src="' + IMG[DOC_DIAGRAM[state.openDoc]] + '" alt="Concept diagram for ' + esc(meta.Title) + '">'
+          : '') +
         '<div class="md">' + renderMarkdown(doc.Body, { docId: state.openDoc, index: state.index }) + '</div>' +
         '<hr>' +
         field('My notes on this', '<textarea id="docNotes" placeholder="What you want to remember, or what did not make sense">' + esc(meta['My notes'] || '') + '</textarea>') +
