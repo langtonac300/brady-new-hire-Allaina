@@ -2351,20 +2351,31 @@
         e.preventDefault();
         var appId = globalNavBtn.getAttribute('data-app');
         
-        // Update active class on nav
-        document.querySelectorAll('.global-nav-item').forEach(function(el) {
-          el.classList.remove('active');
+        // Update active state on switcher buttons
+        document.querySelectorAll('.switcher-btn').forEach(function(el) {
+          var isActive = (el.getAttribute('data-app') === appId);
+          el.classList.toggle('active', isActive);
+          el.setAttribute('aria-selected', isActive ? 'true' : 'false');
         });
-        globalNavBtn.classList.add('active');
 
-        // Hide all apps, show target app
+        // Hide/show topbar contextual elements
+        var crumbs = document.getElementById('crumbs');
+        var trail = document.getElementById('trail');
+        var daychip = document.getElementById('daychip');
+        var isAcademy = (appId === 'academy');
+
+        if (crumbs) crumbs.style.display = isAcademy ? '' : 'none';
+        if (trail) trail.style.display = isAcademy ? '' : 'none';
+
+        // Toggle app views
         document.querySelectorAll('.app-module').forEach(function(el) {
           el.hidden = true;
         });
-        document.getElementById('academyApp').hidden = (appId !== 'academy');
         
         var targetApp = document.getElementById(appId + 'App');
-        if (targetApp) targetApp.hidden = false;
+        if (targetApp) {
+          targetApp.hidden = false;
+        }
         
         return;
       }

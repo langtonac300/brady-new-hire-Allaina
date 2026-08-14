@@ -15,23 +15,23 @@
 
   <body>
     <div class="app">
-      <nav class="global-nav" aria-label="Global Sections">
-        <a href="#academy" class="global-nav-item active" data-app="academy">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
-          <span>Academy</span>
-        </a>
-        <a href="#simulator" class="global-nav-item" data-app="simulator">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-          <span>Simulator</span>
-        </a>
-        <a href="#scorecard" class="global-nav-item" data-app="scorecard">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
-          <span>Scorecard</span>
-        </a>
-      </nav>
-      <div class="app-content">
-        <header class="topbar">
+      <header class="topbar">
         <h1 class="brand" id="brand"></h1>
+
+        <div class="app-switcher" role="tablist" aria-label="Application Mode">
+          <button class="switcher-btn active" data-app="academy" role="tab" aria-selected="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+            <span>Academy</span>
+          </button>
+          <button class="switcher-btn" data-app="simulator" role="tab" aria-selected="false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span>Simulator</span>
+          </button>
+          <button class="switcher-btn" data-app="scorecard" role="tab" aria-selected="false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+            <span>Scorecard</span>
+          </button>
+        </div>
 
         <div class="daychip" id="daychip" hidden>
           <b id="dayNumber">-</b><span id="dayPhase"></span>
@@ -53,14 +53,14 @@
       <!-- What you left unfinished. Empty and hidden unless there is something to come back to. -->
       <div class="resume" id="resume" role="region" aria-label="Resume reading" hidden></div>
 
-      <div class="body" id="academyApp">
+      <div class="body app-module" id="academyApp">
         <nav class="nav" id="nav" aria-label="Sections"></nav>
         <main class="main" id="main">
           <div class="loading">Loading the workbook...</div>
         </main>
       </div>
 
-      <div class="body app-module" id="simulatorApp" hidden style="padding: 0;">
+      <div class="body app-module" id="simulatorApp" hidden style="padding: 0; background: #0f172a;">
         <iframe id="simulatorFrame" src="sim.html" style="width: 100%; height: 100%; border: none;"></iframe>
       </div>
 
@@ -69,8 +69,6 @@
           <h1>Analyst Scorecard</h1>
           <p>Automated grading engine coming soon.</p>
         </main>
-      </div>
-
       </div>
     </div>
 
