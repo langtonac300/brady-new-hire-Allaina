@@ -43,6 +43,13 @@ contracts. B2B only: the buyers are facility managers and safety directors, not 
 | **Conversion** | A lead form — the "Request an Assessment" form on the landing page |
 | **Run length** | 12 weeks, one week at a time |
 
+> **Six industries, one set of mechanics.** The briefing screen has a picker — fire protection
+> is the default, but you can also run commercial HVAC, industrial labeling, lab supply,
+> janitorial supply, or managed IT. Each is a different world of search terms, gray-zone
+> queries and deal sizes, so the *judgment* you practice transfers instead of you memorizing
+> one account. Run it more than once across different verticals. Only fire protection has a
+> rendered landing page; the others give you a landing-page brief to design against.
+
 ---
 
 ## What you actually do
@@ -110,15 +117,37 @@ terms report tell two completely different stories.
 
 ## For maintainers
 
-Both files are self-contained — all CSS and JS inline, no build step, no dependencies. Open
-`sim.html` and it runs.
+`sim.html` and `landing-page.html` are self-contained — all CSS and JS inline, no server, no
+dependencies. Open `sim.html` and it runs.
 
-- The search-query database, traffic waves, conversion-delay distribution, and scoring
-  thresholds all live in the `CONFIG` object and the `QUERIES` array near the top of the
-  `<script>` in `sim.html`. Tune the simulation by editing those.
-- There's no automated test wired into the tracker's suite — the engine logic (`simulateWeek`,
-  `getTotalStats`, `calculateScore`) is pure and DOM-free, so it can be exercised headlessly by
-  extracting the `<script>` and stubbing `document`, if a regression check is ever wanted.
+**The files:**
+
+| File | What it is |
+|------|-----------|
+| `sim.html` | The simulator. Engine, UI, and the embedded scenario data all inline. |
+| `landing-page.html` | The rendered landing page for the fire-protection vertical only. |
+| `scenario-corpus.json` | **The source of truth** for the six verticals — every query, label, negative-keyword answer key and landing brief. |
+| `validate-corpus.mjs` | Checks the corpus against the rules (schema, waste zeroed, gray coverage, and the load-bearing one: a negative must never be a substring of a buyer query). |
+| `build-sim.mjs` | Embeds `scenario-corpus.json` into `sim.html` between the `CORPUS_START/END` markers. |
+
+**To change the scenarios** — edit `scenario-corpus.json`, then:
+
+```
+node 06-tracker/simulation/validate-corpus.mjs 06-tracker/simulation/scenario-corpus.json
+node 06-tracker/simulation/build-sim.mjs
+```
+
+Validate first (it exits non-zero on any hard failure), then build, then commit both the JSON
+and the rebuilt `sim.html`. The browser can't `fetch()` the JSON from a local `file://`, which
+is why the corpus is embedded rather than loaded at runtime — `build-sim.mjs` keeps the JSON as
+the single source and `sim.html` as the shipped artifact.
+
+- `CONFIG` (near the top of the `<script>` in `sim.html`) holds the budget, target CPA, traffic
+  waves, conversion-delay distribution and scoring thresholds. `QUERIES` there is the
+  fire-protection fallback used only if the corpus hasn't been embedded.
+- The engine (`simulateWeek`, `getTotalStats`, `calculateScore`) is pure and DOM-free, so it
+  can be exercised headlessly by extracting the `<script>` and stubbing `document` — that's how
+  the corpus and scenario switching were smoke-tested.
 - This folder is deliberately outside the content build (`06-tracker` is excluded), so nothing
   here is swept into the Apps Script web app. It's a standalone browser tool, like the rest of
   the tracker.
