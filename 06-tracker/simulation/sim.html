@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campaign Simulator — Apex Fire Solutions</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue: #1a73e8; --blue-dark: #1557b0; --blue-light: #e8f0fe;
+  --green: #188038; --green-light: #e6f4ea;
+  --red: #c5221f; --red-light: #fce8e6;
+  --orange: #e8710a; --orange-light: #fef7e0;
+  --text: #202124; --text-2: #5f6368; --text-3: #80868b;
+  --bg: #f8f9fa; --white: #fff; --border: #dadce0; --border-light: #e8eaed;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: var(--text); background: var(--bg); font-size: 14px; line-height: 1.5; }
+button { font-family: inherit; cursor: pointer; }
+
+/* LAYOUT */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+.top-bar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 1.5rem; display: flex; align-items: center; height: 56px; gap: 1.5rem; }
+.top-bar h1 { font-size: 1.1rem; font-weight: 600; color: var(--blue); white-space: nowrap; }
+.top-bar .week-badge { background: var(--blue); color: #fff; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+.top-bar .metrics { display: flex; gap: 1.5rem; margin-left: auto; }
+.top-bar .metric { text-align: right; }
+.top-bar .metric-val { font-weight: 700; font-size: 1rem; }
+.top-bar .metric-label { font-size: 0.7rem; color: var(--text-3); text-transform: uppercase; }
+
+.main { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 200px; background: var(--white); border-right: 1px solid var(--border); padding: 1rem 0; flex-shrink: 0; }
+.sidebar a { display: block; padding: 0.5rem 1.25rem; color: var(--text-2); font-size: 0.9rem; cursor: pointer; border-left: 3px solid transparent; }
+.sidebar a:hover { background: var(--bg); }
+.sidebar a.active { color: var(--blue); font-weight: 600; border-left-color: var(--blue); background: var(--blue-light); }
+.sidebar .nav-section { padding: 0.5rem 1.25rem; font-size: 0.7rem; color: var(--text-3); text-transform: uppercase; font-weight: 700; margin-top: 1rem; }
+.content { flex: 1; padding: 1.5rem; overflow-y: auto; max-height: calc(100vh - 56px); }
+
+/* PANELS */
+.panel { display: none; }
+.panel.active { display: block; }
+.panel-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+.panel-desc { color: var(--text-2); margin-bottom: 1.5rem; max-width: 700px; }
+
+/* CARDS */
+.card { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+.metric-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.metric-card { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; padding: 1rem 1.25rem; min-width: 140px; flex: 1; }
+.metric-card .mc-val { font-size: 1.5rem; font-weight: 700; }
+.metric-card .mc-label { font-size: 0.75rem; color: var(--text-3); text-transform: uppercase; margin-top: 0.15rem; }
+.metric-card .mc-delta { font-size: 0.8rem; margin-top: 0.25rem; }
+.mc-delta.up { color: var(--green); }
+.mc-delta.down { color: var(--red); }
+
+/* TABLES */
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th { text-align: left; padding: 0.6rem 0.75rem; border-bottom: 2px solid var(--border); color: var(--text-2); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; white-space: nowrap; }
+td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border-light); }
+tr:hover td { background: #f1f3f4; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* BUTTONS */
+.btn { padding: 0.5rem 1.25rem; border-radius: 4px; font-weight: 600; font-size: 0.85rem; border: none; }
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: var(--blue-dark); }
+.btn-sm { padding: 0.3rem 0.75rem; font-size: 0.8rem; border-radius: 3px; }
+.btn-danger { background: var(--red-light); color: var(--red); border: 1px solid var(--red); }
+.btn-success { background: var(--green-light); color: var(--green); border: 1px solid var(--green); }
+.btn-outline { background: var(--white); color: var(--blue); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--blue-light); }
+.btn-advance { background: var(--green); color: #fff; padding: 0.75rem 2rem; font-size: 1rem; border-radius: 6px; }
+.btn-advance:hover { background: #146c2e; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* FORMS */
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem; color: var(--text-2); }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 0.5rem 0.65rem; border: 1px solid var(--border); border-radius: 4px;
+  font-size: 0.9rem; font-family: inherit; color: var(--text);
+}
+.form-group textarea { min-height: 60px; resize: vertical; }
+.form-row-inline { display: flex; gap: 0.75rem; align-items: end; }
+.form-row-inline .form-group { flex: 1; margin-bottom: 0; }
+
+/* TAGS */
+.tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 3px; font-size: 0.75rem; font-weight: 600; }
+.tag-exact { background: #e8f0fe; color: #1a73e8; }
+.tag-phrase { background: #fef7e0; color: #e8710a; }
+.tag-broad { background: #e6f4ea; color: #188038; }
+.tag-paused { background: #f1f3f4; color: var(--text-3); }
+
+/* STATUS */
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 0.35rem; vertical-align: middle; }
+.status-active { background: var(--green); }
+.status-paused { background: var(--text-3); }
+
+/* CHART */
+.chart-container { position: relative; height: 200px; margin: 1rem 0; }
+.chart-bar-group { display: flex; align-items: end; gap: 2px; height: 100%; padding-bottom: 24px; }
+.chart-bar { flex: 1; background: var(--blue); border-radius: 3px 3px 0 0; min-width: 20px; position: relative; transition: height 0.3s; }
+.chart-bar.future { background: var(--border-light); }
+.chart-bar .bar-label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; color: var(--text-3); white-space: nowrap; }
+.chart-bar .bar-val { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; font-weight: 600; color: var(--text); white-space: nowrap; }
+
+/* BRIEFING */
+.briefing { max-width: 740px; margin: 0 auto; }
+.briefing h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+.briefing .lead { font-size: 1.1rem; color: var(--text-2); margin-bottom: 2rem; }
+.brief-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+.brief-item { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; padding: 1.25rem; }
+.brief-item .bi-label { font-size: 0.75rem; color: var(--text-3); text-transform: uppercase; font-weight: 700; }
+.brief-item .bi-val { font-size: 1.5rem; font-weight: 700; color: var(--blue); margin-top: 0.25rem; }
+.brief-item .bi-note { font-size: 0.85rem; color: var(--text-2); margin-top: 0.25rem; }
+.brief-section { margin-bottom: 2rem; }
+.brief-section h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+.brief-section ul { padding-left: 1.25rem; color: var(--text-2); }
+.brief-section li { margin-bottom: 0.35rem; }
+
+/* SCORECARD */
+.score-section { text-align: center; padding: 3rem 2rem; }
+.score-grade { font-size: 4rem; font-weight: 800; margin: 1rem 0; }
+.score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem auto; max-width: 800px; }
+.score-item { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; padding: 1.25rem; }
+.score-item .si-label { font-size: 0.8rem; color: var(--text-3); text-transform: uppercase; font-weight: 600; }
+.score-item .si-val { font-size: 1.75rem; font-weight: 700; margin: 0.5rem 0; }
+.score-item .si-target { font-size: 0.85rem; color: var(--text-2); }
+
+/* TOAST */
+.toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #323232; color: #fff; padding: 0.75rem 1.25rem; border-radius: 6px; font-size: 0.9rem; z-index: 100; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+
+/* NEGATIVE KW HIGHLIGHT */
+.neg-added { background: var(--green-light); }
+
+/* CONVERSION DELAY INDICATOR */
+.delay-badge { display: inline-block; background: var(--orange-light); color: var(--orange); font-size: 0.7rem; font-weight: 600; padding: 0.1rem 0.4rem; border-radius: 3px; margin-left: 0.35rem; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .brief-grid { grid-template-columns: 1fr; }
+  .top-bar .metrics { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// CONFIGURATION
+// ============================================================
+const CONFIG = {
+  budget: 2000,
+  targetCpa: 150,
+  totalWeeks: 12,
+  defaultBid: 4.50,
+  trafficWaves: [0.5, 0.7, 0.9, 1.0, 1.1, 1.3, 1.6, 1.2, 1.0, 0.6, 0.9, 1.1],
+  conversionDelayDist: [
+    { minDelay: 0, maxDelay: 0, pct: 0.25 },
+    { minDelay: 1, maxDelay: 2, pct: 0.35 },
+    { minDelay: 3, maxDelay: 5, pct: 0.25 },
+    { minDelay: 6, maxDelay: 8, pct: 0.15 },
+  ],
+};
+
+// ============================================================
+// SEARCH QUERY DATABASE
+// ============================================================
+const QUERIES = [
+  // HIGH INTENT — should target
+  { q: "commercial fire suppression system installation", intent: "high", baseImp: 40, baseCtr: 0.08, baseCvr: 0.06, value: 12000, tags: ["suppression","install","commercial"] },
+  { q: "fire suppression system quote", intent: "high", baseImp: 35, baseCtr: 0.09, baseCvr: 0.07, value: 15000, tags: ["suppression","quote"] },
+  { q: "commercial fire sprinkler company", intent: "high", baseImp: 30, baseCtr: 0.07, baseCvr: 0.05, value: 8000, tags: ["sprinkler","commercial","company"] },
+  { q: "fire suppression installation cost", intent: "high", baseImp: 45, baseCtr: 0.06, baseCvr: 0.04, value: 10000, tags: ["suppression","install","cost"] },
+  { q: "fire sprinkler installation quote", intent: "high", baseImp: 25, baseCtr: 0.09, baseCvr: 0.06, value: 9000, tags: ["sprinkler","install","quote"] },
+  { q: "fire protection company near me", intent: "high", baseImp: 50, baseCtr: 0.07, baseCvr: 0.05, value: 7000, tags: ["fire protection","company","near me"] },
+  { q: "commercial fire alarm installation", intent: "high", baseImp: 35, baseCtr: 0.06, baseCvr: 0.04, value: 6000, tags: ["alarm","install","commercial"] },
+  { q: "fire suppression contractor", intent: "high", baseImp: 20, baseCtr: 0.08, baseCvr: 0.06, value: 11000, tags: ["suppression","contractor"] },
+  { q: "buy commercial fire suppression system", intent: "high", baseImp: 15, baseCtr: 0.10, baseCvr: 0.07, value: 18000, tags: ["suppression","commercial","buy"] },
+  { q: "fire protection system installation company", intent: "high", baseImp: 22, baseCtr: 0.07, baseCvr: 0.05, value: 9500, tags: ["fire protection","install","company"] },
+
+  // COMPLIANCE / AUDIT — should target
+  { q: "fire safety compliance audit", intent: "high", baseImp: 30, baseCtr: 0.07, baseCvr: 0.05, value: 5000, tags: ["compliance","audit","safety"] },
+  { q: "NFPA compliance inspection", intent: "high", baseImp: 20, baseCtr: 0.06, baseCvr: 0.05, value: 4500, tags: ["nfpa","compliance","inspection"] },
+  { q: "fire code compliance service", intent: "high", baseImp: 18, baseCtr: 0.06, baseCvr: 0.04, value: 4000, tags: ["compliance","service","fire code"] },
+  { q: "commercial fire inspection service", intent: "high", baseImp: 40, baseCtr: 0.07, baseCvr: 0.05, value: 3500, tags: ["inspection","service","commercial"] },
+  { q: "annual fire safety inspection", intent: "high", baseImp: 45, baseCtr: 0.06, baseCvr: 0.04, value: 3000, tags: ["inspection","annual","safety"] },
+  { q: "fire sprinkler inspection company", intent: "high", baseImp: 28, baseCtr: 0.07, baseCvr: 0.05, value: 3200, tags: ["sprinkler","inspection","company"] },
+  { q: "fire extinguisher inspection service", intent: "high", baseImp: 35, baseCtr: 0.05, baseCvr: 0.03, value: 1500, tags: ["extinguisher","inspection","service"] },
+  { q: "fire alarm inspection near me", intent: "high", baseImp: 30, baseCtr: 0.06, baseCvr: 0.04, value: 2500, tags: ["alarm","inspection","near me"] },
+  { q: "NFPA 25 inspection company", intent: "high", baseImp: 12, baseCtr: 0.08, baseCvr: 0.06, value: 4000, tags: ["nfpa","inspection","company"] },
+
+  // RESEARCH — worth targeting, lower conversion
+  { q: "types of fire suppression systems", intent: "research", baseImp: 60, baseCtr: 0.04, baseCvr: 0.01, value: 8000, tags: ["suppression","types"] },
+  { q: "clean agent vs water fire suppression", intent: "research", baseImp: 25, baseCtr: 0.04, baseCvr: 0.012, value: 10000, tags: ["clean agent","suppression","comparison"] },
+  { q: "NFPA fire suppression requirements", intent: "research", baseImp: 35, baseCtr: 0.03, baseCvr: 0.008, value: 5000, tags: ["nfpa","suppression","requirements"] },
+  { q: "how often fire sprinkler inspection required", intent: "research", baseImp: 55, baseCtr: 0.04, baseCvr: 0.01, value: 3000, tags: ["sprinkler","inspection","frequency"] },
+  { q: "fire suppression system maintenance cost", intent: "research", baseImp: 40, baseCtr: 0.04, baseCvr: 0.012, value: 4000, tags: ["suppression","maintenance","cost"] },
+  { q: "commercial fire safety requirements", intent: "research", baseImp: 50, baseCtr: 0.03, baseCvr: 0.008, value: 3500, tags: ["commercial","safety","requirements"] },
+  { q: "fire suppression system for server room", intent: "research", baseImp: 30, baseCtr: 0.05, baseCvr: 0.02, value: 15000, tags: ["suppression","server room"] },
+  { q: "fire protection for warehouse", intent: "research", baseImp: 45, baseCtr: 0.04, baseCvr: 0.015, value: 8000, tags: ["fire protection","warehouse"] },
+  { q: "fire sprinkler system cost", intent: "research", baseImp: 70, baseCtr: 0.05, baseCvr: 0.015, value: 7000, tags: ["sprinkler","cost"] },
+  { q: "best commercial fire alarm system", intent: "research", baseImp: 28, baseCtr: 0.04, baseCvr: 0.01, value: 5500, tags: ["alarm","commercial","best"] },
+  { q: "fire suppression system for data center", intent: "research", baseImp: 22, baseCtr: 0.05, baseCvr: 0.025, value: 20000, tags: ["suppression","data center"] },
+
+  // WASTE — Job seekers
+  { q: "fire protection engineer jobs", intent: "jobs", baseImp: 80, baseCtr: 0.03, baseCvr: 0, value: 0, tags: ["fire protection","jobs"] },
+  { q: "fire safety inspector salary", intent: "jobs", baseImp: 60, baseCtr: 0.02, baseCvr: 0, value: 0, tags: ["safety","inspector","salary"] },
+  { q: "fire alarm technician certification", intent: "jobs", baseImp: 50, baseCtr: 0.02, baseCvr: 0, value: 0, tags: ["alarm","technician","certification"] },
+  { q: "fire sprinkler fitter apprenticeship", intent: "jobs", baseImp: 40, baseCtr: 0.02, baseCvr: 0, value: 0, tags: ["sprinkler","fitter","apprenticeship"] },
+  { q: "fire safety officer jobs near me", intent: "jobs", baseImp: 55, baseCtr: 0.02, baseCvr: 0, value: 0, tags: ["safety","officer","jobs","near me"] },
+  { q: "fire protection career path", intent: "jobs", baseImp: 35, baseCtr: 0.02, baseCvr: 0, value: 0, tags: ["fire protection","career"] },
+  { q: "how to become a fire inspector", intent: "jobs", baseImp: 45, baseCtr: 0.02, baseCvr: 0, value: 0, tags: ["inspector","career","how to"] },
+
+  // WASTE — Residential / DIY
+  { q: "home fire sprinkler system cost", intent: "residential", baseImp: 90, baseCtr: 0.04, baseCvr: 0, value: 0, tags: ["sprinkler","cost","home"] },
+  { q: "residential fire suppression system", intent: "residential", baseImp: 70, baseCtr: 0.04, baseCvr: 0, value: 0, tags: ["suppression","residential"] },
+  { q: "fire extinguisher for kitchen", intent: "residential", baseImp: 100, baseCtr: 0.03, baseCvr: 0, value: 0, tags: ["extinguisher","kitchen"] },
+  { q: "home fire safety tips", intent: "residential", baseImp: 85, baseCtr: 0.02, baseCvr: 0, value: 0, tags: ["safety","home","tips"] },
+  { q: "residential fire alarm system", intent: "residential", baseImp: 75, baseCtr: 0.04, baseCvr: 0, value: 0, tags: ["alarm","residential"] },
+  { q: "fire sprinkler head replacement DIY", intent: "residential", baseImp: 40, baseCtr: 0.03, baseCvr: 0, value: 0, tags: ["sprinkler","replacement","diy"] },
+  { q: "best smoke detector for home", intent: "residential", baseImp: 110, baseCtr: 0.02, baseCvr: 0, value: 0, tags: ["smoke detector","home"] },
+
+  // WASTE — Irrelevant
+  { q: "fire pit for backyard", intent: "irrelevant", baseImp: 150, baseCtr: 0.01, baseCvr: 0, value: 0, tags: ["fire pit","backyard"] },
+  { q: "fire truck toys for kids", intent: "irrelevant", baseImp: 80, baseCtr: 0.005, baseCvr: 0, value: 0, tags: ["fire truck","toys"] },
+  { q: "forest fire prevention", intent: "irrelevant", baseImp: 120, baseCtr: 0.01, baseCvr: 0, value: 0, tags: ["forest fire","prevention"] },
+  { q: "fireplace installation cost", intent: "irrelevant", baseImp: 90, baseCtr: 0.01, baseCvr: 0, value: 0, tags: ["fireplace","installation","cost"] },
+  { q: "fire department volunteer application", intent: "irrelevant", baseImp: 60, baseCtr: 0.01, baseCvr: 0, value: 0, tags: ["fire department","volunteer"] },
+  { q: "campfire cooking equipment", intent: "irrelevant", baseImp: 70, baseCtr: 0.005, baseCvr: 0, value: 0, tags: ["campfire","cooking"] },
+
+  // GRAY ZONE — B2B but not buyers
+  { q: "fire safety training course", intent: "gray", baseImp: 65, baseCtr: 0.03, baseCvr: 0.003, value: 1000, tags: ["safety","training","course"] },
+  { q: "OSHA fire safety regulations", intent: "gray", baseImp: 80, baseCtr: 0.02, baseCvr: 0.002, value: 800, tags: ["osha","safety","regulations"] },
+  { q: "fire risk assessment template", intent: "gray", baseImp: 55, baseCtr: 0.03, baseCvr: 0.002, value: 500, tags: ["risk assessment","template"] },
+  { q: "fire evacuation plan requirements", intent: "gray", baseImp: 70, baseCtr: 0.02, baseCvr: 0.002, value: 600, tags: ["evacuation","plan","requirements"] },
+  { q: "fire warden training requirements", intent: "gray", baseImp: 40, baseCtr: 0.02, baseCvr: 0.001, value: 400, tags: ["warden","training","requirements"] },
+  { q: "fire safety training materials free", intent: "gray", baseImp: 50, baseCtr: 0.03, baseCvr: 0, value: 0, tags: ["safety","training","materials","free"] },
+
+  // COMPETITOR
+  { q: "SimplexGrinnell fire suppression", intent: "competitor", baseImp: 25, baseCtr: 0.03, baseCvr: 0.02, value: 9000, tags: ["competitor","suppression"] },
+  { q: "Tyco fire protection reviews", intent: "competitor", baseImp: 20, baseCtr: 0.03, baseCvr: 0.015, value: 7000, tags: ["competitor","fire protection","reviews"] },
+  { q: "Cintas fire inspection cost", intent: "competitor", baseImp: 30, baseCtr: 0.04, baseCvr: 0.02, value: 3500, tags: ["competitor","inspection","cost"] },
+];
+
+// Pre-compute a map of query text to query object
+const QUERY_MAP = new Map(QUERIES.map(q => [q.q.toLowerCase(), q]));
+
+// ============================================================
+// KEYWORD MATCHING
+// ============================================================
+function matchesExact(keyword, query) {
+  return query.toLowerCase() === keyword.toLowerCase();
+}
+
+function matchesPhrase(keyword, query) {
+  return query.toLowerCase().includes(keyword.toLowerCase());
+}
+
+function matchesBroad(keyword, queryObj) {
+  const kwWords = keyword.toLowerCase().split(/\s+/);
+  const qLower = queryObj.q.toLowerCase();
+  const qTags = queryObj.tags.map(t => t.toLowerCase());
+  let matchCount = 0;
+  for (const w of kwWords) {
+    if (qLower.includes(w) || qTags.some(t => t.includes(w))) matchCount++;
+  }
+  return matchCount >= Math.max(1, Math.ceil(kwWords.length * 0.5));
+}
+
+function keywordMatchesQuery(kw, queryObj) {
+  if (!kw.enabled) return false;
+  switch (kw.matchType) {
+    case 'exact': return matchesExact(kw.text, queryObj.q);
+    case 'phrase': return matchesPhrase(kw.text, queryObj.q);
+    case 'broad': return matchesBroad(kw.text, queryObj);
+    default: return false;
+  }
+}
+
+function isNegated(query, negatives) {
+  const qLower = query.toLowerCase();
+  return negatives.some(n => qLower.includes(n.toLowerCase()));
+}
+
+// ============================================================
+// STATE
+// ============================================================
+let state = null;
+
+function initState() {
+  state = {
+    phase: 'briefing',
+    week: 0,
+    adGroups: [
+      { name: 'Fire Suppression', keywords: [], ads: [] },
+      { name: 'Inspections', keywords: [], ads: [] },
+      { name: 'Compliance', keywords: [], ads: [] },
+    ],
+    negativeKeywords: [],
+    weeklyHistory: [],
+    pendingConversions: [],
+    totalSpend: 0,
+    totalClicks: 0,
+    totalImpressions: 0,
+    totalConversions: 0,
+    totalConversionValue: 0,
+    activeTab: 'overview',
+    selectedAdGroup: 0,
+  };
+}
+
+// ============================================================
+// SIMULATION ENGINE
+// ============================================================
+function simulateWeek() {
+  const weekIdx = state.week;
+  const wave = CONFIG.trafficWaves[weekIdx] || 1.0;
+  const weekBudget = CONFIG.budget;
+  let weekSpend = 0;
+  let weekImpressions = 0;
+  let weekClicks = 0;
+  let weekSearchTerms = [];
+
+  const allKeywords = state.adGroups.flatMap((ag, agi) =>
+    ag.keywords.filter(k => k.enabled).map(k => ({ ...k, adGroupIdx: agi, adGroupName: ag.name }))
+  );
+
+  if (allKeywords.length === 0) {
+    state.weeklyHistory.push({
+      week: weekIdx + 1, impressions: 0, clicks: 0, spend: 0,
+      conversions: 0, conversionValue: 0, searchTerms: [], cpa: 0, roas: 0,
+    });
+    state.week++;
+    resolveConversions(weekIdx + 1);
+    return;
+  }
+
+  for (const queryObj of QUERIES) {
+    if (isNegated(queryObj.q, state.negativeKeywords)) continue;
+
+    const matchingKws = allKeywords.filter(kw => keywordMatchesQuery(kw, queryObj));
+    if (matchingKws.length === 0) continue;
+
+    const bestKw = matchingKws[0];
+    const rawImpressions = Math.round(queryObj.baseImp * wave * (0.7 + Math.random() * 0.6));
+    const ctr = queryObj.baseCtr * (0.8 + Math.random() * 0.4) * adQualityMultiplier(bestKw.adGroupIdx);
+    const clicks = Math.round(rawImpressions * ctr);
+    const cpc = (bestKw.bid || CONFIG.defaultBid) * (0.6 + Math.random() * 0.5);
+    const cost = clicks * cpc;
+
+    if (weekSpend + cost > weekBudget * 1.1) {
+      const remainBudget = weekBudget * 1.1 - weekSpend;
+      const affordableClicks = Math.floor(remainBudget / cpc);
+      if (affordableClicks <= 0) continue;
+      const adjCost = affordableClicks * cpc;
+      const adjImp = Math.round(rawImpressions * (affordableClicks / Math.max(clicks, 1)));
+      weekImpressions += adjImp;
+      weekClicks += affordableClicks;
+      weekSpend += adjCost;
+      scheduleConversions(queryObj, affordableClicks, weekIdx);
+      weekSearchTerms.push({ query: queryObj.q, intent: queryObj.intent, impressions: adjImp, clicks: affordableClicks, cost: adjCost, keyword: bestKw.text, matchType: bestKw.matchType, adGroup: bestKw.adGroupName });
+      break;
+    }
+
+    weekImpressions += rawImpressions;
+    weekClicks += clicks;
+    weekSpend += cost;
+    scheduleConversions(queryObj, clicks, weekIdx);
+    weekSearchTerms.push({ query: queryObj.q, intent: queryObj.intent, impressions: rawImpressions, clicks, cost, keyword: bestKw.text, matchType: bestKw.matchType, adGroup: bestKw.adGroupName });
+
+    bestKw._impressions = (bestKw._impressions || 0) + rawImpressions;
+    bestKw._clicks = (bestKw._clicks || 0) + clicks;
+    bestKw._cost = (bestKw._cost || 0) + cost;
+  }
+
+  weekSearchTerms.sort((a, b) => b.clicks - a.clicks);
+
+  const arrivedConversions = resolveConversions(weekIdx + 1);
+
+  state.weeklyHistory.push({
+    week: weekIdx + 1,
+    impressions: weekImpressions,
+    clicks: weekClicks,
+    spend: weekSpend,
+    conversions: arrivedConversions.count,
+    conversionValue: arrivedConversions.value,
+    searchTerms: weekSearchTerms,
+    cpa: arrivedConversions.count > 0 ? weekSpend / arrivedConversions.count : 0,
+    roas: weekSpend > 0 ? arrivedConversions.value / weekSpend : 0,
+    wave,
+  });
+
+  state.totalSpend += weekSpend;
+  state.totalClicks += weekClicks;
+  state.totalImpressions += weekImpressions;
+  state.totalConversions += arrivedConversions.count;
+  state.totalConversionValue += arrivedConversions.value;
+  state.week++;
+}
+
+function scheduleConversions(queryObj, clicks, fromWeek) {
+  if (queryObj.baseCvr <= 0) return;
+  for (let i = 0; i < clicks; i++) {
+    if (Math.random() > queryObj.baseCvr) continue;
+    const delay = pickConversionDelay();
+    const arriveWeek = fromWeek + 1 + delay;
+    state.pendingConversions.push({
+      fromWeek: fromWeek + 1,
+      arriveWeek,
+      value: queryObj.value * (0.5 + Math.random()),
+      query: queryObj.q,
+    });
+  }
+}
+
+function pickConversionDelay() {
+  const r = Math.random();
+  let cumul = 0;
+  for (const d of CONFIG.conversionDelayDist) {
+    cumul += d.pct;
+    if (r <= cumul) {
+      return d.minDelay + Math.floor(Math.random() * (d.maxDelay - d.minDelay + 1));
+    }
+  }
+  return 0;
+}
+
+function resolveConversions(currentWeek) {
+  let count = 0, value = 0;
+  for (const c of state.pendingConversions) {
+    if (c.arriveWeek === currentWeek && !c.resolved) {
+      c.resolved = true;
+      count++;
+      value += c.value;
+    }
+  }
+  return { count, value };
+}
+
+function adQualityMultiplier(adGroupIdx) {
+  const ag = state.adGroups[adGroupIdx];
+  if (!ag || ag.ads.length === 0) return 0.6;
+  const ad = ag.ads.find(a => a.enabled);
+  if (!ad) return 0.5;
+  const headlines = ad.headlines.filter(h => h.trim()).length;
+  const descs = ad.descriptions.filter(d => d.trim()).length;
+  if (headlines >= 8 && descs >= 3) return 1.1;
+  if (headlines >= 5 && descs >= 2) return 0.95;
+  if (headlines >= 3 && descs >= 1) return 0.8;
+  return 0.6;
+}
+
+function getTotalStats() {
+  let maturedConversions = 0, maturedValue = 0;
+  for (const c of state.pendingConversions) {
+    if (c.resolved) { maturedConversions++; maturedValue += c.value; }
+  }
+  const pendingCount = state.pendingConversions.filter(c => !c.resolved).length;
+  return {
+    spend: state.totalSpend,
+    clicks: state.totalClicks,
+    impressions: state.totalImpressions,
+    conversions: maturedConversions,
+    conversionValue: maturedValue,
+    pendingConversions: pendingCount,
+    cpa: maturedConversions > 0 ? state.totalSpend / maturedConversions : 0,
+    roas: state.totalSpend > 0 ? maturedValue / state.totalSpend : 0,
+    ctr: state.totalImpressions > 0 ? state.totalClicks / state.totalImpressions : 0,
+    avgCpc: state.totalClicks > 0 ? state.totalSpend / state.totalClicks : 0,
+  };
+}
+
+// ============================================================
+// SCORING
+// ============================================================
+function calculateScore() {
+  const stats = getTotalStats();
+  let score = 0;
+  const details = [];
+
+  // CPA score (0-25)
+  if (stats.conversions > 0) {
+    const cpaRatio = stats.cpa / CONFIG.targetCpa;
+    if (cpaRatio <= 0.8) { score += 25; details.push({ cat: 'CPA vs Target', pts: 25, max: 25, note: `$${fmt(stats.cpa)} — well under $${CONFIG.targetCpa} target` }); }
+    else if (cpaRatio <= 1.0) { score += 20; details.push({ cat: 'CPA vs Target', pts: 20, max: 25, note: `$${fmt(stats.cpa)} — within target` }); }
+    else if (cpaRatio <= 1.3) { score += 12; details.push({ cat: 'CPA vs Target', pts: 12, max: 25, note: `$${fmt(stats.cpa)} — above target` }); }
+    else { score += 5; details.push({ cat: 'CPA vs Target', pts: 5, max: 25, note: `$${fmt(stats.cpa)} — significantly over target` }); }
+  } else { details.push({ cat: 'CPA vs Target', pts: 0, max: 25, note: 'No conversions recorded yet' }); }
+
+  // Waste elimination (0-25)
+  const wasteQueries = QUERIES.filter(q => ['jobs','residential','irrelevant'].includes(q.intent));
+  const negatedWaste = wasteQueries.filter(q => isNegated(q.q, state.negativeKeywords)).length;
+  const wastePct = wasteQueries.length > 0 ? negatedWaste / wasteQueries.length : 0;
+  const wastePts = Math.round(wastePct * 25);
+  score += wastePts;
+  details.push({ cat: 'Waste Blocked', pts: wastePts, max: 25, note: `${negatedWaste}/${wasteQueries.length} waste queries blocked (${Math.round(wastePct*100)}%)` });
+
+  // Keyword coverage (0-20)
+  const highIntentQueries = QUERIES.filter(q => q.intent === 'high');
+  const allKws = state.adGroups.flatMap(ag => ag.keywords.filter(k => k.enabled));
+  const coveredHigh = highIntentQueries.filter(q => allKws.some(kw => keywordMatchesQuery(kw, q))).length;
+  const coverPct = highIntentQueries.length > 0 ? coveredHigh / highIntentQueries.length : 0;
+  const coverPts = Math.round(coverPct * 20);
+  score += coverPts;
+  details.push({ cat: 'High-Intent Coverage', pts: coverPts, max: 20, note: `${coveredHigh}/${highIntentQueries.length} high-intent queries reachable` });
+
+  // Ad copy quality (0-15)
+  let adScore = 0;
+  const adsWithContent = state.adGroups.filter(ag => ag.ads.some(a => a.enabled && a.headlines.filter(h=>h.trim()).length >= 3));
+  if (adsWithContent.length >= 3) { adScore = 15; }
+  else if (adsWithContent.length >= 2) { adScore = 10; }
+  else if (adsWithContent.length >= 1) { adScore = 5; }
+  score += adScore;
+  details.push({ cat: 'Ad Copy', pts: adScore, max: 15, note: `${adsWithContent.length}/3 ad groups have quality ads` });
+
+  // Efficiency — pipeline ROAS (0-15). B2B search is traffic-constrained, so we reward
+  // capturing high-value queries efficiently, not spending the whole budget.
+  let effPts = 0;
+  const roas = stats.roas;
+  if (roas >= 20) { effPts = 15; }
+  else if (roas >= 12) { effPts = 11; }
+  else if (roas >= 6) { effPts = 7; }
+  else if (roas > 0) { effPts = 3; }
+  score += effPts;
+  details.push({ cat: 'Efficiency (pipeline ROAS)', pts: effPts, max: 15, note: stats.conversions > 0 ? `${fmtD(roas)}x pipeline value returned per $1 spent` : 'No conversions matured yet' });
+
+  const grade = score >= 85 ? 'A' : score >= 70 ? 'B' : score >= 55 ? 'C' : score >= 40 ? 'D' : 'F';
+  return { score, grade, details, stats };
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 }); }
+function fmtD(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 }); }
+function fmtPct(n) { return (n * 100).toFixed(1) + '%'; }
+function fmtMoney(n) { return '$' + Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 }); }
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// RENDER ENGINE
+// ============================================================
+function render() {
+  const app = document.getElementById('app');
+  switch (state.phase) {
+    case 'briefing': app.innerHTML = renderBriefing(); break;
+    case 'setup': app.innerHTML = renderSetup(); break;
+    case 'running': app.innerHTML = renderRunning(); break;
+    case 'complete': app.innerHTML = renderScorecard(); break;
+  }
+  bindEvents();
+}
+
+// ---- BRIEFING ----
+function renderBriefing() {
+  return `
+    <div class="briefing" style="padding: 3rem 2rem;">
+      <h1>Campaign Simulator</h1>
+      <p class="lead">Build a Google Ads search campaign from scratch for a fictional B2B company, then optimize it over 12 simulated weeks.</p>
+
+      <div class="brief-grid">
+        <div class="brief-item"><div class="bi-label">Weekly Budget</div><div class="bi-val">$2,000</div><div class="bi-note">Resets each simulated week</div></div>
+        <div class="brief-item"><div class="bi-label">Target CPA</div><div class="bi-val">$150</div><div class="bi-note">Cost per qualified lead</div></div>
+        <div class="brief-item"><div class="bi-label">Duration</div><div class="bi-val">12 Weeks</div><div class="bi-note">Advance one week at a time</div></div>
+        <div class="brief-item"><div class="bi-label">Conversions</div><div class="bi-val">Lead Forms</div><div class="bi-note">Assessment requests on the landing page</div></div>
+      </div>
+
+      <div class="brief-section">
+        <h3>The Company: Apex Fire Solutions</h3>
+        <p style="color: var(--text-2); margin-bottom: 0.75rem;">A commercial fire protection company selling fire suppression system installation, compliance audits, annual inspections, and maintenance programs. B2B only — their customers are facility managers, safety directors, and property managers at hospitals, warehouses, data centers, and office buildings.</p>
+        <p style="margin-bottom: 0.75rem;"><a href="landing-page.html" target="_blank" style="font-weight: 600;">Open the landing page in a new tab &#x2197;</a> — reference it when writing your ad copy.</p>
+      </div>
+
+      <div class="brief-section">
+        <h3>Your Job</h3>
+        <ul>
+          <li><strong>Build the campaign:</strong> Add keywords (with match types) to three ad groups, write RSA ads, set your bids</li>
+          <li><strong>Launch and run it:</strong> Advance time week by week. Each week generates realistic search traffic based on your keywords</li>
+          <li><strong>Optimize as you go:</strong> Review search terms, add negatives, pause underperformers, adjust bids</li>
+          <li><strong>Watch for B2B patterns:</strong> Conversions arrive with a delay (like real B2B). Traffic comes in waves. Don't panic.</li>
+        </ul>
+      </div>
+
+      <div class="brief-section">
+        <h3>What the Simulation Models</h3>
+        <ul>
+          <li><strong>Match types:</strong> Exact, phrase, and broad work like Google Ads — broader = more reach but more waste</li>
+          <li><strong>Search terms:</strong> Real queries people search for — some are gold, some are junk, some are gray zone</li>
+          <li><strong>Conversion delay:</strong> B2B leads convert weeks after clicking — your early CPA will look worse than it really is</li>
+          <li><strong>Traffic waves:</strong> Search volume fluctuates. Week 7 spikes (trade show). Week 10 dips (holiday). Stay steady.</li>
+          <li><strong>Budget pacing:</strong> If your keywords are too broad, you'll burn through budget before the week ends</li>
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin-top: 2rem;">
+        <button class="btn-advance" onclick="startSetup()">Start Building Your Campaign</button>
+      </div>
+    </div>`;
+}
+
+// ---- SETUP ----
+function renderSetup() {
+  const agTabs = state.adGroups.map((ag, i) =>
+    `<a class="${state.selectedAdGroup === i ? 'active' : ''}" onclick="selectAdGroup(${i})">${ag.name}</a>`
+  ).join('');
+  const ag = state.adGroups[state.selectedAdGroup];
+
+  const kwRows = ag.keywords.map((kw, ki) => `
+    <tr>
+      <td><span class="tag tag-${kw.matchType}">${kw.matchType}</span></td>
+      <td>${kw.text}</td>
+      <td class="num">$${fmtD(kw.bid)}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="removeKeyword(${state.selectedAdGroup}, ${ki})">Remove</button></td>
+    </tr>`).join('');
+
+  const ad = ag.ads[0] || { headlines: Array(15).fill(''), descriptions: Array(4).fill(''), enabled: true };
+  const headlineInputs = ad.headlines.slice(0, 15).map((h, i) =>
+    `<input type="text" maxlength="30" placeholder="Headline ${i+1}${i < 3 ? ' (required)' : ''}" value="${escHtml(h)}" onchange="updateAdHeadline(${state.selectedAdGroup}, ${i}, this.value)" style="margin-bottom: 0.35rem; ${i < 3 ? 'border-left: 3px solid var(--blue);' : ''}">`
+  ).join('');
+  const descInputs = ad.descriptions.slice(0, 4).map((d, i) =>
+    `<input type="text" maxlength="90" placeholder="Description ${i+1}${i < 2 ? ' (required)' : ''}" value="${escHtml(d)}" onchange="updateAdDesc(${state.selectedAdGroup}, ${i}, this.value)" style="margin-bottom: 0.35rem; ${i < 2 ? 'border-left: 3px solid var(--blue);' : ''}">`
+  ).join('');
+
+  const allKwCount = state.adGroups.reduce((n, ag) => n + ag.keywords.length, 0);
+  const allAdCount = state.adGroups.filter(ag => ag.ads.length > 0 && ag.ads[0].headlines.filter(h=>h.trim()).length >= 3).length;
+  const canLaunch = allKwCount >= 3 && allAdCount >= 1;
+
+  return `
+    <div class="top-bar">
+      <h1>Campaign Setup</h1>
+      <div style="margin-left: auto;">
+        <button class="btn btn-primary ${canLaunch ? '' : 'btn-outline'}" onclick="launchCampaign()" ${canLaunch ? '' : 'disabled'}>
+          Launch Campaign${canLaunch ? '' : ' (need 3+ keywords and 1+ ad)'}
+        </button>
+      </div>
+    </div>
+    <div class="main">
+      <div class="sidebar">
+        <div class="nav-section">Ad Groups</div>
+        ${agTabs}
+        <div class="nav-section" style="margin-top: 2rem;">Checklist</div>
+        <div style="padding: 0.35rem 1.25rem; font-size: 0.85rem; color: ${allKwCount >= 3 ? 'var(--green)' : 'var(--text-3)'};">${allKwCount >= 3 ? '&#10003;' : '&#x25CB;'} Keywords (${allKwCount})</div>
+        <div style="padding: 0.35rem 1.25rem; font-size: 0.85rem; color: ${allAdCount >= 1 ? 'var(--green)' : 'var(--text-3)'};">${allAdCount >= 1 ? '&#10003;' : '&#x25CB;'} Ads (${allAdCount}/3)</div>
+      </div>
+      <div class="content">
+        <div class="card">
+          <h3>Keywords — ${ag.name}</h3>
+          <p style="color: var(--text-2); font-size: 0.85rem; margin-bottom: 1rem;">Add keywords that should trigger your ads. Choose match types carefully — broader types reach more people but attract more irrelevant traffic.</p>
+          <div class="form-row-inline" style="margin-bottom: 1rem;">
+            <div class="form-group"><label>Keyword</label><input type="text" id="kw-text" placeholder="e.g. fire suppression system"></div>
+            <div class="form-group" style="max-width: 140px;"><label>Match Type</label>
+              <select id="kw-match">
+                <option value="phrase">Phrase</option>
+                <option value="exact">Exact</option>
+                <option value="broad">Broad</option>
+              </select>
+            </div>
+            <div class="form-group" style="max-width: 100px;"><label>Max CPC</label><input type="number" id="kw-bid" value="4.50" step="0.50" min="0.50" max="20"></div>
+            <div class="form-group" style="max-width: 80px;"><label>&nbsp;</label><button class="btn btn-primary" onclick="addKeyword()">Add</button></div>
+          </div>
+          ${ag.keywords.length > 0 ? `
+            <table>
+              <thead><tr><th>Match</th><th>Keyword</th><th class="num">Bid</th><th></th></tr></thead>
+              <tbody>${kwRows}</tbody>
+            </table>` : '<p style="color: var(--text-3); font-style: italic;">No keywords yet. Add some above.</p>'}
+        </div>
+
+        <div class="card">
+          <h3>RSA Ad — ${ag.name}</h3>
+          <p style="color: var(--text-2); font-size: 0.85rem; margin-bottom: 1rem;">Write a Responsive Search Ad. At least 3 headlines and 2 descriptions are required. More assets = better performance. <a href="landing-page.html" target="_blank">Open landing page &#x2197;</a></p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div>
+              <label style="font-weight: 600; font-size: 0.85rem; color: var(--text-2); display: block; margin-bottom: 0.5rem;">Headlines (30 chars max each)</label>
+              ${headlineInputs}
+            </div>
+            <div>
+              <label style="font-weight: 600; font-size: 0.85rem; color: var(--text-2); display: block; margin-bottom: 0.5rem;">Descriptions (90 chars max each)</label>
+              ${descInputs}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ---- RUNNING ----
+function renderRunning() {
+  const stats = getTotalStats();
+  const currentWeekData = state.weeklyHistory[state.weeklyHistory.length - 1];
+  const prevWeekData = state.weeklyHistory.length > 1 ? state.weeklyHistory[state.weeklyHistory.length - 2] : null;
+
+  const tabs = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'search-terms', label: 'Search Terms' },
+    { id: 'keywords', label: 'Keywords' },
+    { id: 'ads', label: 'Ads' },
+    { id: 'negatives', label: `Negatives (${state.negativeKeywords.length})` },
+  ];
+  const tabHtml = tabs.map(t =>
+    `<a class="${state.activeTab === t.id ? 'active' : ''}" onclick="switchTab('${t.id}')">${t.label}</a>`
+  ).join('');
+
+  const isComplete = state.week >= CONFIG.totalWeeks;
+
+  return `
+    <div class="top-bar">
+      <h1>Apex Fire Solutions</h1>
+      <span class="week-badge">Week ${state.week} / ${CONFIG.totalWeeks}</span>
+      <div class="metrics">
+        <div class="metric"><div class="metric-val">${fmtMoney(stats.spend)}</div><div class="metric-label">Spend</div></div>
+        <div class="metric"><div class="metric-val">${fmt(stats.conversions)}</div><div class="metric-label">Conversions</div></div>
+        <div class="metric"><div class="metric-val">${stats.conversions > 0 ? fmtMoney(stats.cpa) : '—'}</div><div class="metric-label">CPA</div></div>
+        <div class="metric"><div class="metric-val">${stats.pendingConversions > 0 ? stats.pendingConversions : '—'}</div><div class="metric-label">Pending</div></div>
+      </div>
+    </div>
+    <div class="main">
+      <div class="sidebar">
+        <div class="nav-section">Views</div>
+        ${tabHtml}
+        <div class="nav-section" style="margin-top: 1.5rem;">Actions</div>
+        ${isComplete
+          ? `<div style="padding: 0.5rem 1.25rem;"><button class="btn btn-primary" onclick="showScorecard()" style="width: 100%;">View Scorecard</button></div>`
+          : `<div style="padding: 0.5rem 1.25rem;"><button class="btn-advance" onclick="advanceWeek()" style="width: 100%; font-size: 0.9rem; padding: 0.6rem;">Run Week ${state.week + 1}</button></div>`
+        }
+        <div style="padding: 0.5rem 1.25rem;"><a href="landing-page.html" target="_blank" style="font-size: 0.85rem;">Landing page &#x2197;</a></div>
+      </div>
+      <div class="content">
+        ${renderActiveTab(stats, currentWeekData, prevWeekData)}
+      </div>
+    </div>`;
+}
+
+function renderActiveTab(stats, current, prev) {
+  switch (state.activeTab) {
+    case 'overview': return renderOverview(stats, current, prev);
+    case 'search-terms': return renderSearchTerms(current);
+    case 'keywords': return renderKeywordsTab();
+    case 'ads': return renderAdsTab();
+    case 'negatives': return renderNegativesTab();
+    default: return '';
+  }
+}
+
+function renderOverview(stats, current, prev) {
+  const delta = (cur, prv, field, isMoney) => {
+    if (!prv || !cur) return '';
+    const diff = cur[field] - prv[field];
+    if (diff === 0) return '';
+    const arrow = diff > 0 ? '&#x25B2;' : '&#x25BC;';
+    const cls = field === 'cpa' ? (diff < 0 ? 'up' : 'down') : (diff > 0 ? 'up' : 'down');
+    return `<div class="mc-delta ${cls}">${arrow} ${isMoney ? fmtMoney(Math.abs(diff)) : fmt(Math.abs(diff))}</div>`;
+  };
+
+  const chartBars = Array.from({ length: CONFIG.totalWeeks }, (_, i) => {
+    const wk = state.weeklyHistory[i];
+    if (!wk) return `<div class="chart-bar future" style="height: 20%;"><div class="bar-label">W${i+1}</div></div>`;
+    const maxSpend = Math.max(...state.weeklyHistory.map(w => w.spend), 1);
+    const h = Math.max(5, (wk.spend / maxSpend) * 100);
+    return `<div class="chart-bar" style="height: ${h}%;"><div class="bar-val">${fmtMoney(wk.spend)}</div><div class="bar-label">W${i+1}</div></div>`;
+  }).join('');
+
+  const pendingNote = stats.pendingConversions > 0
+    ? `<div class="card" style="background: var(--orange-light); border-color: var(--orange);"><strong>${stats.pendingConversions} conversion${stats.pendingConversions===1?'':'s'} still maturing.</strong> B2B leads convert weeks after clicking. Your real CPA is better than it looks right now.</div>`
+    : '';
+
+  return `
+    <div class="panel-title">Week ${state.week} Overview</div>
+    ${pendingNote}
+    <div class="metric-row">
+      <div class="metric-card"><div class="mc-val">${current ? fmtMoney(current.spend) : '—'}</div><div class="mc-label">This Week Spend</div>${delta(current,prev,'spend',true)}</div>
+      <div class="metric-card"><div class="mc-val">${current ? fmt(current.clicks) : '—'}</div><div class="mc-label">Clicks</div>${delta(current,prev,'clicks',false)}</div>
+      <div class="metric-card"><div class="mc-val">${current ? fmt(current.conversions) : '—'}</div><div class="mc-label">Conversions</div>${delta(current,prev,'conversions',false)}</div>
+      <div class="metric-card"><div class="mc-val">${stats.conversions > 0 ? fmtMoney(stats.cpa) : '—'}</div><div class="mc-label">Overall CPA</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-card"><div class="mc-val">${fmtMoney(stats.spend)}</div><div class="mc-label">Total Spend</div></div>
+      <div class="metric-card"><div class="mc-val">${fmt(stats.conversions)}</div><div class="mc-label">Total Conversions</div></div>
+      <div class="metric-card"><div class="mc-val">${fmtPct(stats.ctr)}</div><div class="mc-label">CTR</div></div>
+      <div class="metric-card"><div class="mc-val">${fmtMoney(stats.avgCpc)}</div><div class="mc-label">Avg CPC</div></div>
+    </div>
+    <div class="card">
+      <h3>Weekly Spend</h3>
+      <div class="chart-container"><div class="chart-bar-group">${chartBars}</div></div>
+    </div>
+    <div class="card">
+      <h3>Weekly Performance</h3>
+      <div style="overflow-x: auto;">
+      <table>
+        <thead><tr><th>Week</th><th class="num">Impressions</th><th class="num">Clicks</th><th class="num">CTR</th><th class="num">Spend</th><th class="num">Conv</th><th class="num">CPA</th><th>Wave</th></tr></thead>
+        <tbody>
+          ${state.weeklyHistory.map(w => `
+            <tr>
+              <td>Week ${w.week}</td>
+              <td class="num">${fmt(w.impressions)}</td>
+              <td class="num">${fmt(w.clicks)}</td>
+              <td class="num">${w.impressions > 0 ? fmtPct(w.clicks/w.impressions) : '—'}</td>
+              <td class="num">${fmtMoney(w.spend)}</td>
+              <td class="num">${w.conversions}${w.week <= state.week - 3 ? '' : '<span class="delay-badge">maturing</span>'}</td>
+              <td class="num">${w.conversions > 0 ? fmtMoney(w.spend/w.conversions) : '—'}</td>
+              <td>${'&#x25A0;'.repeat(Math.round(w.wave * 5))} ${w.wave}x</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      </div>
+    </div>`;
+}
+
+function renderSearchTerms(current) {
+  if (!current || current.searchTerms.length === 0) {
+    return `<div class="panel-title">Search Terms</div><p class="panel-desc">No search term data yet. Run a week first.</p>`;
+  }
+
+  const intentLabel = (intent) => {
+    const map = { high: '&#x2705; Buyer', research: '&#x1F50D; Research', jobs: '&#x274C; Job seeker', residential: '&#x274C; Residential', irrelevant: '&#x274C; Irrelevant', gray: '&#x26A0; Gray zone', competitor: '&#x1F3AF; Competitor' };
+    return map[intent] || intent;
+  };
+
+  const rows = current.searchTerms.map(st => {
+    const isNeg = isNegated(st.query, state.negativeKeywords);
+    return `
+      <tr class="${isNeg ? 'neg-added' : ''}">
+        <td>${st.query}</td>
+        <td>${intentLabel(st.intent)}</td>
+        <td class="num">${fmt(st.impressions)}</td>
+        <td class="num">${fmt(st.clicks)}</td>
+        <td class="num">${fmtMoney(st.cost)}</td>
+        <td><span class="tag tag-${st.matchType}">${st.matchType}</span> ${st.keyword}</td>
+        <td>${isNeg ? '<span style="color: var(--green); font-weight: 600;">Blocked</span>' : `<button class="btn btn-sm btn-outline" onclick="addNegativeFromST('${escJs(st.query)}')">+ Negative</button>`}</td>
+      </tr>`;
+  }).join('');
+
+  return `
+    <div class="panel-title">Search Terms — Week ${state.week}</div>
+    <p class="panel-desc">These are the actual queries people searched that triggered your ads. Add irrelevant ones as negative keywords to stop paying for them.</p>
+    <div class="card" style="overflow-x: auto;">
+      <table>
+        <thead><tr><th>Search Term</th><th>Intent</th><th class="num">Impr</th><th class="num">Clicks</th><th class="num">Cost</th><th>Matched By</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderKeywordsTab() {
+  const allKws = state.adGroups.flatMap((ag, agi) =>
+    ag.keywords.map((kw, ki) => ({ ...kw, agName: ag.name, agi, ki }))
+  );
+
+  const rows = allKws.map(kw => `
+    <tr>
+      <td><span class="status-dot ${kw.enabled ? 'status-active' : 'status-paused'}"></span>${kw.enabled ? 'Active' : 'Paused'}</td>
+      <td>${kw.agName}</td>
+      <td><span class="tag tag-${kw.matchType}">${kw.matchType}</span> ${kw.text}</td>
+      <td class="num">$${fmtD(kw.bid)}</td>
+      <td>
+        <button class="btn btn-sm ${kw.enabled ? 'btn-outline' : 'btn-success'}" onclick="toggleKeyword(${kw.agi}, ${kw.ki})">${kw.enabled ? 'Pause' : 'Enable'}</button>
+      </td>
+    </tr>`).join('');
+
+  return `
+    <div class="panel-title">Keywords</div>
+    <p class="panel-desc">Manage your keywords. Pause underperformers or adjust bids.</p>
+    <div class="card">
+      <div class="form-row-inline" style="margin-bottom: 1rem;">
+        <div class="form-group"><label>Keyword</label><input type="text" id="kw-text" placeholder="e.g. fire alarm inspection"></div>
+        <div class="form-group" style="max-width: 140px;"><label>Match Type</label>
+          <select id="kw-match"><option value="phrase">Phrase</option><option value="exact">Exact</option><option value="broad">Broad</option></select>
+        </div>
+        <div class="form-group" style="max-width: 120px;"><label>Ad Group</label>
+          <select id="kw-ag">${state.adGroups.map((ag, i) => `<option value="${i}">${ag.name}</option>`).join('')}</select>
+        </div>
+        <div class="form-group" style="max-width: 90px;"><label>Bid</label><input type="number" id="kw-bid" value="4.50" step="0.50" min="0.50" max="20"></div>
+        <div class="form-group" style="max-width: 80px;"><label>&nbsp;</label><button class="btn btn-primary" onclick="addKeywordRunning()">Add</button></div>
+      </div>
+    </div>
+    <div class="card" style="overflow-x: auto;">
+      <table>
+        <thead><tr><th>Status</th><th>Ad Group</th><th>Keyword</th><th class="num">Bid</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderAdsTab() {
+  const agIdx = state.selectedAdGroup;
+  const ag = state.adGroups[agIdx];
+  const ad = ag.ads[0] || { headlines: Array(15).fill(''), descriptions: Array(4).fill(''), enabled: true };
+
+  const agTabs = state.adGroups.map((a, i) =>
+    `<button class="btn ${i === agIdx ? 'btn-primary' : 'btn-outline'} btn-sm" onclick="state.selectedAdGroup=${i}; render();" style="margin-right: 0.5rem;">${a.name}</button>`
+  ).join('');
+
+  const headlineInputs = ad.headlines.slice(0, 15).map((h, i) =>
+    `<input type="text" maxlength="30" placeholder="Headline ${i+1}" value="${escHtml(h)}" onchange="updateAdHeadline(${agIdx}, ${i}, this.value)" style="margin-bottom: 0.35rem;">`
+  ).join('');
+  const descInputs = ad.descriptions.slice(0, 4).map((d, i) =>
+    `<input type="text" maxlength="90" placeholder="Description ${i+1}" value="${escHtml(d)}" onchange="updateAdDesc(${agIdx}, ${i}, this.value)" style="margin-bottom: 0.35rem;">`
+  ).join('');
+
+  return `
+    <div class="panel-title">Ad Copy</div>
+    <p class="panel-desc">Edit your RSA ads. More quality headlines and descriptions = better CTR.</p>
+    <div style="margin-bottom: 1rem;">${agTabs}</div>
+    <div class="card">
+      <h3>RSA Ad — ${ag.name}</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div><label style="font-weight: 600; font-size: 0.85rem; color: var(--text-2); display: block; margin-bottom: 0.5rem;">Headlines (30 chars)</label>${headlineInputs}</div>
+        <div><label style="font-weight: 600; font-size: 0.85rem; color: var(--text-2); display: block; margin-bottom: 0.5rem;">Descriptions (90 chars)</label>${descInputs}</div>
+      </div>
+    </div>`;
+}
+
+function renderNegativesTab() {
+  const rows = state.negativeKeywords.map((nk, i) => `
+    <tr>
+      <td>${nk}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="removeNegative(${i})">Remove</button></td>
+    </tr>`).join('');
+
+  return `
+    <div class="panel-title">Negative Keywords</div>
+    <p class="panel-desc">Negative keywords prevent your ads from showing for irrelevant searches. Add terms here that you don't want triggering your ads.</p>
+    <div class="card">
+      <div class="form-row-inline" style="margin-bottom: 1rem;">
+        <div class="form-group"><label>Negative Keyword</label><input type="text" id="neg-text" placeholder="e.g. jobs, residential, DIY"></div>
+        <div class="form-group" style="max-width: 80px;"><label>&nbsp;</label><button class="btn btn-primary" onclick="addNegative()">Add</button></div>
+      </div>
+    </div>
+    <div class="card">
+      ${state.negativeKeywords.length > 0 ? `
+        <table>
+          <thead><tr><th>Negative Keyword</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>` : '<p style="color: var(--text-3); font-style: italic;">No negative keywords yet. Review your Search Terms tab to find irrelevant queries.</p>'}
+    </div>`;
+}
+
+// ---- SCORECARD ----
+function renderScorecard() {
+  const result = calculateScore();
+  const gradeColor = { A: 'var(--green)', B: 'var(--blue)', C: 'var(--orange)', D: 'var(--red)', F: 'var(--red)' };
+
+  const detailRows = result.details.map(d => `
+    <div class="score-item">
+      <div class="si-label">${d.cat}</div>
+      <div class="si-val">${d.pts} / ${d.max}</div>
+      <div class="si-target">${d.note}</div>
+    </div>`).join('');
+
+  const pendingNote = result.stats.pendingConversions > 0
+    ? `<div class="card" style="background: var(--orange-light); border-color: var(--orange); max-width: 600px; margin: 1rem auto; text-align: left;">
+        <strong>${result.stats.pendingConversions} conversions are still maturing.</strong> In a real account, your final numbers would be better than what you see here — B2B leads keep converting for months after the click. This is exactly the maturation lag described in <code>how-brady-measures.md</code>.
+      </div>` : '';
+
+  return `
+    <div class="score-section">
+      <h1>Campaign Complete</h1>
+      <p style="color: var(--text-2); font-size: 1.1rem;">12 weeks of Apex Fire Solutions paid search</p>
+      <div class="score-grade" style="color: ${gradeColor[result.grade]};">${result.grade}</div>
+      <p style="font-size: 1.5rem; font-weight: 600;">${result.score} / 100</p>
+      ${pendingNote}
+      <div class="score-grid">${detailRows}</div>
+
+      <div class="card" style="max-width: 800px; margin: 2rem auto; text-align: left;">
+        <h3>Final Numbers</h3>
+        <div class="metric-row">
+          <div class="metric-card"><div class="mc-val">${fmtMoney(result.stats.spend)}</div><div class="mc-label">Total Spend</div></div>
+          <div class="metric-card"><div class="mc-val">${fmt(result.stats.impressions)}</div><div class="mc-label">Impressions</div></div>
+          <div class="metric-card"><div class="mc-val">${fmt(result.stats.clicks)}</div><div class="mc-label">Clicks</div></div>
+          <div class="metric-card"><div class="mc-val">${fmt(result.stats.conversions)}</div><div class="mc-label">Conversions</div></div>
+          <div class="metric-card"><div class="mc-val">${result.stats.conversions > 0 ? fmtMoney(result.stats.cpa) : '—'}</div><div class="mc-label">CPA</div></div>
+          <div class="metric-card"><div class="mc-val">${result.stats.roas > 0 ? fmtD(result.stats.roas) + 'x' : '—'}</div><div class="mc-label">Pipeline ROAS</div></div>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 800px; margin: 1rem auto; text-align: left;">
+        <h3>What to Reflect On</h3>
+        <ul style="padding-left: 1.25rem; color: var(--text-2);">
+          <li style="margin-bottom: 0.5rem;"><strong>Match types:</strong> Did your broad match keywords bring in waste? Would tighter match types have been worth the lower volume?</li>
+          <li style="margin-bottom: 0.5rem;"><strong>Negative keywords:</strong> How quickly did you catch the job seekers and residential queries? What would you add on day one next time?</li>
+          <li style="margin-bottom: 0.5rem;"><strong>The conversion delay:</strong> Did you panic in weeks 1–3 when CPA looked terrible? How would you explain the maturation lag to a stakeholder?</li>
+          <li style="margin-bottom: 0.5rem;"><strong>The traffic spike (week 7):</strong> Did you adjust anything, or let the campaign ride? What was the right call?</li>
+          <li style="margin-bottom: 0.5rem;"><strong>Budget pacing:</strong> Did you run out of budget in any week? What caused it?</li>
+          <li style="margin-bottom: 0.5rem;"><strong>Gray zone queries</strong> (training, regulations, templates): Did you block them or keep them? What's the argument either way?</li>
+        </ul>
+      </div>
+
+      <div style="margin-top: 2rem;">
+        <button class="btn-advance" onclick="resetSim()">Start Over</button>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// EVENT HANDLERS
+// ============================================================
+function startSetup() { state.phase = 'setup'; render(); }
+
+function selectAdGroup(i) { state.selectedAdGroup = i; render(); }
+
+function addKeyword() {
+  const text = document.getElementById('kw-text').value.trim();
+  const matchType = document.getElementById('kw-match').value;
+  const bid = parseFloat(document.getElementById('kw-bid').value) || CONFIG.defaultBid;
+  if (!text) return;
+  state.adGroups[state.selectedAdGroup].keywords.push({ text, matchType, bid, enabled: true });
+  toast(`Added "${text}" as ${matchType} match`);
+  render();
+}
+
+function addKeywordRunning() {
+  const text = document.getElementById('kw-text').value.trim();
+  const matchType = document.getElementById('kw-match').value;
+  const agIdx = parseInt(document.getElementById('kw-ag').value);
+  const bid = parseFloat(document.getElementById('kw-bid').value) || CONFIG.defaultBid;
+  if (!text) return;
+  state.adGroups[agIdx].keywords.push({ text, matchType, bid, enabled: true });
+  toast(`Added "${text}" to ${state.adGroups[agIdx].name}`);
+  render();
+}
+
+function removeKeyword(agi, ki) {
+  state.adGroups[agi].keywords.splice(ki, 1);
+  render();
+}
+
+function toggleKeyword(agi, ki) {
+  const kw = state.adGroups[agi].keywords[ki];
+  kw.enabled = !kw.enabled;
+  toast(`${kw.text}: ${kw.enabled ? 'enabled' : 'paused'}`);
+  render();
+}
+
+function updateAdHeadline(agIdx, idx, val) {
+  ensureAd(agIdx);
+  state.adGroups[agIdx].ads[0].headlines[idx] = val;
+}
+
+function updateAdDesc(agIdx, idx, val) {
+  ensureAd(agIdx);
+  state.adGroups[agIdx].ads[0].descriptions[idx] = val;
+}
+
+function ensureAd(agIdx) {
+  if (state.adGroups[agIdx].ads.length === 0) {
+    state.adGroups[agIdx].ads.push({ headlines: Array(15).fill(''), descriptions: Array(4).fill(''), enabled: true });
+  }
+}
+
+function launchCampaign() {
+  state.phase = 'running';
+  state.activeTab = 'overview';
+  advanceWeek();
+}
+
+function advanceWeek() {
+  if (state.week >= CONFIG.totalWeeks) return;
+  simulateWeek();
+  toast(`Week ${state.week} complete`);
+  render();
+}
+
+function showScorecard() { state.phase = 'complete'; render(); }
+
+function switchTab(tab) { state.activeTab = tab; render(); }
+
+function addNegativeFromST(query) {
+  const words = query.toLowerCase().split(/\s+/);
+  const candidates = words.filter(w => w.length > 3 && !['fire','system','commercial','service','near','cost'].includes(w));
+  const neg = candidates.length > 0 ? candidates[0] : words[words.length - 1];
+  if (!state.negativeKeywords.includes(neg)) {
+    state.negativeKeywords.push(neg);
+    toast(`Added negative: "${neg}"`);
+  }
+  render();
+}
+
+function addNegative() {
+  const text = document.getElementById('neg-text').value.trim().toLowerCase();
+  if (!text) return;
+  const parts = text.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+  for (const p of parts) {
+    if (!state.negativeKeywords.includes(p)) state.negativeKeywords.push(p);
+  }
+  toast(`Added ${parts.length} negative${parts.length === 1 ? '' : 's'}`);
+  render();
+}
+
+function removeNegative(i) {
+  state.negativeKeywords.splice(i, 1);
+  render();
+}
+
+function resetSim() { initState(); render(); }
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escJs(s) { return String(s).replace(/'/g,"\\'").replace(/\\/g,'\\\\'); }
+function bindEvents() {}
+
+// ============================================================
+// INIT
+// ============================================================
+initState();
+render();
+</script>
+</body>
+</html>

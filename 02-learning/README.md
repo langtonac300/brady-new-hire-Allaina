@@ -39,3 +39,18 @@ is the exception: if you get it wrong, you can work confidently for weeks and be
 confidently wrong the whole time — quoting numbers in meetings that don't mean what you
 think they mean. It's also the thing most likely to feel unclear the first three times you
 read it, which is normal and not a reflection on you.
+
+---
+
+## Want to practice, not just read?
+
+There's a **campaign simulator** in
+[`06-tracker/simulation/`](../06-tracker/simulation/README.md) — a sandbox where you build a
+search campaign from scratch for a fictional company, launch it, and optimize it over 12
+simulated weeks against fake traffic. Nothing real, nothing at stake.
+
+It's optional and it's not on any schedule — but it's the one place you can practice *building*
+a campaign rather than auditing one someone else built, and it puts the ideas from
+`ad-copy-and-assets.md`, `landing-pages.md`, `who-else-is-searching.md` and the
+long-buying-cycle section of `how-brady-measures.md` into one thing you actually operate. Good
+to reach for any time those files feel abstract.
