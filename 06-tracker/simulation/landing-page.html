@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Fire Solutions — Commercial Fire Protection</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --primary: #0D5C63;
+    --primary-dark: #094148;
+    --accent: #E8742C;
+    --accent-hover: #D4621D;
+    --text: #1a1a1a;
+    --text-light: #555;
+    --bg: #fff;
+    --bg-light: #f5f7f8;
+    --border: #dde1e4;
+  }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: var(--text); line-height: 1.6; background: var(--bg); }
+  a { color: var(--primary); text-decoration: none; }
+
+  /* NAV */
+  .nav { background: var(--primary-dark); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-logo { color: #fff; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a { color: rgba(255,255,255,0.85); font-size: 0.9rem; font-weight: 500; }
+  .nav-links a:hover { color: #fff; }
+  .nav-cta { background: var(--accent); color: #fff; padding: 0.5rem 1.25rem; border-radius: 4px; font-weight: 600; font-size: 0.9rem; }
+  .nav-cta:hover { background: var(--accent-hover); }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); color: #fff; padding: 5rem 2rem; text-align: center; }
+  .hero h1 { font-size: 2.75rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.03em; line-height: 1.15; }
+  .hero p { font-size: 1.2rem; opacity: 0.9; max-width: 640px; margin: 0 auto 2rem; }
+  .hero-cta { display: inline-block; background: var(--accent); color: #fff; padding: 0.9rem 2rem; border-radius: 4px; font-weight: 700; font-size: 1.05rem; }
+  .hero-cta:hover { background: var(--accent-hover); }
+  .hero-sub { margin-top: 0.75rem; font-size: 0.85rem; opacity: 0.7; }
+
+  /* TRUST BAR */
+  .trust-bar { background: var(--bg-light); border-bottom: 1px solid var(--border); padding: 1.25rem 2rem; display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; }
+  .trust-item { font-size: 0.85rem; color: var(--text-light); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  /* SECTIONS */
+  .section { padding: 4rem 2rem; max-width: 1100px; margin: 0 auto; }
+  .section-title { font-size: 1.75rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; color: var(--primary-dark); }
+  .section-sub { text-align: center; color: var(--text-light); margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+
+  /* SERVICE CARDS */
+  .services { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+  .card { border: 1px solid var(--border); border-radius: 8px; padding: 2rem; transition: box-shadow 0.2s; }
+  .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .card-icon { font-size: 2rem; margin-bottom: 1rem; }
+  .card h3 { font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--primary-dark); }
+  .card p { color: var(--text-light); font-size: 0.95rem; }
+  .card ul { margin-top: 0.75rem; padding-left: 1.25rem; color: var(--text-light); font-size: 0.9rem; }
+  .card ul li { margin-bottom: 0.25rem; }
+
+  /* WHY SECTION */
+  .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; text-align: center; }
+  .why-item { padding: 1.5rem; }
+  .why-num { font-size: 2.25rem; font-weight: 800; color: var(--accent); }
+  .why-label { font-size: 0.9rem; color: var(--text-light); margin-top: 0.25rem; }
+
+  /* INDUSTRIES */
+  .industries { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin-top: 1.5rem; }
+  .ind-tag { background: var(--bg-light); border: 1px solid var(--border); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; color: var(--text-light); }
+
+  /* CTA SECTION */
+  .cta-section { background: var(--primary-dark); color: #fff; padding: 4rem 2rem; text-align: center; }
+  .cta-section h2 { font-size: 2rem; margin-bottom: 0.75rem; }
+  .cta-section p { opacity: 0.85; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+
+  /* FORM */
+  .form-wrapper { background: #fff; border-radius: 8px; padding: 2.5rem; max-width: 520px; margin: 0 auto; text-align: left; }
+  .form-wrapper h3 { color: var(--primary-dark); margin-bottom: 1.5rem; font-size: 1.25rem; }
+  .form-row { margin-bottom: 1.25rem; }
+  .form-row label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 0.35rem; }
+  .form-row input, .form-row select, .form-row textarea {
+    width: 100%; padding: 0.65rem 0.75rem; border: 1px solid var(--border); border-radius: 4px;
+    font-size: 0.95rem; font-family: inherit; color: var(--text);
+  }
+  .form-row textarea { resize: vertical; min-height: 80px; }
+  .form-btn { background: var(--accent); color: #fff; border: none; padding: 0.75rem 2rem; border-radius: 4px; font-weight: 700; font-size: 1rem; cursor: pointer; width: 100%; }
+  .form-btn:hover { background: var(--accent-hover); }
+  .form-note { font-size: 0.8rem; color: var(--text-light); margin-top: 0.75rem; text-align: center; }
+
+  /* FOOTER */
+  .footer { background: #1a1a1a; color: rgba(255,255,255,0.6); padding: 2rem; text-align: center; font-size: 0.8rem; }
+
+  /* BANNER */
+  .sim-banner { background: #FFF3CD; border-bottom: 2px solid #FFCC02; padding: 0.75rem 2rem; text-align: center; font-size: 0.85rem; color: #664D03; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="sim-banner">
+  SIMULATION — This is a fictional company for training purposes. No real business exists at this URL.
+</div>
+
+<nav class="nav">
+  <div class="nav-logo">APEX <span>FIRE</span> SOLUTIONS</div>
+  <div class="nav-links">
+    <a href="#services">Services</a>
+    <a href="#why">Why Apex</a>
+    <a href="#industries">Industries</a>
+    <a href="#contact" class="nav-cta">Get a Quote</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>Commercial Fire Protection<br>You Can Count On</h1>
+  <p>From code-compliant suppression systems to annual inspections, Apex Fire Solutions keeps your facilities safe, certified, and audit-ready.</p>
+  <a href="#contact" class="hero-cta">Request a Free Assessment</a>
+  <div class="hero-sub">Response within 24 hours &middot; No obligation</div>
+</section>
+
+<div class="trust-bar">
+  <span class="trust-item">NFPA Certified</span>
+  <span class="trust-item">25+ Years Experience</span>
+  <span class="trust-item">3,200+ Facilities Protected</span>
+  <span class="trust-item">Licensed in 38 States</span>
+  <span class="trust-item">24/7 Emergency Service</span>
+</div>
+
+<section class="section" id="services">
+  <h2 class="section-title">Our Services</h2>
+  <p class="section-sub">Full-service commercial fire protection — from design and installation through lifetime maintenance and compliance.</p>
+  <div class="services">
+    <div class="card">
+      <div class="card-icon">&#x1F525;</div>
+      <h3>Fire Suppression Systems</h3>
+      <p>Custom-engineered systems for your facility. We design, install, and retrofit wet, dry, pre-action, and clean agent suppression to meet your specific code requirements.</p>
+      <ul>
+        <li>Wet and dry sprinkler systems</li>
+        <li>Clean agent (FM-200, Novec)</li>
+        <li>Kitchen hood suppression</li>
+        <li>Retrofit and expansion</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#x1F4CB;</div>
+      <h3>Compliance Audits</h3>
+      <p>Stay ahead of code violations. Our certified inspectors audit your fire protection systems against current NFPA, OSHA, and local fire codes — and hand you a clear remediation plan.</p>
+      <ul>
+        <li>NFPA 13, 25, 72 compliance</li>
+        <li>OSHA 29 CFR 1910 reviews</li>
+        <li>AHJ pre-inspection preparation</li>
+        <li>Remediation prioritization</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#x1F50D;</div>
+      <h3>Inspections &amp; Testing</h3>
+      <p>Annual, semi-annual, and quarterly inspections to keep your systems certified and your insurance compliant. We test every component and document everything.</p>
+      <ul>
+        <li>Sprinkler flow and trip tests</li>
+        <li>Fire alarm panel testing</li>
+        <li>Extinguisher service (6-yr / 12-yr)</li>
+        <li>Backflow preventer testing</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#x1F527;</div>
+      <h3>Maintenance Programs</h3>
+      <p>Planned maintenance that prevents failures. Quarterly or annual programs tailored to your facility size and system complexity — with guaranteed response times.</p>
+      <ul>
+        <li>Preventive maintenance contracts</li>
+        <li>Valve and pump maintenance</li>
+        <li>Corrosion monitoring</li>
+        <li>24/7 emergency repairs</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="why" style="background: var(--bg-light);">
+  <h2 class="section-title">Why Facilities Choose Apex</h2>
+  <p class="section-sub">We protect critical infrastructure for some of the most demanding environments in the country.</p>
+  <div class="why-grid">
+    <div class="why-item">
+      <div class="why-num">3,200+</div>
+      <div class="why-label">Facilities Protected</div>
+    </div>
+    <div class="why-item">
+      <div class="why-num">98.7%</div>
+      <div class="why-label">First-Pass Inspection Rate</div>
+    </div>
+    <div class="why-item">
+      <div class="why-num">4 hrs</div>
+      <div class="why-label">Avg. Emergency Response</div>
+    </div>
+    <div class="why-item">
+      <div class="why-num">25</div>
+      <div class="why-label">Years in Business</div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="industries">
+  <h2 class="section-title">Industries We Serve</h2>
+  <p class="section-sub">Every facility has different fire protection requirements. We've engineered systems for all of them.</p>
+  <div class="industries">
+    <span class="ind-tag">Healthcare &amp; Hospitals</span>
+    <span class="ind-tag">Manufacturing</span>
+    <span class="ind-tag">Warehousing &amp; Distribution</span>
+    <span class="ind-tag">Data Centers</span>
+    <span class="ind-tag">Office &amp; Commercial</span>
+    <span class="ind-tag">Education</span>
+    <span class="ind-tag">Retail &amp; Hospitality</span>
+    <span class="ind-tag">Government &amp; Military</span>
+    <span class="ind-tag">Multifamily Residential</span>
+    <span class="ind-tag">Industrial &amp; Chemical</span>
+  </div>
+</section>
+
+<section class="cta-section" id="contact">
+  <h2>Protect Your Facility</h2>
+  <p>Tell us about your building and we'll provide a free fire protection assessment with code-specific recommendations.</p>
+  <div class="form-wrapper">
+    <h3>Request a Free Assessment</h3>
+    <div class="form-row">
+      <label>Full Name *</label>
+      <input type="text" placeholder="e.g. Sarah Chen">
+    </div>
+    <div class="form-row">
+      <label>Business Email *</label>
+      <input type="email" placeholder="e.g. schen@facilityname.com">
+    </div>
+    <div class="form-row">
+      <label>Company *</label>
+      <input type="text" placeholder="e.g. Lakeside Medical Center">
+    </div>
+    <div class="form-row">
+      <label>Phone</label>
+      <input type="tel" placeholder="e.g. (555) 123-4567">
+    </div>
+    <div class="form-row">
+      <label>Facility Type *</label>
+      <select>
+        <option value="">Select one...</option>
+        <option>Healthcare / Hospital</option>
+        <option>Manufacturing</option>
+        <option>Warehouse / Distribution</option>
+        <option>Data Center</option>
+        <option>Office / Commercial</option>
+        <option>Education</option>
+        <option>Retail / Hospitality</option>
+        <option>Government / Military</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>What do you need?</label>
+      <textarea placeholder="e.g. We need a compliance audit for our 120,000 sq ft warehouse before our insurance renewal in March..."></textarea>
+    </div>
+    <button class="form-btn" onclick="alert('This is a simulation — no form is submitted.')">Request Assessment</button>
+    <div class="form-note">We respond within 24 hours. Your information is never shared.</div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>SIMULATION ONLY — Apex Fire Solutions is a fictional company created for paid search training.</p>
+  <p style="margin-top: 0.5rem;">&copy; 2026 Apex Fire Solutions &middot; This page is not real.</p>
+</footer>
+
+</body>
+</html>
