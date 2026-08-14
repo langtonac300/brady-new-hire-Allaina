@@ -1,0 +1,9 @@
+{
+  "name": "brady-paid-search-training",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "mkdir -p public && node 06-tracker/tools/build-content.mjs && node 06-tracker/tools/preview.mjs public/index.html && cp 06-tracker/simulation/sim.html public/sim.html 2>/dev/null || true && cp 06-tracker/simulation/landing-page.html public/landing-page.html 2>/dev/null || true",
+    "start": "npx serve public"
+  }
+}
