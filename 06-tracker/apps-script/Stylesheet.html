@@ -91,7 +91,33 @@
 
   /* ============================== shell ============================== */
 
-  .app { display: flex; flex-direction: column; height: 100vh; }
+  .app { display: flex; flex-direction: row; height: 100vh; overflow: hidden; }
+
+  .global-nav {
+    display: flex; flex-direction: column; gap: 16px;
+    width: 80px; flex: 0 0 auto;
+    background: var(--navy); border-right: 1px solid rgba(255,255,255,0.1);
+    padding: 20px 0; align-items: center;
+    z-index: 100;
+  }
+
+  .global-nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    color: rgba(255, 255, 255, 0.6); text-decoration: none;
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 12px 0; width: 64px; border-radius: var(--r-sm);
+    transition: all 0.2s var(--ease);
+  }
+  .global-nav-item:hover {
+    color: #fff; background: rgba(255, 255, 255, 0.1);
+  }
+  .global-nav-item.active {
+    color: #fff; background: rgba(255, 255, 255, 0.15);
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+
+  .app-content { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+
 
   .topbar {
     display: flex; align-items: center; gap: 14px;

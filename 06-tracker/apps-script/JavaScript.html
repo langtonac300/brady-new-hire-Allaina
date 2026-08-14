@@ -2346,6 +2346,29 @@
         return;
       }
 
+      var globalNavBtn = t.closest('[data-app]');
+      if (globalNavBtn) {
+        e.preventDefault();
+        var appId = globalNavBtn.getAttribute('data-app');
+        
+        // Update active class on nav
+        document.querySelectorAll('.global-nav-item').forEach(function(el) {
+          el.classList.remove('active');
+        });
+        globalNavBtn.classList.add('active');
+
+        // Hide all apps, show target app
+        document.querySelectorAll('.app-module').forEach(function(el) {
+          el.hidden = true;
+        });
+        document.getElementById('academyApp').hidden = (appId !== 'academy');
+        
+        var targetApp = document.getElementById(appId + 'App');
+        if (targetApp) targetApp.hidden = false;
+        
+        return;
+      }
+
       var docBtn = t.closest('[data-doc]');
       if (docBtn) {
         e.preventDefault();
