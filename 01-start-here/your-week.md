@@ -12,7 +12,7 @@ The recurring meetings, what each one is for, and what's expected of you in it.
 | Day | | What |
 |-----|---|------|
 | **Mon** | 1:00 | **Meta Monday** — Stuart's digital team weekly (SEO + Email + Paid) |
-| **Tue** | 10:00 | **L10 Huddle** — your team's weekly. The big one. *(10:30 on 9 Sep only — your first week)* |
+| **Tue** | 10:00 | **L10 Huddle** — your team's weekly. The big one. *(10:30 on Tue 8 Sep only — Allaina's first day)* |
 | **Wed** | 2:00 | **Seton / EMEDCO weekly** |
 | **Thu** | 10:00 | **Search Deep Dive** — the performance review working session |
 | **Fri** | 9:00–11:00 | **Professional development block** — protected time, not a meeting |
