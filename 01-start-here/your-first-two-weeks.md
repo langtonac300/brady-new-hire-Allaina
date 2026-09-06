@@ -20,7 +20,14 @@ Two things run alongside every day below:
 - **Post your three lines at the end of each day** (what you did, what you learned, what
   surprised you) — see [`how-the-ramp-works.md`](./how-the-ramp-works.md).
 
-The day layout assumes you start on a Monday. If you don't, slide the rows.
+**These are your actual dates** — you start **Tuesday, September 8**, so the ten days below
+run Tue 9/8 to Mon 9/21, and the standing meetings are shown where they really fall. If a day
+slips, slide the *reading*; the meetings stay where they are.
+
+> **A Tuesday start means you meet the team fast.** The L10 huddle is at 10:00 on your very
+> first morning, and all four standing meetings land in your first week. That's a lot of
+> rooms early — **sit in all of them and say nothing.** You are there to hear what the week
+> sounds like, not to contribute.
 
 ---
 
@@ -31,14 +38,14 @@ feels like.
 
 | Day | Morning | Afternoon |
 |-----|---------|-----------|
-| **1 · Getting in** | Check every login works — Google Ads, the spend dashboard, chat, calendar. **Say something today if one doesn't**; access takes far longer to fix than to request. Meet the team — [`who-everyone-is.md`](./who-everyone-is.md) is the map | Fill in your [Day-1 baseline](../05-self-assessment/baseline.md) — **before any training**, that's the whole point. Then [`about-how-you-work.md`](./about-how-you-work.md), which is how we fix the parts of this plan that were guesses. Read [`how-the-ramp-works.md`](./how-the-ramp-works.md) |
-| **2 · What paid search is** | [`ppc-fundamentals.md`](../02-learning/ppc-fundamentals.md), first half | Shadow Alex or Courtney through a normal day. You're watching for the *shape* of it — what gets opened, in what order, what gets ignored. Don't try to take notes on everything |
-| **3 · The rest of it** | [`ppc-fundamentals.md`](../02-learning/ppc-fundamentals.md), second half | Start your questions-and-unknowns doc in `04-my-work/`. Sit in on whichever standing meetings fall today — silent, just listening. [`your-week.md`](./your-week.md) says what each one is; read [`the-l10-huddle.md`](../02-learning/the-l10-huddle.md) before the Tuesday one |
-| **4 · Your first account tour** | [`how-to-run-a-project.md`](../02-learning/how-to-run-a-project.md) — ten minutes, and it applies to every project after this. Then skim the opening of [`pdc-primer.md`](../02-learning/pdc-primer.md), just enough to know what the accounts are called | [**T1-1 · Account tour, narrated**](../03-projects/t1-01-account-tour.md), paired with Alex. Your first time inside a real account. **Write your prediction down before you open it** |
-| **5 · Write it up** | [`what-a-deliverable-looks-like.md`](../02-learning/what-a-deliverable-looks-like.md), then write up T1-1 — the one-page structure map | Settle with Alex **where your work lives**: which board or folder, and how he wants a change posted for review. Cheap to agree now, annoying to fix in week six |
+| **1 · Tue 9/8 · Getting in** | Check every login works — Google Ads, the spend dashboard, chat, calendar. **Say something today if one doesn't**; access takes far longer to fix than to request. **10:00 — the L10 huddle.** You'll walk into it cold on your first morning; that's fine and it's the fastest way to meet everyone. Just listen. [`who-everyone-is.md`](./who-everyone-is.md) is the map of who was in the room | Fill in your [Day-1 baseline](../05-self-assessment/baseline.md) — **before any training**, that's the whole point. Then [`about-how-you-work.md`](./about-how-you-work.md), which is how we fix the parts of this plan that were guesses. Read [`how-the-ramp-works.md`](./how-the-ramp-works.md) |
+| **2 · Wed 9/9 · What paid search is** | [`ppc-fundamentals.md`](../02-learning/ppc-fundamentals.md), first half | **2:00 — the Seton / EMEDCO weekly**, listening only. Around it, shadow Alex or Courtney through a normal day. You're watching for the *shape* of it — what gets opened, in what order, what gets ignored. Don't try to take notes on everything |
+| **3 · Thu 9/10 · The rest of it** | **10:00 — the Search Deep Dive**, the performance review working session. Most of it won't land yet; write down two things you didn't understand. Around it, [`ppc-fundamentals.md`](../02-learning/ppc-fundamentals.md), second half | Start your questions-and-unknowns doc in `04-my-work/`. The two things from this morning are its first entries |
+| **4 · Fri 9/11 · Your first account tour** | **9:00–11:00 is your professional-development block** — protected time, use it for [`how-to-run-a-project.md`](../02-learning/how-to-run-a-project.md) (ten minutes, and it applies to every project after this) and then skim the opening of [`pdc-primer.md`](../02-learning/pdc-primer.md), just enough to know what the accounts are called | [**T1-1 · Account tour, narrated**](../03-projects/t1-01-account-tour.md), paired with Alex. Your first time inside a real account. **Write your prediction down before you open it** |
+| **5 · Mon 9/14 · Write it up** | [`what-a-deliverable-looks-like.md`](../02-learning/what-a-deliverable-looks-like.md), then write up T1-1 — the one-page structure map | **1:00 — Meta Monday**, Stuart's whole digital team. Listening only. Afterwards, settle with Alex **where your work lives**: which board or folder, and how he wants a change posted for review. Cheap to agree now, annoying to fix in week six |
 
-**By Friday you should have:** a filled-in baseline, a long list of questions and a
-one-page map of an account you'd never seen on Monday. That's the week.
+**By the end of day 5 you should have:** a filled-in baseline, a long list of questions and
+a one-page map of an account you'd never seen the week before. That's the week.
 
 ---
 
@@ -50,11 +57,11 @@ confidently for a month and be confidently wrong the whole time.
 
 | Day | Morning | Afternoon |
 |-----|---------|-----------|
-| **6 · First pass** | [`how-brady-measures.md`](../02-learning/how-brady-measures.md). **Expect not to follow all of it.** Mark the parts that don't land rather than re-reading until they do | [**T1-3 · Keyword vs. search term**](../03-projects/t1-03-keyword-vs-search-term.md), solo. Concrete, after a heavy morning |
-| **7 · What counts as a conversion** | Re-read the conversion-tracking section of [`ppc-fundamentals.md`](../02-learning/ppc-fundamentals.md) | [**T1-4 · Conversion-action inventory**](../03-projects/t1-04-conversion-action-inventory.md), paired with Alex |
-| **8 · Second pass** | [`how-brady-measures.md`](../02-learning/how-brady-measures.md) again. It reads differently now that you've seen the conversion actions | Start your one-pager: **how a dollar of PDC spend becomes a dollar of reported revenue**, in your own words. Being wrong on paper is the cheapest possible place to be wrong |
-| **9 · Sourcing a number** | Finish the one-pager draft | [**T1-5 · Source and caveat the slide**](../03-projects/t1-05-source-and-caveat-the-slide.md), paired with Alex. This is the one that shows whether the week landed |
-| **10 · Review** | Fix the one-pager using what T1-5 exposed | Walk it through with Alex. Then read [`pdc-primer.md`](../02-learning/pdc-primer.md) properly — from here on the accounts are the subject |
+| **6 · Tue 9/15 · First pass** | **10:00 — the L10 huddle.** Read [`the-l10-huddle.md`](../02-learning/the-l10-huddle.md) before it: you saw this room cold on day 1, and knowing what the format is for makes it sound like a different meeting. Around it, [`how-brady-measures.md`](../02-learning/how-brady-measures.md). **Expect not to follow all of it.** Mark the parts that don't land rather than re-reading until they do | [**T1-3 · Keyword vs. search term**](../03-projects/t1-03-keyword-vs-search-term.md), solo. Concrete, after a heavy morning |
+| **7 · Wed 9/16 · What counts as a conversion** | Re-read the conversion-tracking section of [`ppc-fundamentals.md`](../02-learning/ppc-fundamentals.md) | [**T1-4 · Conversion-action inventory**](../03-projects/t1-04-conversion-action-inventory.md), paired with Alex. The Seton / EMEDCO weekly is also at 2:00 — Alex's time wins this week; you'll be in that meeting every week from here |
+| **8 · Thu 9/17 · Second pass** | **10:00 — the Search Deep Dive**, your second one. Notice how much more of it lands than last week. Around it, [`how-brady-measures.md`](../02-learning/how-brady-measures.md) again — it reads differently now that you've seen the conversion actions | Start your one-pager: **how a dollar of PDC spend becomes a dollar of reported revenue**, in your own words. Being wrong on paper is the cheapest possible place to be wrong |
+| **9 · Fri 9/18 · Sourcing a number** | **PD block, 9:00–11:00** — protected time. Finish the one-pager draft | [**T1-5 · Source and caveat the slide**](../03-projects/t1-05-source-and-caveat-the-slide.md), paired with Alex. This is the one that shows whether the week landed |
+| **10 · Mon 9/21 · Review** | Fix the one-pager using what T1-5 exposed | **1:00 — Meta Monday.** Around it, walk the one-pager through with Alex. Then read [`pdc-primer.md`](../02-learning/pdc-primer.md) properly — from here on the accounts are the subject |
 
 > ⚠️ **If the attribution material still feels slippery on Day 10, that is the normal
 > outcome, not a bad sign.** It's the thing most people need three passes and one real
