@@ -181,6 +181,25 @@ interface in a browser without deploying anything.
 
 ---
 
+## The other things in this folder
+
+`06-tracker/` is tooling rather than content, and three of the four things in it aren't the
+workbook at all:
+
+| Folder | What it is |
+|--------|-----------|
+| [`apps-script/`](./apps-script/) | The workbook itself — everything above this line |
+| [`sheets-practice/`](./sheets-practice/README.md) | **The guided Sheets workbook** — a fake account, 940 search terms and nine tasks covering pivots, `FILTER`, `QUERY` and the per-business-day math T2-4 runs on. Paired with `02-learning/sheets-for-paid-search.md` |
+| [`simulation/`](./simulation/README.md) | The campaign simulator — build and optimize a search campaign for a fictional company over 12 simulated weeks |
+| [`google-ads-scripts/`](./google-ads-scripts/) | The three Google Ads scripts, documented below |
+
+> ⚠️ **`sheets-practice/` regenerates as one artifact.** `generate.mjs` writes `data/` **and**
+> `ANSWERS.md` from a single seed, so the answer key is computed from the rows that ship rather
+> than written by hand. Run it and commit both together, or the key silently stops matching the
+> data — which is a worse failure than having no key at all.
+
+---
+
 ## What's in `apps-script/`
 
 | File | What it does |

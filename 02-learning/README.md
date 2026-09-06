@@ -25,6 +25,7 @@ Reference you'll come back to.
 | `ad-copy-and-assets.md` | Writing RSAs, B2B ad copy principles, copy testing, PMax asset groups and ad extensions | Before T2-6 |
 | `landing-pages.md` | What makes a landing page good or bad, message match, Quality Score connection and how to audit a page | Before T4-1 and T4-3 |
 | `who-else-is-searching.md` | The groups that bad search terms fall into, the ones that look bad and aren't, and the B2B gray zone (not junk, just not your buyer) | Week 4, before your first search-terms round |
+| `sheets-for-paid-search.md` | The five spreadsheet skills the ladder assumes — pivots, `FILTER`, `QUERY`, per-business-day math — and the four ways a spreadsheet quietly lies to you | Weeks 3–5, before T2-4 |
 | `before-it-ships.md` | The checklist to run on your own work before you post a change for review | Week 4 onward — every time you change something |
 | `running-a-real-test.md` | Control vs treatment, the three test modes and what they're worth, and the rules that void a result | Before you propose your first experiment (Phase 2) |
 
@@ -44,7 +45,21 @@ read it, which is normal and not a reflection on you.
 
 ## Want to practice, not just read?
 
-There's a **campaign simulator** in
+Two sandboxes, both optional, neither on a schedule.
+
+### The Sheets workbook — two hours, weeks 3–5
+
+[`06-tracker/sheets-practice/`](../06-tracker/sheets-practice/README.md) — a fake safety-supply
+account, 940 search terms, and nine guided tasks covering everything in
+[`sheets-for-paid-search.md`](./sheets-for-paid-search.md): pivots, `FILTER`, `QUERY`, the
+silent-truncation trap and the per-business-day math that **T2-4** runs on.
+
+It's the one to do **before** T2-4, not after. Learning a formula and getting a live budget
+number right are different tasks, and doing them at the same time is how quiet mistakes happen.
+
+### The campaign simulator
+
+There's also a **campaign simulator** in
 [`06-tracker/simulation/`](../06-tracker/simulation/README.md) — a sandbox where you build a
 search campaign from scratch for a fictional company, launch it, and optimize it over 12
 simulated weeks against fake traffic. Nothing real, nothing at stake.
