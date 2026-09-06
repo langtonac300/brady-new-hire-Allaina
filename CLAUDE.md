@@ -72,9 +72,10 @@ other except what's written down here — so a few habits matter more than usual
    grep -rinE "wrong-hire|fit-with-support|business case|headcount|probation|I-9|background check" . --include=*.md
    ```
    Only the mentions inside this file's boundary-rule section above should match. Anything
-   in another file, stop and investigate before pushing. (A GitHub Action also runs this
-   check automatically on every push to `main` — but it only reports after the fact; don't
-   rely on it instead of checking yourself.)
+   in another file, stop and investigate before pushing. (A GitHub Action runs the same
+   check on every pull request targeting `main`, and again on every push to `main` — so the
+   pull-request run does catch it before it lands. Don't lean on that instead of checking
+   yourself: a red build tells you less than the grep does, and later.)
 6. **When in doubt, don't add it.** If you're not sure content belongs in this repo —
    because it's not clearly about Allaina's ramp, or you can't tell which side of the boundary
    it came from — say so and leave it out, rather than guessing.

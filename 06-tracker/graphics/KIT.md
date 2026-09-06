@@ -77,7 +77,7 @@ changes, the slide is wrong until it is redrawn, and a wrong number in a diagram
 no diagram: it looks authoritative and it is not in a system anyone can check it against.
 
 ⚠️ **The diagrams are not inlined into the app.** Each is a slide of about 70 KB and belongs to
-one or two of the 63 documents, so the build puts them in `apps-script/DataDiagrams.gs` and the
+one or two of the 66 documents, so the build puts them in `apps-script/DataDiagrams.gs` and the
 browser fetches one when a document needs it. Everything else in this kit is inlined and lands
 on every page load. `tools/build-images.py` decides which pile an image goes in.
 
