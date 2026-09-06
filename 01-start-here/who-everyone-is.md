@@ -23,11 +23,11 @@ stuff that the team chat makes sense in week one.
                                    Stephen Sundstrom
                                    VP & GM, Americas Marketing
                                           │
-   ┌───────────────────┬──────────────────┴─┬─────────────────────┐
-   │                   │                    │                     │
-   Tyler Whitten       Julie Molsky         STUART MacKAY         Michele DiStasio
-   Marketing           Sr. Ecommerce        Sr. Digital           Channel Marketing
-   Analytics           Merchandising        Marketing             Director
+   ┌───────────────────┬──────────────────┴─┐
+   │                   │                    │
+   Tyler Whitten       Julie Molsky         STUART MacKAY
+   Marketing           Sr. Ecommerce        Sr. Digital
+   Analytics           Merchandising        Marketing
                                             ↑ your skip-level
                                             │
    ┌──────────────────┬──────────────────┬──┴───────────┐
@@ -53,7 +53,7 @@ stuff that the team chat makes sense in week one.
 
 **Where you sit:** four levels below the CEO, on a team of five including Alex. Most of
 Americas Marketing sits in **Good Hope** (you'll see it written **GHO**). Stephen Sundstrom
-is in Camden, Michele DiStasio in Branford.
+is in Camden.
 
 > **A naming oddity worth knowing on day one:** Alex's team is formally called
 > **"Digital Paid Media: Seton, Emedco"** in Workday — even though it also runs Brady's paid
@@ -216,7 +216,7 @@ thread, just ask which one** — everybody does it.
 | **Matt** | **Matt Kashuda** ("Matt K") — ecommerce, the site tools · **Matthew Ryno** ("Matt R") — MOps and Salesforce routing · **Matt Bougie** — SEO/content |
 | **Courtney** | **Courtney Hamilton** — your teammate · **Courtney Culp** — Sr. Copywriter in Creative Services |
 | **CJ** | **CJ Weissenberger** — your teammate · **CJ Noggle** — ran paid search years ago, appears only in old budget files |
-| **Michele / Michelle** | **Michele DiStasio** (Channel Marketing Director) · **Michele Kowalkowski** (Digital Merchandising Ops) · a third **Michelle** on ABM, who is departing |
+| **Michele / Michelle** | **Michele Kowalkowski** (Digital Merchandising Ops) — the only one still here · **Michele A DiStasio** — *left Brady around Aug 2026*. In older docs you'll also see a **"Michelle"** who owned ABM: same person, not a second one. Her work moved to **Tyler Whitten** |
 | **Ben** | **Ben Youngblade** — SEO, the one you want · **Ben Wischnewski** — Sr. Copywriter, Creative Services |
 | **Tyler** | **Tyler Whitten** — Marketing Analytics Manager · Courtney's husband is also a Tyler, which comes up more often than you'd think |
 
