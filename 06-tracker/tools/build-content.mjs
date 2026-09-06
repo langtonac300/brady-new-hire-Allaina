@@ -50,6 +50,7 @@ const ORDER = [
   'README.md',
 
   '01-start-here/README.md',
+  '01-start-here/your-first-day.md',
   '01-start-here/how-the-ramp-works.md',
   '01-start-here/your-first-two-weeks.md',
   '01-start-here/about-how-you-work.md',
