@@ -18,7 +18,7 @@ deliberate, so the morning isn't a scramble.
 | **10:00–10:30** | 30 min | **Getting in** — badge, desk, laptop. Then the one time-critical thing: **try every login** |
 | **10:30–12:00** | 90 min | **The L10 huddle** — your team's weekly. Moved half an hour this week so you can be in it from the start |
 | **12:00–13:00** | 60 min | **Lunch** |
-| **13:00–13:30** | 30 min | **Coffee with Courtney** — your peer buddy, no agenda |
+| **13:00–13:30** | 30 min | **Settling in** — flexible time to finish setup |
 | **13:30–14:15** | 45 min | **Your Day-1 baseline** — before any training |
 | **14:15–14:45** | 30 min | **[`about-how-you-work.md`](./about-how-you-work.md)** — the twenty-minute intake |
 | **14:45–15:00** | 15 min | **Break.** Take it |
@@ -81,13 +81,10 @@ Actually stop. It's a long first day and the afternoon is the part that matters.
 
 ---
 
-## 13:00–13:30 · Coffee with Courtney
+## 13:00–13:30 · Settling in
 
-**Courtney Hamilton** is your peer buddy — the person to ask *"is this normal?"* without it
-being a whole thing.
-
-**No agenda.** This isn't training. It's so that the first time you need to ask a small
-question, you're not asking a stranger. That's the entire purpose and it's worth half an hour.
+Use this half hour to settle at your desk and finish any setup that ran over in the morning.
+If a login still doesn't work, flag it to Alex. Your baseline starts at 13:30.
 
 ---
 
@@ -161,8 +158,8 @@ part of onboarding nobody controls.
 
 **Everything from 13:30 onward works on paper.** The baseline and
 [`about-how-you-work.md`](./about-how-you-work.md) are both just questions; print them or
-write the answers longhand and type them up later. The huddle, lunch and both conversations
-are unaffected.
+write the answers longhand and type them up later. The huddle, lunch and your closing
+conversation with Alex are unaffected.
 
 **Say so early and the day still works.** See
 [`when-youre-stuck-or-idle.md`](./when-youre-stuck-or-idle.md).
