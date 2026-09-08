@@ -716,7 +716,9 @@ if (win.MD) {
   const problems = [];
   let deadLinks = [];
   let docLinks = 0;
+  let mentionLinks = 0;
   let totalHtml = 0;
+  let allHtml = '';
 
   for (const d of docs) {
     const body = run(`dbGet(T.DOCS, ${JSON.stringify(d.ID)}).Body`);
@@ -728,6 +730,7 @@ if (win.MD) {
       continue;
     }
     totalHtml += html.length;
+    allHtml += html;
 
     // Tag balance.
     const stack = [];
@@ -763,14 +766,22 @@ if (win.MD) {
       problems.push(`${d.ID}: rendered "undefined" - ...${around}`);
     }
 
-    docLinks += (html.match(/class="doclink"/g) || []).length;
-    const dead = html.match(/<span class="dead">([^<]*)<\/span>/g) || [];
+    docLinks += (html.match(/class="doclink\b/g) || []).length;
+    mentionLinks += (html.match(/class="doclink mention"/g) || []).length;
+    // Not [^<]*. The house style writes link labels as inline code -
+    // [`ppc-fundamentals.md`](...) - so a dead one renders as
+    // <span class="dead"><code>...</code></span> and a character class that stops at the
+    // first "<" never matches it. That is every dead link in this corpus, which is why this
+    // report read as clean while four of them were live in the app.
+    const dead = html.match(/<span class="dead">([\s\S]*?)<\/span>/g) || [];
     dead.forEach((x) => deadLinks.push(`${d.ID}: ${x.replace(/<[^>]+>/g, '')}`));
   }
 
   check('every document renders without a problem', problems.length === 0, problems.slice(0, 25).join('\n      '));
   check('internal links resolve to documents', docLinks > 100, `only ${docLinks} resolved`);
-  console.log(`  ${docs.length} documents rendered, ${Math.round(totalHtml / 1024)} KB of HTML, ${docLinks} internal links wired up.`);
+  console.log(`  ${docs.length} documents rendered, ${Math.round(totalHtml / 1024)} KB of HTML, ${docLinks} internal links wired up (${mentionLinks} of them bare \`filename.md\` mentions).`);
+  check('bare filename mentions are linked', mentionLinks > 50, `only ${mentionLinks} linked`);
+  check('no anchor is nested inside another', !/<a\b[^>]*>(?:(?!<\/a>)[\s\S])*<a\b/.test(allHtml), 'an <a> was rendered inside another <a>');
 
   if (deadLinks.length) {
     console.log(`\n  ${deadLinks.length} link(s) point outside the library and render as plain text:`);

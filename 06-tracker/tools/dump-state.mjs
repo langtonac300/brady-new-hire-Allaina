@@ -203,7 +203,10 @@ const boot = api('apiBootstrap').data;
 /* A few document bodies so the reader has something real in it. */
 const bodies = {};
 ['02-learning/how-brady-measures', '03-projects/t1-08-the-timezone-trap', '01-start-here/how-the-ramp-works',
- '03-projects/README', '02-learning/cheat-sheet'].forEach((id) => {
+ '03-projects/README', '02-learning/cheat-sheet',
+ // The folder indexes are the pages that are almost entirely filenames, so they are the ones
+ // worth having in the preview when the question is whether those filenames are clickable.
+ '01-start-here/README', '02-learning/README'].forEach((id) => {
   bodies[id] = api('apiGetDoc', id).data;
 });
 

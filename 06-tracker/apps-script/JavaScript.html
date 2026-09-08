@@ -63,6 +63,86 @@
     }
 
     /**
+     * Resolve a bare filename mentioned in inline code - `how-brady-measures.md` - to a
+     * document, so it can be clicked.
+     *
+     * The house style names other files in backticks far more often than it links them: the
+     * index tables in the folder READMEs are entirely bare filenames, and so is most of the
+     * "go and read X" prose. On GitHub that is fine, because the reader has the file tree
+     * next to them. In this app it was a dead end - 101 mentions of real documents that
+     * looked like something you could click and were not.
+     *
+     * Deliberately separate from resolveDocId() rather than folded into it. That one backs
+     * 384 working links written as explicit relative paths, and those must keep resolving
+     * exactly as they do; this one guesses, and a guess belongs behind its own door.
+     *
+     * Three tries, narrowest first:
+     *   1. relative to the folder the mention sits in  - the same rule as a real link
+     *   2. relative to the root                        - "04-my-work/questions/"
+     *   3. a unique basename anywhere in the library   - "how-brady-measures.md" cited from
+     *      a project brief, where relative-to-folder cannot find it
+     *
+     * Step 3 only accepts a single match. Two documents sharing a filename means the
+     * mention is genuinely ambiguous, and a confident link to the wrong one of them is
+     * worse than no link.
+     */
+    function resolveMention(text, fromDocId, index) {
+      var raw = String(text || '').trim();
+      if (!raw || /\s/.test(raw)) return '';
+      // Must look like a file or a folder, or every backticked word becomes a candidate.
+      if (!/\.md$/i.test(raw) && raw.indexOf('/') === -1) return '';
+      if (raw.charAt(0) === '.') return '';
+
+      var baseDir = '';
+      if (fromDocId && fromDocId.indexOf('/') !== -1) {
+        baseDir = fromDocId.slice(0, fromDocId.lastIndexOf('/'));
+      }
+
+      function norm(path, dir) {
+        var joined = path.charAt(0) === '/' ? path.slice(1) : (dir ? dir + '/' : '') + path;
+        var out = [];
+        joined.split('/').forEach(function (part) {
+          if (!part || part === '.') return;
+          if (part === '..') out.pop();
+          else out.push(part);
+        });
+        return out.join('/').replace(/\.md$/i, '');
+      }
+
+      var tries = [norm(raw, baseDir), norm(raw, '')];
+      for (var i = 0; i < tries.length; i++) {
+        if (!tries[i]) continue;
+        if (index[tries[i]]) return tries[i];
+        if (index[tries[i] + '/README']) return tries[i] + '/README';
+      }
+
+      var leafSrc = raw.replace(/\/$/, '').replace(/\.md$/i, '');
+      var leaf = leafSrc.slice(leafSrc.lastIndexOf('/') + 1);
+      if (!leaf) return '';
+      var found = '';
+      var seen = 0;
+      Object.keys(index).forEach(function (id) {
+        var base = id.slice(id.lastIndexOf('/') + 1);
+        if (base === leaf || id === leaf + '/README' || id.slice(-(leaf.length + 8)) === '/' + leaf + '/README') {
+          seen++;
+          found = id;
+        }
+      });
+      return seen === 1 ? found : '';
+    }
+
+    /** Character ranges covered by an <a>...</a>, so a code span inside a link label is left
+     *  alone. Nesting an anchor inside an anchor is invalid and the browser unpicks it in
+     *  ways that break both links. */
+    function anchorRanges(html) {
+      var ranges = [];
+      var re = /<a\b[^>]*>[\s\S]*?<\/a>/g;
+      var m;
+      while ((m = re.exec(html))) ranges.push([m.index, m.index + m[0].length]);
+      return ranges;
+    }
+
+    /**
      * Inline formatting, deliberately split in two.
      *
      * Code spans are lifted out once here and put back once here. Everything in between
@@ -83,8 +163,19 @@
 
       s = inlineBody(s, ctx);
 
-      return s.replace(RESTORE_RE, function (m, i) {
-        return '<code>' + codes[Number(i)] + '</code>';
+      // Link a bare `filename.md` to its document, unless the span is already inside a link
+      // label - the house style writes [`x.md`](x.md) too, and that must not gain a second
+      // anchor inside the first.
+      var ranges = anchorRanges(s);
+      return s.replace(RESTORE_RE, function (m, i, offset) {
+        var body = '<code>' + codes[Number(i)] + '</code>';
+        if (!ctx || !ctx.index) return body;
+        for (var r = 0; r < ranges.length; r++) {
+          if (offset >= ranges[r][0] && offset < ranges[r][1]) return body;
+        }
+        var id = resolveMention(codes[Number(i)], ctx.docId, ctx.index);
+        if (!id || id === ctx.docId) return body;
+        return '<a class="doclink mention" href="#" data-doc="' + esc(id) + '">' + body + '</a>';
       });
     }
 

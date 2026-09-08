@@ -561,6 +561,16 @@
   .md a { color: var(--navy-600); text-underline-offset: 2px; }
   .md a.doclink { font-weight: 600; text-decoration-style: dotted; text-decoration-thickness: 1px; }
   .md a.doclink:hover { background: var(--navy-50); }
+  /* A filename mentioned in backticks that turned out to be a document. It still has to read
+     as a filename, so the code styling stays and the link is carried by colour plus the
+     dotted underline the other doclinks use. */
+  .md a.doclink.mention { text-decoration: none; }
+  .md a.doclink.mention code {
+    color: var(--navy); border-color: var(--navy-100);
+    text-decoration: underline; text-decoration-style: dotted; text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+  .md a.doclink.mention:hover code { background: var(--navy-50); }
   .md .dead { color: var(--ink-3); }
   .md code {
     background: var(--grey-bg); padding: 1.5px 6px; border-radius: 5px;
