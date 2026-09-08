@@ -669,6 +669,76 @@
       };
     }
 
+    var TIER_ORDER = ['Tier 1', 'Tier 2', 'Tier 3', 'Mecco', 'Tier 4'];
+
+    /** The day range out of a tier's Window string - "Days 20-45" -> { from: 20, to: 45 }.
+     *  Null if it does not parse, and every caller treats that as "no window known" rather
+     *  than guessing one. */
+    function tierWindow(text) {
+      var m = /(\d+)\s*-\s*(\d+)/.exec(String(text || ''));
+      return m ? { from: Number(m[1]), to: Number(m[2]) } : null;
+    }
+
+    /**
+     * Per-tier progress against the tier's own window.
+     *
+     * The counts and the windows were both already here - the ladder prints "6 of 12 done"
+     * next to "Days 1-25" - but nothing ever compared the two to the day she is actually on.
+     *
+     * What this deliberately does NOT do is spread a tier's projects evenly across its window
+     * and call her behind for being under the line. The briefs grow from an hour to a week, so
+     * an even split would be an invented number, and inventing numbers is the one thing this
+     * repo is most emphatic about. A tier is only ever reported as outstanding once its window
+     * has actually closed, which is a fact rather than a projection.
+     */
+    function ladderProgress() {
+      var day = state.data.position ? state.data.position.day : null;
+      var byTier = {};
+      state.data.projects.forEach(function (p) {
+        (byTier[p.Tier] = byTier[p.Tier] || []).push(p);
+      });
+
+      return TIER_ORDER.filter(function (t) { return byTier[t]; }).map(function (tier) {
+        var rows = byTier[tier];
+        // Aliases are the same project counted once - T2-7 is M-1 - so they are not a unit
+        // of work of their own.
+        var tracked = rows.filter(function (p) { return !p['Same as']; });
+        var done = tracked.filter(function (p) { return p.Status === 'Done'; }).length;
+        var open = tracked.length - done;
+        var win = tierWindow(rows[0].Window);
+        var state_ = 'unknown';
+
+        if (day !== null && win) {
+          if (done === tracked.length) state_ = 'complete';
+          else if (day < win.from) state_ = 'upcoming';
+          else if (day <= win.to) state_ = 'open';
+          else state_ = 'overdue';
+        } else if (done === tracked.length) {
+          state_ = 'complete';
+        }
+
+        return {
+          tier: tier, done: done, open: open, total: tracked.length,
+          window: rows[0].Window, from: win ? win.from : null, to: win ? win.to : null,
+          state: state_
+        };
+      });
+    }
+
+    /** The one-line verdict for a tier, as a chip. Wording stays factual - it names the day the
+     *  window closes rather than telling her she is late, because the ramp says in as many
+     *  words that she is not behind, and a badge that argues with the material is worse than
+     *  no badge. */
+    function tierChip(t) {
+      if (t.state === 'complete') return '<span class="chip green">Complete</span>';
+      if (t.state === 'upcoming') return '<span class="chip blue">Opens day ' + t.from + '</span>';
+      if (t.state === 'open') return '<span class="chip blue">Open now &middot; to day ' + t.to + '</span>';
+      if (t.state === 'overdue') {
+        return '<span class="chip amber">' + t.open + ' still open &middot; window closed day ' + t.to + '</span>';
+      }
+      return '';
+    }
+
     var HOT = { questions: true, systems: true };
 
     function renderNav() {
@@ -1171,6 +1241,38 @@
         stat(IMG.statWrong, d.wrong.length, 'Things I got wrong', null) +
         '</div>';
 
+      // Where the ladder actually is, tier by tier, against each tier's own window. The stat
+      // tile above says how many projects are done; this says whether the ones still open are
+      // in a window that is still running.
+      var prog = ladderProgress();
+      if (prog.length) {
+        html += '<h3 class="group">Where the ladder is</h3><div class="card tiers">' +
+          prog.map(function (t) {
+            return '<div class="tierprog">' +
+              '<img src="' + IMG[TIER_ART[t.tier]] + '" alt="">' +
+              '<div class="tierprog-body">' +
+              '<div class="row tight">' +
+              '<b>' + esc(t.tier) + '</b>' +
+              '<span class="chip mono">' + t.done + ' of ' + t.total + '</span>' +
+              tierChip(t) +
+              '<span class="push sub">' + esc(t.window) + '</span>' +
+              '</div>' +
+              '<div class="meter"><i style="width:' +
+              Math.round((t.done / Math.max(t.total, 1)) * 100) + '%"></i></div>' +
+              '</div></div>';
+          }).join('') + '</div>';
+
+        var late = prog.filter(function (t) { return t.state === 'overdue'; });
+        if (late.length) {
+          html += '<div class="callout"><b>Worth raising with Alex.</b> ' +
+            late.map(function (t) {
+              return esc(t.tier) + ' has ' + t.open + ' project' + (t.open === 1 ? '' : 's') +
+                ' still open and its window closed on day ' + t.to;
+            }).join('; ') + '. That is a scoping conversation, not a telling-off - the ' +
+            'windows overlap on purpose and they were drawn before anyone had met you.</div>';
+        }
+      }
+
       // Phase medals, once each threshold is behind her.
       var medals = [];
       if (p.started && p.day !== null) {
@@ -1349,9 +1451,36 @@
       return html;
     }
 
-    function refreshLibraryList() {
+    /** Where the library list is scrolled to, or null if it is not on screen.
+     *
+     *  The list is an `overflow-y: auto` pane of its own. Anything that rewrites its
+     *  innerHTML - or rebuilds `main` around it - empties it first, which drops scrollTop to
+     *  zero and leaves it there once the new rows go in. Without this the list jumps back to
+     *  the top every time a document is opened, which on a 68-row list means scrolling back
+     *  down to where you were after every single click.
+     */
+    function libListTop() {
       var node = el('liblist');
-      if (node) node.innerHTML = libraryListHtml();
+      return node ? node.scrollTop : null;
+    }
+
+    function setLibListTop(top) {
+      if (top === null || top === undefined) return;
+      var node = el('liblist');
+      if (node) node.scrollTop = top;
+    }
+
+    /** Redraw the list rows. Pass `reset` when the filter changed, since the list is then a
+     *  different list and holding the old offset would land the reader somewhere arbitrary. */
+    function refreshLibraryList(reset) {
+      var node = el('liblist');
+      if (!node) return;
+      var top = node.scrollTop;
+      node.innerHTML = libraryListHtml();
+      // Set it either way. Leaving it alone is not the same as resetting it - the browser's
+      // own scroll anchoring puts the pane back part of the way on its own, which lands a
+      // filtered list somewhere arbitrary rather than at its first row.
+      node.scrollTop = reset ? 0 : top;
     }
 
     function viewLibrary() {
@@ -1429,23 +1558,29 @@
         (byTier[p.Tier] = byTier[p.Tier] || []).push(p);
       });
 
+      var progByTier = {};
+      ladderProgress().forEach(function (t) { progByTier[t.tier] = t; });
+
       var html =
         '<div class="page-head"><h2 class="page">The ladder</h2>' +
         '<p class="lede">Thirty-three projects across five tiers. They start at about an hour and grow to ' +
         'week-long by the end, and the length is part of what is being trained.</p></div>';
 
-      ['Tier 1', 'Tier 2', 'Tier 3', 'Mecco', 'Tier 4'].forEach(function (tier) {
+      TIER_ORDER.forEach(function (tier) {
         var rows = byTier[tier] || [];
         if (!rows.length) return;
         var tracked = rows.filter(function (p) { return !p['Same as']; });
         var done = tracked.filter(function (p) { return p.Status === 'Done'; }).length;
+
+        var prog = progByTier[tier];
 
         html +=
           '<div class="tierhead">' +
           '<img src="' + IMG[TIER_ART[tier]] + '" alt="">' +
           '<div><b>' + esc(tier) + '</b>' +
           '<span>' + esc(rows[0].Window) + ' &middot; ' + esc(rows[0].Safety) + '</span></div>' +
-          '<div class="push row tight"><span class="chip mono">' + done + ' of ' + tracked.length + ' done</span></div>' +
+          '<div class="push row tight"><span class="chip mono">' + done + ' of ' + tracked.length + ' done</span>' +
+          (prog ? tierChip(prog) : '') + '</div>' +
           '</div>';
         html += rows.map(projectRow).join('');
       });
@@ -1995,6 +2130,9 @@
 
       var main = el('main');
       var split = state.view === 'library';
+      // Read before the rebuild below throws the old list away. Null when arriving from
+      // another view, and setLibListTop ignores that.
+      var listTop = libListTop();
       main.className = 'main' + (split ? ' split' : '');
       var body = (VIEW_FNS[state.view] || viewToday)();
       main.innerHTML = split ? body : '<div class="wrap">' + body + '</div>';
@@ -2004,6 +2142,7 @@
       renderTrail();
       renderResume();
       if (!split) main.scrollTop = 0;
+      if (split) setLibListTop(listTop);
       restoreScroll();
     }
 
@@ -2635,7 +2774,7 @@
 
       if (t.id === 'libFolder') {
         state.libraryFolder = t.value;
-        refreshLibraryList();
+        refreshLibraryList(true);
         return;
       }
       if (t.id === 'docStatus') {
@@ -2743,7 +2882,7 @@
     document.addEventListener('input', function (e) {
       if (e.target.id === 'libSearch') {
         state.libraryFilter = e.target.value;
-        refreshLibraryList();
+        refreshLibraryList(true);
         return;
       }
       if (e.target.id === 'paletteInput') updatePalette(e.target.value);

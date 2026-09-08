@@ -118,6 +118,7 @@ const ORDER = [
   '04-my-work/drafts/README.md',
   '04-my-work/what-i-got-wrong/README.md',
 
+  '05-self-assessment/README.md',
   '05-self-assessment/baseline.md',
 ];
 
