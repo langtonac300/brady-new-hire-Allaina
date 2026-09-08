@@ -117,7 +117,12 @@ function SCHEMA() {
         { name: 'Timebox held', w: 130, list: 'Timebox' },
         { name: 'Deliverable link', w: 240 },
         { name: 'Notes', w: 340, wrap: true },
-        { name: 'Updated', w: 140, type: 'date' }
+        { name: 'Updated', w: 140, type: 'date' },
+        // Which of the brief's "You're done when" items she has ticked: a comma list of keys
+        // derived from each item's text, so a re-ordered brief keeps its ticks. It lives here
+        // and not on Library because Library's Body column is heavy and bulk reads stop
+        // there - anything after it never reaches the app. Appended last, as always.
+        { name: 'Checks', w: 200 }
       ]
     },
 
