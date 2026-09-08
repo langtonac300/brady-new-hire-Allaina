@@ -162,7 +162,7 @@ function apiSaveProject(id, patch) {
   try {
     var allowed = [
       'Status', 'Started', 'Finished', 'Hours', 'Deliverable link', 'Notes',
-      'Prediction', 'Predicted on', 'Timebox held'
+      'Prediction', 'Predicted on', 'Timebox held', 'Checks'
     ];
     var clean = {};
     allowed.forEach(function (f) {
@@ -189,6 +189,10 @@ function apiSaveProject(id, patch) {
       }
       if (clean.Status !== 'Done' && clean.Finished === undefined) clean.Finished = '';
     }
+
+    // Same trap as Notes.Archived: dbUpdate() drops a field with no column, so on a workbook
+    // set up before Checks existed the ticks would look saved and be gone on reload. Widen first.
+    if (clean.Checks !== undefined && headerMap(sheetFor(T.PROJECTS)).Checks === undefined) ensureSheet(tableDef(T.PROJECTS));
 
     return ok(dbUpdate(T.PROJECTS, id, clean));
   } catch (err) {

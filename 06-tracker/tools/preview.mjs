@@ -47,6 +47,16 @@ const page = [
         script: {
           run: (function () {
             var handlers = {};
+            // Saves persist across a reload in this preview, the way they do against the real
+            // Sheet. Without this every save looked like data loss the moment the page was
+            // refreshed, which is exactly the thing the tests most need to see.
+            try {
+              var remembered = JSON.parse(window.localStorage.getItem('preview.boot') || 'null');
+              if (remembered) Object.keys(remembered).forEach(function (k) { SNAPSHOT.boot[k] = remembered[k]; });
+            } catch (e) { /* no storage here - in-memory only */ }
+            function remember() {
+              try { window.localStorage.setItem('preview.boot', JSON.stringify(SNAPSHOT.boot)); } catch (e) { /* fine */ }
+            }
             var runner = {};
             runner.withSuccessHandler = function (fn) { handlers.ok = fn; return runner; };
             runner.withFailureHandler = function (fn) { handlers.fail = fn; return runner; };
@@ -72,29 +82,35 @@ const page = [
                     var made = Object.assign({ ID: args[0].slice(0, 1).toUpperCase() + '-9' + String(Date.now() % 100).padStart(2, '0'),
                       Date: new Date().toISOString().slice(0, 10) }, args[1] || {});
                     (SNAPSHOT.boot[args[0]] = SNAPSHOT.boot[args[0]] || []).push(made);
-                    return handlers.ok({ ok: true, data: made });
+                    remember(); return handlers.ok({ ok: true, data: made });
                   }
                   if (name === 'apiUpdate') {
                     var list = SNAPSHOT.boot[args[0]] || [];
                     var hit = list.filter(function (r) { return r.ID === args[1]; })[0] || { ID: args[1] };
                     Object.assign(hit, args[2] || {});
-                    return handlers.ok({ ok: true, data: hit });
+                    remember(); return handlers.ok({ ok: true, data: hit });
+                  }
+                  if (name === 'apiSaveProject') {
+                    var pr = (SNAPSHOT.boot.projects || []).filter(function (p) { return p.ID === args[0]; })[0] || { ID: args[0] };
+                    Object.assign(pr, args[1] || {});
+                    remember(); return handlers.ok({ ok: true, data: pr });
                   }
                   if (name === 'apiSaveDoc') {
                     var doc = (SNAPSHOT.boot.docs || []).filter(function (d) { return d.ID === args[0]; })[0] || { ID: args[0] };
                     Object.assign(doc, args[1] || {});
-                    return handlers.ok({ ok: true, data: doc });
+                    remember(); return handlers.ok({ ok: true, data: doc });
                   }
                   if (name === 'apiSaveIntake') {
                     var iq = (SNAPSHOT.boot.intake || []).filter(function (r) { return r.Key === args[0]; })[0] || { Key: args[0] };
                     iq.Answer = args[1];
-                    return handlers.ok({ ok: true, data: iq });
+                    remember(); return handlers.ok({ ok: true, data: iq });
                   }
                   if (name === 'apiDelete') {
                     var rows = SNAPSHOT.boot[args[0]] || [];
                     var victim = rows.filter(function (r) { return r.ID === args[1]; })[0];
                     if (args[0] === 'notes' && victim) victim.Archived = 'Yes';
                     else SNAPSHOT.boot[args[0]] = rows.filter(function (r) { return r.ID !== args[1]; });
+                    remember();
                     return handlers.ok({ ok: true, data: true });
                   }
                   handlers.ok({ ok: true, data: {} });

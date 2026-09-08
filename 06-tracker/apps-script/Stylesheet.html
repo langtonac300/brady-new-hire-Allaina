@@ -26,7 +26,7 @@
     /* Ink */
     --ink: #14171A;
     --ink-2: #4A5158;
-    --ink-3: #767E88;
+    --ink-3: #6B727B;   /* was #767E88 at 4.11:1 - every small label uses this, and AA needs 4.5 */
 
     /* Surfaces */
     --paper: #FFFFFF;
@@ -51,7 +51,7 @@
     --amber-bg: #FBF2D9;
     --red: #97231D;
     --red-bg: #FBEAE8;
-    --grey: #5C646D;
+    --grey: #525A63;   /* was #5C646D; chips sit on tints darker than the page ground, and AA needs 4.5 there too */
     --grey-bg: #EFF1F4;
 
     /* Rhythm */
@@ -143,7 +143,7 @@
     font-size: 12.5px; color: #9FB6DD;
   }
   .crumbs .pin { flex: 0 0 auto; width: 12px; height: 14px; color: var(--accent); }
-  .crumbs .sep { flex: 0 0 auto; opacity: .55; }
+  .crumbs .sep { flex: 0 0 auto; opacity: .8; }
   .crumbs .seg {
     flex: 0 0 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
@@ -282,7 +282,7 @@
     background: var(--navy); color: #fff; font-weight: 600;
   }
   .nav .count {
-    font-size: 10.5px; font-weight: 700; background: var(--grey-bg); color: var(--ink-3);
+    font-size: 10.5px; font-weight: 700; background: var(--grey-bg); color: var(--grey);
     border-radius: 999px; padding: 1px 7px; min-width: 20px; text-align: center;
   }
   .nav button[aria-current="true"] .count { background: rgba(255, 255, 255, .22); color: #fff; }
@@ -478,7 +478,7 @@
     box-shadow: 0 0 0 3px var(--navy-50);
   }
   textarea { resize: vertical; min-height: 74px; line-height: 1.6; }
-  ::placeholder { color: #A2A9B2; }
+  ::placeholder { color: #72777D; }   /* was #A2A9B2 at 2.37:1; placeholders now carry instructions */
 
   .btn {
     background: var(--navy); color: #fff; border: 0; border-radius: 8px;
@@ -529,7 +529,7 @@
   .liblist .t { font-weight: 600; display: block; margin-bottom: 3px; font-size: 13.5px; }
   .liblist button[aria-current="true"] .t { color: var(--navy); }
   .liblist .s {
-    color: var(--ink-3); font-size: 12px; display: block; line-height: 1.45;
+    color: var(--grey); font-size: 12px; display: block; line-height: 1.45;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
 
@@ -630,7 +630,8 @@
   .proj .detail {
     border-top: 1px solid var(--hairline); padding: 18px 17px; background: #FBFCFD;
   }
-  .proj.alias { opacity: .72; }
+  /* Muted by tint and a dashed edge, not opacity - opacity takes every word on the row under 4.5:1. */
+  .proj.alias { background: var(--ground); border-style: dashed; }
   .proj.alias .idbadge { background: var(--grey-bg); color: var(--grey); }
 
   .prediction {
@@ -670,6 +671,54 @@
   .callout.fillable { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
   .callout.fillable .btn.small { margin-left: auto; }
 
+  /* A chip on a tier head was inheriting the tier subtitle's meta grey, which on the chip's own
+     background lands at 4.3:1. Chips carry their own colour everywhere else; here too. */
+  .tierhead .chip { color: var(--grey); }
+
+  /* ---- Reader: moving on ---- */
+  .readnav {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--hairline);
+  }
+  .readnav .pos { color: var(--ink-3); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .readnav .spacer { flex: 1; }
+  .readnav .btn { max-width: 100%; }
+  .readnav .btn .t { display: inline-block; max-width: 34ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+  .reader .head .nextcue { font-size: 12.5px; }
+  .reader .head .nextcue .t { display: inline-block; max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+  @media (max-width: 1120px) { .reader .head .nextcue .t { display: none; } }
+
+  /* ---- Checklists in a brief ---- */
+  /* A hanging indent: a wrapped line sits under its own text, not under the box. Padding plus a
+     negative text-indent keeps the item inline, which flex would not - a <strong> inside would
+     become its own flex item and break the line. */
+  .md li.task { list-style: none; margin-left: -1.4em; padding-left: 1.6em; text-indent: -1.6em; }
+  .md li.task input[type="checkbox"] { width: 16px; height: 16px; margin: 0 8px 0 0; vertical-align: -2px; accent-color: var(--navy); cursor: pointer; }
+  .md .checknote { font-size: 12.5px; color: var(--ink-3); margin: -6px 0 18px; }
+  .md .checknote b { color: var(--navy); }
+
+  /* ---- I'm stuck: the 30-minute rule, with a clock ---- */
+  .stuckpill {
+    position: fixed; right: 18px; bottom: 18px; z-index: 50;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--navy); color: #fff; border: 0; border-radius: 999px;
+    padding: 11px 16px; font-weight: 700; font-size: 13.5px; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0, 45, 114, .28);
+    transition: transform .08s var(--ease), background .13s var(--ease);
+  }
+  .stuckpill:hover { background: var(--navy-600); }
+  .stuckpill:active { transform: translateY(1px); }
+  .stuckpill .clock { font-variant-numeric: tabular-nums; opacity: .9; font-weight: 600; }
+  .stuckpill.running { background: var(--accent-ink); }
+  .stuckpill.due { animation: pulse 1.2s ease-in-out infinite; background: var(--accent); color: #1a1a1a; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 6px 20px rgba(255, 107, 0, .25); } 50% { box-shadow: 0 6px 28px rgba(255, 107, 0, .6); } }
+  .stuck .rule { margin: 0 0 16px; font-size: 14.5px; line-height: 1.55; }
+  .stuck .clockrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; border: 1px solid var(--hairline); border-radius: var(--r); background: var(--ground); margin-bottom: 16px; }
+  .stuck .clockrow b { font-variant-numeric: tabular-nums; }
+  .stuck .where { font-size: 13px; color: var(--ink-2); margin: 0 0 12px; }
+  .stuck textarea { min-height: 150px; font-family: 'Roboto Mono', ui-monospace, monospace; font-size: 13px; line-height: 1.6; }
+  .stuck .hint { font-size: 12px; color: var(--ink-3); margin: 6px 0 0; }
+
   /* ---- Notes: the composer, in-place editing, archive ---- */
   .composer.closed { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
   .composer .hint { color: var(--ink-3); font-size: 12.5px; }
@@ -706,7 +755,8 @@
   details.archived > summary::-webkit-details-marker { display: none; }
   details.archived > summary::before { content: '\25B8'; font-size: 12px; transition: transform .15s var(--ease); }
   details.archived[open] > summary::before { transform: rotate(90deg); }
-  .entry.archived-note { opacity: .72; }
+  /* Muted by tint, not opacity - opacity drags the text under 4.5:1 along with everything else. */
+  .entry.archived-note { background: var(--ground); border-style: dashed; }
   .entry.archived-note .preview { color: var(--ink-3); font-size: 13px; margin: 6px 0 0; }
   .toast .toastact {
     background: transparent; border: 1px solid rgba(255,255,255,.5); color: #fff; border-radius: 6px;

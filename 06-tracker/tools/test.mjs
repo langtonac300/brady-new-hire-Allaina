@@ -482,6 +482,19 @@ for (const section of ['questions', 'wrong', 'notes', 'daily']) {
   }
 }
 
+/* ----------------------------- the checklists ----------------------------- */
+
+{
+  // Ticks live on the project row: Library's Body column is heavy and bulk reads stop there,
+  // so a column after it would never reach the app. The ladder has no heavy column.
+  const ticked = api('apiSaveProject', 'T1-8', { Checks: 'k1abc,k2def' });
+  eq('ticks save on the project', ticked.data && ticked.data.Checks, 'k1abc,k2def');
+  eq('and the bulk read carries them', run('dbSelect(T.PROJECTS)').find((p) => p.ID === 'T1-8').Checks, 'k1abc,k2def');
+  run('importLadder(true)');
+  eq('and they survive a re-import', run('dbGet(T.PROJECTS, "T1-8").Checks'), 'k1abc,k2def');
+  api('apiSaveProject', 'T1-8', { Checks: '' });
+}
+
 /* ------------------------------ the intake ------------------------------ */
 
 {
@@ -812,6 +825,9 @@ if (win.MD) {
   check('internal links resolve to documents', docLinks > 100, `only ${docLinks} resolved`);
   console.log(`  ${docs.length} documents rendered, ${Math.round(totalHtml / 1024)} KB of HTML, ${docLinks} internal links wired up (${mentionLinks} of them bare \`filename.md\` mentions).`);
   check('bare filename mentions are linked', mentionLinks > 50, `only ${mentionLinks} linked`);
+  const task = win.MD.render('## You\'re done when\n\n- [ ] Every counting action inventoried\n- [x] Already done', { index: {} });
+  check('a task item renders a live checkbox keyed to its text', /<input type="checkbox" data-check="[a-z0-9]+"(?! disabled)/.test(task), task.slice(0, 200));
+  check('a [x] item still renders checked', /data-check="[a-z0-9]+" checked/.test(task), task.slice(0, 200));
   check('no anchor is nested inside another', !/<a\b[^>]*>(?:(?!<\/a>)[\s\S])*<a\b/.test(allHtml), 'an <a> was rendered inside another <a>');
 
   if (deadLinks.length) {

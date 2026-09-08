@@ -343,7 +343,8 @@ function importLadder(preserve) {
       Finished: prior.Finished || '',
       Hours: prior.Hours || '',
       'Deliverable link': prior['Deliverable link'] || '',
-      Notes: prior.Notes || ''
+      Notes: prior.Notes || '',
+      Checks: prior.Checks || ''
     };
   });
 

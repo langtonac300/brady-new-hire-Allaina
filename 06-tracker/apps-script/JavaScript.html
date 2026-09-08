@@ -308,7 +308,7 @@
           var task = head.match(/^\[([ xX])\]\s+(.*)$/);
           if (task) {
             cls = ' class="task"';
-            box = '<input type="checkbox" disabled' + (task[1].toLowerCase() === 'x' ? ' checked' : '') + '> ';
+            box = '<input type="checkbox" data-check="' + checkKey(task[2]) + '"' + (task[1].toLowerCase() === 'x' ? ' checked' : '') + '> ';
             head = task[2];
           }
           var inner = inlineMd(esc(head), ctx);
@@ -695,6 +695,162 @@
       var host = el('modalHost');
       host.innerHTML = '';
       host.hidden = true;
+    }
+
+    /* ============================== I'm stuck ============================== */
+
+    /**
+     * The 30-minute rule, as a control instead of a paragraph.
+     *
+     * when-youre-stuck-or-idle.md calls asking after half an hour the single most load-bearing
+     * habit of month one, and it quietly fails in exactly the way it describes: a good day
+     * turns into a lost one because nobody wants to interrupt a room of new names. So the
+     * button is always on screen; it can start a clock, and when the clock runs out it says
+     * so and drafts the ask. The app cannot post to chat, so the message is composed here
+     * and copied, and it can go into her own questions log as well.
+     */
+    var STUCK_MS = 30 * 60 * 1000;
+    var stuckTimer = null;
+
+    function stuckUntil() {
+      var v = Number(readStore('local', 'ramp.stuck.until') || 0);
+      return v > 0 ? v : 0;
+    }
+
+    function stuckLeft() {
+      var until = stuckUntil();
+      return until ? until - Date.now() : null;
+    }
+
+    function mmss(ms) {
+      var s = Math.max(0, Math.round(ms / 1000));
+      return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    }
+
+    function mountStuck() {
+      if (el('stuckpill')) return;
+      var b = document.createElement('button');
+      b.id = 'stuckpill';
+      b.className = 'stuckpill';
+      b.setAttribute('data-act', 'stuck');
+      b.setAttribute('aria-label', "I'm stuck - the 30-minute rule");
+      document.body.appendChild(b);
+      renderStuckPill();
+      clearInterval(stuckTimer);
+      stuckTimer = setInterval(renderStuckPill, 15000);
+    }
+
+    function renderStuckPill() {
+      var b = el('stuckpill');
+      if (!b) return;
+      var left = stuckLeft();
+      if (left === null) {
+        b.className = 'stuckpill';
+        b.innerHTML = "I'm stuck";
+        return;
+      }
+      if (left > 0) {
+        b.className = 'stuckpill running';
+        b.innerHTML = 'Stuck &middot; <span class="clock">' + mmss(left) + '</span>';
+        return;
+      }
+      b.className = 'stuckpill due';
+      b.innerHTML = 'Ask now';
+      if (readStore('local', 'ramp.stuck.fired') !== String(stuckUntil())) {
+        writeStore('local', 'ramp.stuck.fired', String(stuckUntil()));
+        toastAction("30 minutes. Ask now - that's the whole rule.", 'Draft the ask', showStuck);
+      }
+    }
+
+    function stuckContext() {
+      if (state.view === 'library' && state.openDoc && state.index[state.openDoc]) return state.index[state.openDoc].Title;
+      if (state.view === 'ladder' && state.openProject) {
+        var p = projectById(state.openProject);
+        if (p) return p.ID + ' - ' + p.Project;
+      }
+      return '';
+    }
+
+    function stuckWhere() {
+      var row = intakeByKey('s3.where-would-you-rather-ask');
+      var a = row && String(row.Answer || '').trim();
+      if (a) return 'You said you would rather ask in: <b>' + esc(a) + '</b>.';
+      return 'The team chat channel is the default. A direct message to Alex or Courtney is a normal path too, not a concession.';
+    }
+
+    function stuckDraft() {
+      var ctx = stuckContext();
+      return 'Stuck on: ' + (ctx || '') + '\n\nWhat I have tried:\n- \n\nWhat I need:\n- \n';
+    }
+
+    function showStuck() {
+      var left = stuckLeft();
+      var clock;
+      if (left === null) {
+        clock = '<div class="clockrow"><button class="btn" data-act="stuck-start">Start the 30-minute clock</button>' +
+          '<span class="hint" style="margin:0">Start it when you begin wrestling with something. When it runs out, ask.</span></div>';
+      } else if (left > 0) {
+        clock = '<div class="clockrow"><span>Clock running &middot; <b>' + mmss(left) + '</b> left</span>' +
+          '<span class="push"></span><button class="btn quiet small" data-act="stuck-stop">Sorted it - stop</button></div>';
+      } else {
+        clock = '<div class="clockrow"><b>Thirty minutes are up.</b> <span>Ask now. Nobody thinks less of you for it.</span>' +
+          '<span class="push"></span><button class="btn quiet small" data-act="stuck-stop">Asked - reset</button></div>';
+      }
+      openModal({
+        title: "I'm stuck",
+        body:
+          '<div class="stuck">' +
+          '<p class="rule"><b>Stuck on something for 30 minutes?</b> Ask. In chat. That\'s the whole rule. ' +
+          'Thirty minutes of your time is worth more than the two minutes it costs someone to answer.</p>' +
+          clock +
+          '<p class="where">' + stuckWhere() + '</p>' +
+          field('The ask - copy it into chat', '<textarea id="stuckText">' + esc(stuckDraft()) + '</textarea>') +
+          '<p class="hint">Symptom, what you tried, what you need. Two lines each is plenty - it is easier to answer than "any ideas?".</p>' +
+          '</div>',
+        footer:
+          '<button class="btn" data-act="stuck-copy">Copy the message</button>' +
+          '<button class="btn quiet" data-act="stuck-log">Save to my questions</button>' +
+          '<button class="btn quiet" data-close>Close</button>',
+        focus: 'stuckText'
+      });
+      var ta = el('stuckText');
+      if (ta) {
+        // Cursor on the first empty bullet, not at the very end.
+        var at = ta.value.indexOf('- ') + 2;
+        ta.setSelectionRange(at, at);
+      }
+    }
+
+    function stuckAction(action) {
+      if (action === 'stuck') { showStuck(); return true; }
+      if (action === 'stuck-start') {
+        writeStore('local', 'ramp.stuck.until', String(Date.now() + STUCK_MS));
+        renderStuckPill();
+        showStuck();
+        return true;
+      }
+      if (action === 'stuck-stop') {
+        writeStore('local', 'ramp.stuck.until', '0');
+        renderStuckPill();
+        showStuck();
+        return true;
+      }
+      if (action === 'stuck-copy') {
+        var ta = el('stuckText');
+        if (ta) copyText(ta.value, 'The ask');
+        return true;
+      }
+      if (action === 'stuck-log') {
+        var box = el('stuckText');
+        var text = box ? box.value.trim() : '';
+        if (!text) { toast('Write the ask first.', true); return true; }
+        call('apiCreate', 'questions', { Question: text })
+          .then(function () { return reload('questions', function () { toast('Saved to your questions'); }); })
+          .then(function () { writeStore('local', 'ramp.stuck.until', '0'); renderStuckPill(); closeModal(); })
+          .catch(function (err) { toast(err, true); });
+        return true;
+      }
+      return false;
     }
 
     /* ============================== ramp calendar ============================== */
@@ -1725,6 +1881,8 @@
             }).join('')
           : '') +
         '<div class="push row tight">' +
+        (function () { var n = neighbours(state.openDoc); return n.next
+          ? '<button class="btn ghost small nextcue" data-open-doc="' + esc(n.next.ID) + '" title="' + esc(n.next.Title) + '">Next: <span class="t">' + esc(n.next.Title) + '</span> &rarr;</button>' : ''; })() +
         '<select id="docStatus" style="width:auto">' + options(state.data.lists.DocStatus, meta.Status) + '</select>' +
         '</div></div>' +
         '<div class="scroll">' +
@@ -1744,6 +1902,7 @@
         field('My notes on this',
           '<textarea id="docNotes" class="grow docnotes" placeholder="What you want to remember, or what did not make sense. Saves as you type.">' + esc(docNotesText(state.openDoc, meta)) + '</textarea>' +
           '<span class="savestate" data-savestatus="doc:' + esc(state.openDoc) + '"></span>') +
+        readNavHtml(state.openDoc, meta) +
         '</div>'
       );
     }
@@ -2739,6 +2898,7 @@
       if (split) setLibListTop(listTop);
       restoreScroll();
       growAll(main);
+      if (split && state.openDoc) wireChecks(state.openDoc);
     }
 
     function refreshDoc(id) {
@@ -3151,6 +3311,24 @@
         return;
       }
 
+      var openTarget = t.closest('[data-open-doc]');
+      if (openTarget) {
+        openDoc(openTarget.getAttribute('data-open-doc'));
+        return;
+      }
+      if (t.closest('[data-act="read-continue"]')) {
+        var here = state.openDoc;
+        var onward = neighbours(here).next;
+        var wasRead = state.index[here] && state.index[here].Status === 'Read';
+        (wasRead ? Promise.resolve() : saveDoc({ Status: 'Read' }))
+          .then(function () {
+            if (onward) openDoc(onward.ID);
+            else refreshDoc(here);
+          })
+          .catch(function (err) { toast(err, true); });
+        return;
+      }
+
       var go = t.closest('[data-goto-view]');
       if (go) {
         closeModal();
@@ -3227,6 +3405,7 @@
     }
 
     function handleAction(action) {
+      if (stuckAction(action)) return;
       if (action === 'cancel-edit') {
         state.editing = null;
         render();
@@ -3426,6 +3605,19 @@
         return;
       }
 
+      var checkKey_ = t.getAttribute('data-check');
+      if (checkKey_ && t.type === 'checkbox' && state.openDoc) {
+        var docId = state.openDoc;
+        var owner = projectForDoc(docId);
+        if (!owner) return;
+        var have = checksFor(docId);
+        if (t.checked) have[checkKey_] = true; else delete have[checkKey_];
+        owner.Checks = Object.keys(have).join(',');
+        scheduleSave('checks:' + docId, saveChecks(docId), 400);
+        if (t.checked) maybeFlipDone(docId);
+        return;
+      }
+
       var intakeKey = t.getAttribute('data-intake');
       if (intakeKey && t.type === 'radio') {
         var group = t.closest('.choices');
@@ -3506,9 +3698,130 @@
       };
     }
 
+    /** Every document in the order the build put them in - the folder READMEs first, then the
+     *  curated sequence, then the rest. The library list shows the same order, so "next"
+     *  here is the document under this one in the list. */
+    function readingOrder() {
+      return state.data.docs.slice().sort(function (a, b) { return Number(a.Order) - Number(b.Order); });
+    }
+
+    /** A stable key for a checklist item: a hash of its text, so ticks survive a brief being
+     *  re-ordered or having a line added above them. Index-by-position would not. */
+    function checkKey(text) {
+      var t = String(text || '').replace(/\s+/g, ' ').trim().toLowerCase();
+      var h = 5381;
+      for (var i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0;
+      return (h >>> 0).toString(36);
+    }
+
+    /** Ticks are kept on the brief's project row, not the document: Library's Body column is
+     *  heavy and bulk reads stop there, so a column after it would never reach the app. */
+    function checksFor(docId) {
+      var p = projectForDoc(docId);
+      var raw = p && p.Checks ? String(p.Checks) : '';
+      var set = {};
+      raw.split(',').forEach(function (k) { if (k.trim()) set[k.trim()] = true; });
+      return set;
+    }
+
+    /** The project a document belongs to, if it is a brief. */
+    function projectForDoc(docId) {
+      return state.data.projects.filter(function (p) { return p['Doc ID'] === docId && !p['Same as']; })[0] || null;
+    }
+
+    /**
+     * After a document renders: light up its checkboxes from what she has ticked, and mark the
+     * ones under a "You're done when" heading as the gate. Ticking every gate item is what
+     * flips the brief's project to Done - the other lists in a brief (read-first lists, steps)
+     * are hers to tick but do not count.
+     *
+     * Done in the DOM after the render rather than inside the Markdown parser, which knows
+     * nothing about which heading it is under and should not have to.
+     */
+    function wireChecks(docId) {
+      var md = document.querySelector('.reader .md');
+      if (!md || !docId) return;
+      var have = checksFor(docId);
+      var owner = projectForDoc(docId);
+      var gate = false;
+      var gateList = null;
+      Array.prototype.forEach.call(md.children, function (node) {
+        if (/^H[1-6]$/.test(node.tagName)) gate = /done when/i.test(node.textContent);
+        Array.prototype.forEach.call(node.querySelectorAll('input[data-check]'), function (box) {
+          // Only a brief has somewhere to keep a tick. Elsewhere the box stays a reading aid.
+          box.disabled = !owner;
+          if (have[box.getAttribute('data-check')]) box.checked = true;
+          if (gate) { box.setAttribute('data-gate', '1'); gateList = gateList || node; }
+        });
+      });
+      if (owner && gateList && !document.querySelector('[data-savestatus="checks:' + docId + '"]')) {
+        var note = document.createElement('p');
+        note.className = 'checknote';
+        note.innerHTML = 'Ticking all of these marks <b>' + esc(owner.ID) + '</b> done. ' +
+          '<span class="savestate" data-savestatus="checks:' + esc(docId) + '"></span>';
+        gateList.parentNode.insertBefore(note, gateList.nextSibling);
+      }
+    }
+
+    function saveChecks(docId) {
+      return function () {
+        var p = projectForDoc(docId);
+        if (!p) return Promise.resolve();
+        return call('apiSaveProject', p.ID, { Checks: Object.keys(checksFor(docId)).join(',') }).then(function (row) {
+          if (row && row.ID) replaceRow(state.data.projects, row, 'ID');
+        });
+      };
+    }
+
+    /** Every gate item ticked -> the brief's project is Done. Forward only: un-ticking one
+     *  later does not un-finish a project, since the ladder is where status is decided. */
+    function maybeFlipDone(docId) {
+      var gates = document.querySelectorAll('.reader .md input[data-gate]');
+      if (!gates.length) return;
+      for (var i = 0; i < gates.length; i++) if (!gates[i].checked) return;
+      var p = projectForDoc(docId);
+      if (!p || p.Status === 'Done') return;
+      var before = p.Status;
+      call('apiSaveProject', p.ID, { Status: 'Done' })
+        .then(function (row) {
+          replaceRow(state.data.projects, row, 'ID');
+          renderNav();
+          toastAction(p.ID + ' marked Done.', 'Undo', function () {
+            call('apiSaveProject', p.ID, { Status: before || 'In progress' })
+              .then(function (r2) { replaceRow(state.data.projects, r2, 'ID'); renderNav(); toast(p.ID + ' back to ' + (before || 'In progress')); })
+              .catch(function (err) { toast(err, true); });
+          });
+        })
+        .catch(function (err) { toast(err, true); });
+    }
+
+    function neighbours(id) {
+      var all = readingOrder();
+      var i = all.map(function (d) { return d.ID; }).indexOf(id);
+      return { prev: i > 0 ? all[i - 1] : null, next: i >= 0 && i < all.length - 1 ? all[i + 1] : null, pos: i + 1, total: all.length };
+    }
+
+    /** The end of a document: where she is, and the way on. "Mark read & continue" does the
+     *  two things she would otherwise do by hand - flip the status, then find the next one in
+     *  the list - so finishing a page never dead-ends at a notes box. */
+    function readNavHtml(id, meta) {
+      var n = neighbours(id);
+      var isRead = meta.Status === 'Read';
+      var label = n.next ? (isRead ? 'Continue' : 'Mark read & continue') : (isRead ? 'That was the last one' : 'Mark read');
+      return (
+        '<div class="readnav">' +
+        (n.prev ? '<button class="btn quiet" data-open-doc="' + esc(n.prev.ID) + '">&larr; <span class="t">' + esc(n.prev.Title) + '</span></button>' : '') +
+        '<span class="pos">' + n.pos + ' of ' + n.total + '</span>' +
+        '<span class="spacer"></span>' +
+        (n.next ? '<button class="btn quiet" data-open-doc="' + esc(n.next.ID) + '"><span class="t">' + esc(n.next.Title) + '</span> &rarr;</button>' : '') +
+        '<button class="btn" data-act="read-continue"' + (!n.next && isRead ? ' disabled' : '') + '>' + label + (n.next ? ' &rarr;' : '') + '</button>' +
+        '</div>'
+      );
+    }
+
     function saveDoc(patch) {
       var id = state.openDoc;
-      call('apiSaveDoc', id, patch)
+      return call('apiSaveDoc', id, patch)
         .then(function (row) {
           // The saved row comes back with its Body attached. Keep that out of the list state:
           // it is up to 25 KB per document and nothing in the list needs it.
@@ -3634,6 +3947,7 @@
         renderBrand();
         render();
       })
+      .then(function () { mountStuck(); })
       .catch(function (err) {
         el('main').innerHTML =
           '<div class="wrap"><div class="card"><h4>Could not load the workbook</h4><p>' +
