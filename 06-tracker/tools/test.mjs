@@ -319,6 +319,12 @@ const skills = run('dbSelect(T.SKILLS)');
 eq('68 documents seeded', docs.length, 68);
 eq('33 projects seeded', projects.length, 33);
 eq('31 skills seeded', skills.length, 31);
+const intake = run('dbSelect(T.INTAKE)');
+eq('43 intake questions seeded', intake.length, 43);
+check('intake rows are keyed and typed', intake.every((r) => /^s\d\./.test(r.Key) && /^(pick|rank|text)$/.test(r.Type)),
+  JSON.stringify(intake.filter((r) => !/^s\d\./.test(r.Key) || !/^(pick|rank|text)$/.test(r.Type)).slice(0, 3)));
+check('intake answers start blank', intake.every((r) => !r.Answer));
+
 
 check('the light read excludes Body', docs[0].Body === undefined, `got keys: ${Object.keys(docs[0]).join(', ')}`);
 check('a full read includes Body', String(run('dbGet(T.DOCS, "README").Body') || '').length > 100);
@@ -402,6 +408,8 @@ const api = (fn, ...args) => run(`${fn}(${args.map((a) => JSON.stringify(a)).joi
 const boot = api('apiBootstrap');
 check('apiBootstrap succeeds', boot.ok === true, JSON.stringify(boot.error));
 eq('bootstrap carries the documents', boot.data.docs.length, 68);
+eq('bootstrap carries the intake', boot.data.intake.length, 43);
+eq('bootstrap carries the intake questions', boot.data.intakeQuestions && boot.data.intakeQuestions.sections.length, 9);
 check('bootstrap does not ship document bodies', boot.data.docs.every((d) => d.Body === undefined),
   'the bootstrap payload would be 350 KB if it did');
 
@@ -472,6 +480,19 @@ for (const section of ['questions', 'wrong', 'notes', 'daily']) {
   } else {
     eq(`${section}: the row is gone`, api('apiReload', section).data.length, before + 1);
   }
+}
+
+/* ------------------------------ the intake ------------------------------ */
+
+{
+  // Answering one keeps the others untouched, and re-seeding never duplicates a key.
+  const first = intake[0].Key;
+  const saved = api('apiSaveIntake', first, 'Poked at it');
+  eq('an intake answer saves', saved.data && saved.data.Answer, 'Poked at it');
+  eq('and only that row changed', run('dbSelect(T.INTAKE)').filter((r) => r.Answer).length, 1);
+  eq('seeding again adds nothing', run('intakeRows()').length, 43);
+  const cleared = api('apiSaveIntake', first, '');
+  eq('an intake answer can be cleared', cleared.data && cleared.data.Answer, '');
 }
 
 /* ------------------------- the prediction discipline ----------------------- */

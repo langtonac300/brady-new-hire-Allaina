@@ -766,8 +766,16 @@
       { group: 'Reference' },
       { id: 'systems', label: 'Systems' },
       { id: 'scripts', label: 'Scripts' },
-      { id: 'skills', label: 'Self-assessment' }
+      { id: 'skills', label: 'Self-assessment' },
+      { id: 'intake', label: 'How I work' }
     ];
+
+    /** Documents that exist as a fillable screen too. The Library shows the text; these are
+     *  where the answers go, and the reader says so at the top of each. */
+    var FILLABLE = {
+      '01-start-here/about-how-you-work': { view: 'intake', label: 'How I work', what: 'the intake' },
+      '05-self-assessment/baseline': { view: 'skills', label: 'Self-assessment', what: 'the 31 skills' }
+    };
 
     var FOLDER_ART = {
       Overview: 'folderOverview',
@@ -1720,6 +1728,11 @@
         '<select id="docStatus" style="width:auto">' + options(state.data.lists.DocStatus, meta.Status) + '</select>' +
         '</div></div>' +
         '<div class="scroll">' +
+        (FILLABLE[state.openDoc]
+          ? '<div class="callout fillable"><b>This one is fillable.</b> The tables below are the reading copy - ' +
+            'your answers go on the <b>' + esc(FILLABLE[state.openDoc].label) + '</b> screen, where they save as you type. ' +
+            '<button class="btn small" data-goto-view="' + esc(FILLABLE[state.openDoc].view) + '">Open ' + esc(FILLABLE[state.openDoc].label) + '</button></div>'
+          : '') +
         (FOLDER_ART[meta.Folder] && IMG[FOLDER_ART[meta.Folder]]
           ? '<img class="folderbanner" src="' + IMG[FOLDER_ART[meta.Folder]] + '" alt="' + esc(meta.Folder) + '">'
           : '') +
@@ -2540,6 +2553,93 @@
       return '<span class="movement flat">held</span>';
     }
 
+    /* ---- How I work: the intake, fillable ---- */
+
+    function intakeByKey(key) {
+      return (state.data.intake || []).filter(function (r) { return r.Key === key; })[0];
+    }
+
+    function intakeAnswered() {
+      return (state.data.intake || []).filter(function (r) { return String(r.Answer || '').trim(); }).length;
+    }
+
+    function intakeSections() {
+      return (state.data.intakeQuestions && state.data.intakeQuestions.sections) || [];
+    }
+
+    function intakeTotal() {
+      return intakeSections().reduce(function (n, sec) {
+        return n + sec.questions.filter(function (q) { return q.type !== 'note'; }).length;
+      }, 0);
+    }
+
+    /** A text answer shows a local draft newer than the saved one - same rule as document notes. */
+    function intakeText(key, saved) {
+      var draft = readStore('local', 'ramp.intake.draft.' + key);
+      return (draft !== undefined && draft !== null && draft !== '' && draft !== saved) ? draft : saved;
+    }
+
+    function viewIntake() {
+      var data = { sections: intakeSections() };
+      var html =
+        '<div class="page-head titled">' +
+        '<img class="pageicon" src="' + IMG.navSkills + '" alt="">' +
+        '<div><h2 class="page">How I work</h2>' +
+        '<p class="lede">Twenty minutes if you move, in your first couple of days - longer is fine, and so is ' +
+        'leaving things blank. The whole ramp was designed before anyone had met you, which means it is built ' +
+        'on guesses. This is how we replace the guesses with facts. Everything saves as you answer.</p></div></div>' +
+        '<div class="callout"><b>This is not a test and it is not stored anywhere formal.</b> Honest answers make the ' +
+        'next twelve weeks better; flattering ones make them worse. If you only have ten minutes, do sections 1, 2 and 3. ' +
+        'The table of what each answer changes is at the end of ' +
+        '<a class="doclink" href="#" data-doc="01-start-here/about-how-you-work">the written version</a>.</div>' +
+        '<div class="grid" style="margin-bottom:24px" id="intakeProgress">' + intakeProgressHtml() + '</div>';
+
+      data.sections.forEach(function (sec) {
+        html += '<h3 class="group">' + sec.id + ' &middot; ' + esc(sec.title) + '</h3><div class="card intake">';
+        sec.questions.forEach(function (q) {
+          if (q.type === 'note') { html += '<p class="intro">' + esc(q.text) + '</p>'; return; }
+          var row = intakeByKey(q.key) || { Answer: '' };
+          var saved = String(row.Answer || '');
+          html += '<div class="iq" data-iq="' + esc(q.key) + '"><div class="iq-q">' + esc(q.text) +
+            (q.hint && q.type !== 'text' ? '<span class="iq-hint">' + esc(q.hint) + '</span>' : '') + '</div>';
+          if (q.type === 'pick') {
+            html += '<div class="choices">' + q.options.map(function (o) {
+              return '<label class="choice' + (saved === o ? ' on' : '') + '"><input type="radio" name="iq-' + esc(q.key) + '" value="' + esc(o) + '" data-intake="' + esc(q.key) + '"' + (saved === o ? ' checked' : '') + '><span>' + esc(o) + '</span></label>';
+            }).join('') + '</div>';
+          } else if (q.type === 'rank') {
+            html += '<div class="choices">' + ['1', '2', '3', '4'].map(function (o) {
+              return '<label class="choice rank' + (saved === o ? ' on' : '') + '"><input type="radio" name="iq-' + esc(q.key) + '" value="' + o + '" data-intake="' + esc(q.key) + '"' + (saved === o ? ' checked' : '') + '><span>' + o + '</span></label>';
+            }).join('') + '</div>';
+          } else {
+            html += '<textarea class="grow answer" data-intake="' + esc(q.key) + '" placeholder="' + esc(q.hint || 'A sentence is plenty. Nobody is reading this for style.') + '">' + esc(intakeText(q.key, saved)) + '</textarea>';
+          }
+          html += '<span class="savestate" data-savestatus="intake:' + esc(q.key) + '"></span></div>';
+        });
+        html += '</div>';
+      });
+
+      html += '<div class="callout" style="margin-top:26px"><b>Then, once, at about day 30: re-read your own answers.</b> ' +
+        'Some of them will look wrong to you by then. Tell Alex which ones changed, and the plan adjusts again.</div>';
+      return html;
+    }
+
+    function intakeProgressHtml() {
+      var done = intakeAnswered();
+      var total = intakeTotal();
+      return stat(IMG.statSelfAssess, done + '<small> / ' + total + '</small>', 'Answered', done / Math.max(total, 1));
+    }
+
+    function saveIntake(key, value) {
+      return function () {
+        return call('apiSaveIntake', key, value).then(function (row) {
+          replaceRow(state.data.intake, row, 'Key');
+          try { window.localStorage.removeItem('ramp.intake.draft.' + key); } catch (err) { /* memory only */ }
+          var prog = el('intakeProgress');
+          if (prog) prog.innerHTML = intakeProgressHtml();
+        });
+      };
+    }
+
     /* ---- Search ---- */
 
     function viewSearch() {
@@ -2612,7 +2712,7 @@
     var VIEW_FNS = {
       today: viewToday, library: viewLibrary, ladder: viewLadder,
       questions: viewQuestions, wrong: viewWrong, notes: viewNotes, daily: viewDaily,
-      systems: viewSystems, scripts: viewScripts, skills: viewSkills, search: viewSearch
+      systems: viewSystems, scripts: viewScripts, skills: viewSkills, intake: viewIntake, search: viewSearch
     };
 
     function render() {
@@ -3051,6 +3151,14 @@
         return;
       }
 
+      var go = t.closest('[data-goto-view]');
+      if (go) {
+        closeModal();
+        state.view = go.getAttribute('data-goto-view');
+        render();
+        return;
+      }
+
       var noteAct = t.closest('[data-note-act]');
       if (noteAct) {
         noteAction(noteAct.getAttribute('data-note-act'), noteAct.getAttribute('data-id'));
@@ -3318,6 +3426,16 @@
         return;
       }
 
+      var intakeKey = t.getAttribute('data-intake');
+      if (intakeKey && t.type === 'radio') {
+        var group = t.closest('.choices');
+        if (group) Array.prototype.forEach.call(group.querySelectorAll('.choice'), function (l) {
+          l.classList.toggle('on', l.querySelector('input').checked);
+        });
+        scheduleSave('intake:' + intakeKey, saveIntake(intakeKey, t.value), 150);
+        return;
+      }
+
       var skill = t.getAttribute('data-skill');
       if (skill) {
         var sp = {};
@@ -3434,6 +3552,13 @@
       if (editNote && state.noteEdits && state.noteEdits[editNote]) {
         state.noteEdits[editNote][e.target.getAttribute('data-f')] = e.target.value;
         scheduleSave('note:' + editNote, saveNoteEdit(editNote));
+        return;
+      }
+
+      var intakeText_ = e.target.getAttribute && e.target.getAttribute('data-intake');
+      if (intakeText_ && e.target.tagName === 'TEXTAREA') {
+        writeStore('local', 'ramp.intake.draft.' + intakeText_, e.target.value);
+        scheduleSave('intake:' + intakeText_, saveIntake(intakeText_, e.target.value));
         return;
       }
 

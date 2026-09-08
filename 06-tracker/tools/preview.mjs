@@ -52,7 +52,7 @@ const page = [
             runner.withFailureHandler = function (fn) { handlers.fail = fn; return runner; };
             ['apiBootstrap','apiGetDoc','apiGetDiagram','apiSaveDoc','apiSaveProject','apiSaveSkill',
              'apiCreate','apiUpdate','apiDelete','apiReload','apiSetSetting','apiSaveSystem',
-             'apiSaveScript','apiSearch'].forEach(function (name) {
+             'apiSaveScript','apiSearch','apiSaveIntake'].forEach(function (name) {
               runner[name] = function () {
                 var args = arguments;
                 setTimeout(function () {
@@ -84,6 +84,11 @@ const page = [
                     var doc = (SNAPSHOT.boot.docs || []).filter(function (d) { return d.ID === args[0]; })[0] || { ID: args[0] };
                     Object.assign(doc, args[1] || {});
                     return handlers.ok({ ok: true, data: doc });
+                  }
+                  if (name === 'apiSaveIntake') {
+                    var iq = (SNAPSHOT.boot.intake || []).filter(function (r) { return r.Key === args[0]; })[0] || { Key: args[0] };
+                    iq.Answer = args[1];
+                    return handlers.ok({ ok: true, data: iq });
                   }
                   if (name === 'apiDelete') {
                     var rows = SNAPSHOT.boot[args[0]] || [];

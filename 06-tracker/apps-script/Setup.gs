@@ -61,7 +61,7 @@ function setupWorkbook() {
   // A hidden sheet cannot be made active, so Lists is briefly shown while it is moved.
   var order = [
     T.DASHBOARD, T.DOCS, T.PROJECTS, T.QUESTIONS, T.WRONG, T.NOTES, T.DAILY,
-    T.SKILLS, T.SYSTEMS, T.SCRIPTS, T.SETTINGS, T.LISTS
+    T.SKILLS, T.INTAKE, T.SYSTEMS, T.SCRIPTS, T.SETTINGS, T.LISTS
   ];
   order.forEach(function (name, i) {
     var sheet = book.getSheetByName(name);
@@ -266,6 +266,8 @@ function seedIfEmpty() {
       })
     );
   }
+
+  intakeRows();
 
   if (!dbSelect(T.SYSTEMS).length) dbWriteAll(T.SYSTEMS, SEED_SYSTEMS());
   if (!dbSelect(T.SCRIPTS).length) dbWriteAll(T.SCRIPTS, SEED_SCRIPTS());

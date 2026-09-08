@@ -24,6 +24,7 @@ the Apps Script tracker's Score list in apps-script/Schema.gs, so the two agree.
 Needs openpyxl:  pip install openpyxl
 """
 
+import json
 import os
 
 from openpyxl import Workbook
@@ -180,136 +181,31 @@ BASELINE_WRITTEN = [
      'Leave this blank on day one. It is the Day-90 half of the pair.'),
 ]
 
-# 01-start-here/about-how-you-work.md
-# ('pick', question, [options])  |  ('rank', question, [options])  |  ('text', question, hint)
-INTAKE = [
-    ("1 - What you've actually touched", [
-        ('note', "Not what you studied - what you've genuinely used, even a little. "
-                 'A "Never" here isn\'t a problem. A hidden one is - see the "What this changes" tab.', None),
-        ('pick', 'Google Ads (or any ad platform)', TOUCHED),
-        ('pick', 'Google Sheets / Excel - filtering, sorting, a pivot table', TOUCHED),
-        ('pick', 'Any analytics tool (GA, Adobe, similar)', TOUCHED),
-        ('pick', 'SQL, or any query language', TOUCHED),
-        ('pick', 'A dashboard tool - Power BI, Tableau, Looker, similar', TOUCHED),
-        ('pick', 'Working in a spreadsheet with more than a few thousand rows', TOUCHED),
-        ('pick', 'An AI assistant, for real work rather than curiosity', TOUCHED),
-        ('text', "Anything else you've used that we haven't listed?", ''),
-    ]),
-    ('2 - How you learn best', [
-        ('note', 'Rank the next four 1-4, where 1 is what works best for you.', None),
-        ('rank', 'Reading it and working it out', None),
-        ('rank', 'Watching someone do it, then doing it', None),
-        ('rank', 'Being told the concept out loud, then trying', None),
-        ('rank', 'Just doing it and asking when it breaks', None),
-        ('pick', "When you hit a concept that doesn't land, what do you normally do?", [
-            'Read it again, slower',
-            'Go and find a different explanation of the same thing',
-            'Skip it and come back once something else has clicked',
-            'Go looking for a concrete example to work through',
-        ]),
-        ('text', 'Do you want the why before the how, or do you want to do the thing first '
-                 'and get the reasoning after?', ''),
-        ('text', "Is there a course, video series or way of learning that's worked well for "
-                 'you before?', ''),
-    ]),
-    ("3 - When something isn't going well", [
-        ('pick', 'When you get stuck on something, what do you usually do first?', [
-            'Ask straight away',
-            'Try for a bit, then ask',
-            "Keep going until I've cracked it or run out of day",
-        ]),
-        ('pick', 'Where would you rather ask?', [
-            'The team chat channel, where anyone can answer',
-            'A direct message to Alex or Courtney',
-            'Saved up for a scheduled conversation',
-        ]),
-        ('pick', 'How do you like to get feedback?', [
-            'In the moment, as it happens',
-            'At the end of the session, all together',
-            'Written down afterwards so I can sit with it',
-        ]),
-        ('text', "Would you rather be told when you're heading the wrong way, or be allowed "
-                 "to get there and work it out?", ''),
-        ('text', 'How does it feel to be wrong in front of someone?',
-         'A scheduling question, not a character one - a lot of this ramp is predict-then-compare.'),
-        ('text', 'If you had too much on, how would we know?',
-         'Some people go quiet, some ask more questions, some say it plainly. Tell us your tell.'),
-    ]),
-    ("4 - Pace, and how much room you've actually got", [
-        ('pick', 'Which is more true of you?', [
-            "I'd rather move fast and go back over things later",
-            "I'd rather go slowly and feel solid before moving on",
-        ]),
-        ('text', 'If you finish something early, would you rather have more work, or go deeper '
-                 'on what you just did?', ''),
-        ('text', 'How much of your week do you expect to have for the training projects, '
-                 'realistically, once meetings and everything else land?', ''),
-        ('pick', 'Do deadlines help you or stress you?', [
-            'Give me a date. I work toward them',
-            'Give me an order and let me pace it',
-            "A date, but I'd like it to be a soft one",
-        ]),
-    ]),
-    ('5 - Meetings, and speaking in them', [
-        ('pick', "How do you feel about talking in a room of people you don't know yet?", [
-            "Fine. I'd rather join in early than sit silent",
-            "Depends on the room. I'll warm up",
-            "I'd rather listen for a while first",
-        ]),
-        ('pick', 'Would you rather be asked something cold in a meeting, or get a heads-up '
-                 'beforehand?', [
-            'Cold is fine',
-            'A heads-up, so I can think about it',
-            'A heads-up, and ideally the first few times are rehearsed with Alex',
-        ]),
-        ('text', "Anything about meetings that's worked badly for you before?",
-         'Worth saying now, while the calendar is still being built.'),
-    ]),
-    ('6 - When and where you do your best work', [
-        ('pick', 'When in the day do you think most clearly?', [
-            'Early - mornings are my good hours',
-            'Middle of the day',
-            'Later - I get going in the afternoon',
-            "Genuinely doesn't matter",
-        ]),
-        ('text', 'Would you rather have paired sessions clustered into a couple of days, or '
-                 'spread across the week?', ''),
-        ('text', 'Anything about your setup, tools or environment that would help?',
-         'Screens, note-taking, where you like to work from. Fine to leave blank.'),
-    ]),
-    ("7 - Where you're starting from", [
-        ('text', 'Have you worked with anything industrial, safety-related, healthcare or B2B '
-                 'before?', 'Not a requirement - it tells us how much category background to fill in.'),
-        ('note', "Have you worked next to any of these? Tick anything you've been close to, "
-                 'even secondhand. Each one is a shortcut if you have it.', None),
-        ('pick', 'SEO', YESNO),
-        ('pick', 'Email or lifecycle marketing', YESNO),
-        ('pick', 'Ecommerce or merchandising', YESNO),
-        ('pick', 'Data analysis or reporting of any kind', YESNO),
-        ('pick', 'Working with an outside agency, or working at one', YESNO),
-        ('text', 'What do you already know about Brady from interviewing here?',
-         "Saves us re-explaining things you've already been told three times."),
-    ]),
-    ('8 - AI tools', [
-        ('note', 'Gemini is Brady\'s sanctioned AI tool. This is just to find out where you '
-                 'are starting.', None),
-        ('pick', 'Where are you with AI tools today?', [
-            'I use them daily for real work',
-            "I've used them for questions and drafting",
-            "I've tried them and wasn't convinced",
-            'Barely at all',
-        ]),
-        ('text', "Where do you trust them, and where don't you?",
-         'The answer we are building toward is "trust it to draft, never to know a number".'),
-    ]),
-    ('9 - The two that matter most', [
-        ('text', 'What are you most looking forward to?', ''),
-        ('text', 'What are you most worried about?',
-         'Also in the baseline - answer it in whichever place you prefer.'),
-        ('text', 'What would make day 90 feel like a win to you?',
-         'Not the version in the plan - yours. This is the cheapest moment to add it.'),
-    ]),
-]
+# 01-start-here/about-how-you-work.md, via intake/questions.json - the one list the app's
+# How I work screen is built from too (tools/build-intake.mjs), so the two cannot drift.
+# Rows come back in the shape the sheet builder below expects:
+#   ('pick', question, [options])  |  ('rank', question, None)  |  ('text', question, hint)
+#   ('note', text, None)
+def load_intake():
+    with open(os.path.join(REPO, '06-tracker', 'intake', 'questions.json'), encoding='utf-8') as fh:
+        data = json.load(fh)
+    out = []
+    for sec in data['sections']:
+        rows = []
+        for q in sec['questions']:
+            if q['type'] == 'note':
+                rows.append(('note', q['text'], None))
+            elif q['type'] == 'pick':
+                rows.append(('pick', q['text'], list(q['options'])))
+            elif q['type'] == 'rank':
+                rows.append(('rank', q['text'], None))
+            else:
+                rows.append(('text', q['text'], q.get('hint', '')))
+        out.append(('{0} - {1}'.format(sec['id'], sec['title']), rows))
+    return out
+
+
+INTAKE = load_intake()
 
 LEVERS = [
     ("Reading isn't how you learn",
