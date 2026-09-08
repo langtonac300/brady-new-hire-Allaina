@@ -246,10 +246,28 @@ function apiUpdate(section, id, patch) {
   }
 }
 
+/**
+ * Delete a row - except for notes, which are archived instead.
+ *
+ * A note is the one thing here that only ever existed in her head first, so a hard delete
+ * loses something nothing else holds. Archiving flips a column and leaves the row where it
+ * is; the app hides archived notes and can put one back with one click.
+ *
+ * The Archived column is added on demand. A workbook set up before it existed does not have
+ * it, and dbUpdate() silently drops a field with no column - which would report the note as
+ * archived while leaving it live, and it would be back on the next reload. So the header is
+ * checked first and the sheet widened if it has to be; ensureSheet() only touches the header
+ * row and the sheet's width, never the rows below it.
+ */
 function apiDelete(section, id) {
   try {
     var def = sectionDef(section);
-    return ok(dbDelete(def.table, id));
+    if (section !== 'notes') return ok(dbDelete(def.table, id));
+
+    var sheet = sheetFor(def.table);
+    if (headerMap(sheet).Archived === undefined) ensureSheet(tableDef(def.table));
+    dbUpdate(def.table, id, { Archived: 'Yes' });
+    return ok(true);
   } catch (err) {
     return fail(err);
   }

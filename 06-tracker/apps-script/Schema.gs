@@ -190,7 +190,12 @@ function SCHEMA() {
         { name: 'Body', w: 520, wrap: true },
         { name: 'Follow-up', w: 300, wrap: true },
         { name: 'Done', w: 80, list: 'YesNo' },
-        { name: 'Updated', w: 140, type: 'date' }
+        { name: 'Updated', w: 140, type: 'date' },
+        // Deleting a note archives it instead of removing the row, so nothing she wrote is
+        // ever gone. Appended last on purpose: ensureSheet() widens an existing sheet at the
+        // right-hand edge and rewrites the header row in place, so a column added anywhere
+        // else would shift every existing row's data one header to the left.
+        { name: 'Archived', w: 90, list: 'YesNo' }
       ]
     },
 

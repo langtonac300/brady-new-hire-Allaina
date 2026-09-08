@@ -461,7 +461,17 @@ for (const section of ['questions', 'wrong', 'notes', 'daily']) {
 
   const gone = api('apiDelete', section, second.data.ID);
   check(`${section}: delete succeeds`, gone.ok && gone.data === true);
-  eq(`${section}: the row is gone`, api('apiReload', section).data.length, before + 1);
+  if (section === 'notes') {
+    // Notes are archived, not removed: the row stays, flagged, so nothing written is lost.
+    const rows = api('apiReload', section).data;
+    eq(`${section}: the row is kept`, rows.length, before + 2);
+    const kept = rows.find((r) => r.ID === second.data.ID);
+    eq(`${section}: and flagged as archived`, kept && kept.Archived, 'Yes');
+    const back = api('apiUpdate', section, second.data.ID, { Archived: 'No' });
+    eq(`${section}: restore clears the flag`, back.data.Archived, 'No');
+  } else {
+    eq(`${section}: the row is gone`, api('apiReload', section).data.length, before + 1);
+  }
 }
 
 /* ------------------------- the prediction discipline ----------------------- */

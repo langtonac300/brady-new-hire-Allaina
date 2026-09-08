@@ -65,6 +65,33 @@ const page = [
                   }
                   if (name === 'apiReload') return handlers.ok({ ok: true, data: SNAPSHOT.boot[args[0]] || [] });
                   if (name === 'apiSearch') return handlers.ok({ ok: true, data: { query: args[0], documents: [], entries: [] } });
+                  // Writes echo a plausible row. Returning {} here used to wipe the saved
+                  // record's metadata in the page's own state, which made every save look
+                  // like data loss in the preview when the real app keeps it fine.
+                  if (name === 'apiCreate') {
+                    var made = Object.assign({ ID: args[0].slice(0, 1).toUpperCase() + '-9' + String(Date.now() % 100).padStart(2, '0'),
+                      Date: new Date().toISOString().slice(0, 10) }, args[1] || {});
+                    (SNAPSHOT.boot[args[0]] = SNAPSHOT.boot[args[0]] || []).push(made);
+                    return handlers.ok({ ok: true, data: made });
+                  }
+                  if (name === 'apiUpdate') {
+                    var list = SNAPSHOT.boot[args[0]] || [];
+                    var hit = list.filter(function (r) { return r.ID === args[1]; })[0] || { ID: args[1] };
+                    Object.assign(hit, args[2] || {});
+                    return handlers.ok({ ok: true, data: hit });
+                  }
+                  if (name === 'apiSaveDoc') {
+                    var doc = (SNAPSHOT.boot.docs || []).filter(function (d) { return d.ID === args[0]; })[0] || { ID: args[0] };
+                    Object.assign(doc, args[1] || {});
+                    return handlers.ok({ ok: true, data: doc });
+                  }
+                  if (name === 'apiDelete') {
+                    var rows = SNAPSHOT.boot[args[0]] || [];
+                    var victim = rows.filter(function (r) { return r.ID === args[1]; })[0];
+                    if (args[0] === 'notes' && victim) victim.Archived = 'Yes';
+                    else SNAPSHOT.boot[args[0]] = rows.filter(function (r) { return r.ID !== args[1]; });
+                    return handlers.ok({ ok: true, data: true });
+                  }
                   handlers.ok({ ok: true, data: {} });
                 }, 0);
                 return runner;
