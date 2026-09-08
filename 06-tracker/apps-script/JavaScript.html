@@ -472,7 +472,106 @@
       });
     }
 
+    /* ============================== autosave ============================== */
+
+    /**
+     * Debounced, coalescing saves. One key per thing being edited - the composer, one note,
+     * one document's notes - so typing in two places never interleaves their requests.
+     *
+     * The shape matters because of what is behind it: google.script.run is slow (a few
+     * hundred ms) and has no queue of its own, so firing a save per keystroke would race
+     * later saves past earlier ones and land the wrong text. Here a key has at most one
+     * request in flight; anything typed meanwhile marks it dirty and one more save runs
+     * when the first returns. The last keystroke always wins.
+     */
+    var saves = {};
+
+    function scheduleSave(key, fn, delay) {
+      var job = saves[key] = saves[key] || { timer: null, inFlight: false, dirty: false, fn: null };
+      job.fn = fn;
+      job.dirty = true;
+      setSaveStatus(key, 'typing');
+      clearTimeout(job.timer);
+      job.timer = setTimeout(function () { runSave(key); }, delay || 1200);
+    }
+
+    function runSave(key) {
+      var job = saves[key];
+      if (!job || !job.dirty || job.inFlight) return Promise.resolve();
+      job.inFlight = true;
+      job.dirty = false;
+      setSaveStatus(key, 'saving');
+      return Promise.resolve()
+        .then(function () { return job.fn(); })
+        .then(function () {
+          job.inFlight = false;
+          if (job.dirty) return runSave(key);
+          setSaveStatus(key, 'saved');
+        })
+        .catch(function (err) {
+          job.inFlight = false;
+          job.dirty = true;
+          setSaveStatus(key, 'failed', err);
+        });
+    }
+
+    /** Push through whatever is pending on a key right now, e.g. before closing an editor. */
+    function flushSave(key) {
+      var job = saves[key];
+      if (!job) return Promise.resolve();
+      clearTimeout(job.timer);
+      if (job.inFlight) {
+        // Wait for the in-flight one; runSave() will chain the dirty follow-up itself.
+        return new Promise(function (resolve) {
+          var tick = setInterval(function () {
+            if (!job.inFlight && !job.dirty) { clearInterval(tick); resolve(); }
+          }, 60);
+        });
+      }
+      return runSave(key);
+    }
+
+    function setSaveStatus(key, status, err) {
+      var nodes = document.querySelectorAll('[data-savestatus="' + key + '"]');
+      var text = { typing: 'Unsaved', saving: 'Saving\u2026', saved: 'Saved ' + clock(), failed: 'Could not save \u2014 kept here' }[status] || '';
+      Array.prototype.forEach.call(nodes, function (n) {
+        n.textContent = text;
+        n.className = 'savestate ' + status;
+        if (err) n.title = String(err && err.message ? err.message : err);
+      });
+    }
+
+    function clock() {
+      var d = new Date();
+      return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    }
+
+    /** A textarea that grows with what is in it, so a long note is never read through a slot. */
+    function growTextarea(node) {
+      if (!node || node.tagName !== 'TEXTAREA') return;
+      node.style.height = 'auto';
+      node.style.height = Math.max(node.scrollHeight + 2, parseInt(getComputedStyle(node).minHeight, 10) || 0) + 'px';
+    }
+
+    function growAll(root) {
+      Array.prototype.forEach.call((root || document).querySelectorAll('textarea.grow'), growTextarea);
+    }
+
     var toastTimer = null;
+    var toastActionFn = null;
+    /** A toast with one action on it - "Archived - Undo". The action is dropped when the toast goes. */
+    function toastAction(message, label, fn) {
+      var el0 = el('toast');
+      toastActionFn = fn;
+      el0.innerHTML = esc(message) + ' <button class="toastact" data-act="toast-action">' + esc(label) + '</button>';
+      el0.className = 'toast show';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () {
+        el0.className = 'toast';
+        toastActionFn = null;
+      }, 6000);
+    }
+
     function toast(message, isError) {
       var el0 = el('toast');
       el0.textContent = String(message && message.message ? message.message : message);
@@ -1629,7 +1728,9 @@
           : '') +
         '<div class="md">' + renderMarkdown(doc.Body, { docId: state.openDoc, index: state.index }) + '</div>' +
         '<hr>' +
-        field('My notes on this', '<textarea id="docNotes" placeholder="What you want to remember, or what did not make sense">' + esc(meta['My notes'] || '') + '</textarea>') +
+        field('My notes on this',
+          '<textarea id="docNotes" class="grow docnotes" placeholder="What you want to remember, or what did not make sense. Saves as you type.">' + esc(docNotesText(state.openDoc, meta)) + '</textarea>' +
+          '<span class="savestate" data-savestatus="doc:' + esc(state.openDoc) + '"></span>') +
         '</div>'
       );
     }
@@ -1888,65 +1989,367 @@
       );
     }
 
+    /* ------------------------------- Notes ------------------------------- */
+
+    var DRAFT_KEY = 'ramp.notes.draft';
+
+    /** The composer's draft, restored from storage so a reload or a closed tab loses nothing. */
+    function loadNoteDraft() {
+      try {
+        var raw = readStore('local', DRAFT_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (err) { /* a bad draft is not worth an error */ }
+      return null;
+    }
+
+    function storeNoteDraft(draft) {
+      if (draft) writeStore('local', DRAFT_KEY, JSON.stringify(draft));
+      else {
+        writeStore('local', DRAFT_KEY, '');
+        try { window.localStorage.removeItem(DRAFT_KEY); } catch (err) { /* memory only */ }
+      }
+    }
+
+    /**
+     * A draft that came back from storage after a reload. If it had already reached the
+     * server and the server copy matches it, it is not a draft any more - it is a note, and
+     * it is in the list. Showing it in the composer as well would put the same note on the
+     * page twice. Only text the server never got keeps the composer open.
+     */
+    function reconcileDraft(d) {
+      if (!d) return null;
+      if (!d.id) return (d.Body || d.Title) ? d : null;
+      var saved = noteById(d.id);
+      if (!saved) return d;                       // the row is missing - keep her words
+      var same = ['Body', 'Title', 'Who', 'Project', 'Kind', 'Follow-up'].every(function (f) {
+        return String(d[f] || '') === String(saved[f] || '');
+      });
+      if (same) { storeNoteDraft(null); return null; }
+      return d;
+    }
+
+    function blankDraft() {
+      return { id: null, Kind: 'Capture', Title: '', Who: '', Project: '', Body: '', 'Follow-up': '' };
+    }
+
+    function firstLine(text) {
+      var line = String(text || '').split('\n').map(function (l) { return l.trim(); })
+        .filter(function (l) { return l && !/^[-*#>\s]+$/.test(l); })[0] || '';
+      return line.replace(/^#+\s*/, '').replace(/^[-*]\s+/, '').slice(0, 80);
+    }
+
+    function noteHeadline(n) {
+      return n.Title || firstLine(n.Body) || 'Untitled';
+    }
+
+    function activeNotes() {
+      return state.data.notes.filter(function (n) { return n.Archived !== 'Yes'; }).slice().reverse();
+    }
+
+    function archivedNotes() {
+      return state.data.notes.filter(function (n) { return n.Archived === 'Yes'; }).slice().reverse();
+    }
+
     function viewNotes() {
-      var rows = state.data.notes.slice().reverse();
+      if (state.noteDraft === undefined) state.noteDraft = reconcileDraft(loadNoteDraft());
+      state.noteEdits = state.noteEdits || {};
+      var rows = activeNotes();
+      var gone = archivedNotes();
+
       var html =
         '<div class="page-head"><h2 class="page">Notes</h2>' +
         '<p class="lede">Meetings, capture sessions, things people told you. Write them down the same day - ' +
         'especially in the first three weeks, when a lot of what you are told only exists in someone’s ' +
-        'head.</p></div>' +
-        '<div class="card">' +
-        '<div class="cols">' +
-        field('Kind', '<select id="nKind">' + options(state.data.lists.NoteKind, 'Capture') + '</select>') +
-        field('Title', '<input type="text" id="nTitle" placeholder="What it was">') +
-        field('Who', '<input type="text" id="nWho" placeholder="Who was there">') +
-        field('Project', projectSelect('nProject', '')) +
-        '</div>' +
-        field('The note', '<textarea id="nBody"></textarea>') +
-        field('Follow-up, if any', '<input type="text" id="nFollow" placeholder="What you owe someone, or what to chase">') +
-        '<button class="btn" data-act="add-note">Add it</button>' +
-        '</div>';
+        'head. Everything here saves as you type, and nothing is ever deleted - archived notes are one click away.</p></div>' +
+        composerHtml();
 
-      if (!rows.length) return html + emptyState(IMG.emptyNotes, 'Nothing yet.');
+      if (!rows.length && !gone.length) return html + emptyState(IMG.emptyNotes, 'Nothing yet.');
 
-      html += rows.map(function (n) {
-        if (state.editing === 'notes|' + n.ID) return editNote(n);
-        return (
-          '<div class="entry">' +
-          entryHead(n.ID, '<span class="chip blue">' + esc(n.Kind) + '</span>' +
-            (n.Project ? '<span class="chip">' + esc(n.Project) + '</span>' : ''), n.Date, 'notes') +
-          '<div class="q">' + esc(n.Title) + '</div>' +
-          (n.Who ? '<p style="color:var(--ink-3);font-size:12.5px;margin:4px 0 0">' + esc(n.Who) + '</p>' : '') +
-          (n.Body ? '<p style="margin:10px 0 0">' + nl2br(n.Body) + '</p>' : '') +
-          (n['Follow-up']
-            ? '<div class="row" style="margin-top:12px"><span class="chip amber">follow-up</span>' +
-              '<span style="flex:1">' + esc(n['Follow-up']) + '</span>' +
-              '<select data-section="notes" data-id="' + esc(n.ID) + '" data-f="Done" style="max-width:110px">' +
-              options(state.data.lists.YesNo, n.Done) + '</select></div>'
-            : '') +
-          '</div>'
-        );
-      }).join('');
+      html += '<div id="notelist">' + rows.map(noteEntryHtml).join('') + '</div>';
 
+      if (gone.length) {
+        html += '<details class="archived" id="archivedNotes"' + (state.showArchived ? ' open' : '') + '>' +
+          '<summary>Archived <span class="chip mono">' + gone.length + '</span></summary>' +
+          gone.map(archivedEntryHtml).join('') + '</details>';
+      }
       return html;
     }
 
-    function editNote(n) {
+    /** The composer is a button until it is needed, and the open editor whenever there is a draft. */
+    function composerHtml() {
+      var d = state.noteDraft;
+      var open = state.noteComposerOpen || (d && (d.Body || d.Title));
+      if (!open) {
+        return '<div class="card composer closed"><button class="btn" data-note-act="open">Write a note</button>' +
+          '<span class="hint">Just start typing. Title, who, project - file it afterwards, or never.</span></div>';
+      }
+      d = d || blankDraft();
       return (
-        '<div class="entry">' +
-        '<div class="head"><span class="chip mono">' + esc(n.ID) + '</span><b>Editing</b></div>' +
-        '<div class="cols">' +
-        field('Kind', '<select data-e="Kind">' + options(state.data.lists.NoteKind, n.Kind) + '</select>') +
-        field('Title', '<input type="text" data-e="Title" value="' + esc(n.Title) + '">') +
-        field('Who', '<input type="text" data-e="Who" value="' + esc(n.Who) + '">') +
-        field('Project', projectSelect(null, n.Project, 'Project')) +
+        '<div class="card composer" id="composer">' +
+        '<textarea id="nBody" class="grow notebody" placeholder="What happened, what they said, what you want to remember. Bullets and **bold** work.">' + esc(d.Body) + '</textarea>' +
+        '<div class="filing"><span class="filing-label">Optional</span>' +
+        '<select id="nKind" data-draft="Kind">' + options(state.data.lists.NoteKind, d.Kind || 'Capture') + '</select>' +
+        '<input type="text" id="nTitle" data-draft="Title" placeholder="Title (or the first line is used)" value="' + esc(d.Title) + '">' +
+        '<input type="text" id="nWho" data-draft="Who" placeholder="Who" value="' + esc(d.Who) + '">' +
+        projectSelect('nProject', d.Project) +
+        '<input type="text" id="nFollow" data-draft="Follow-up" placeholder="Follow-up, if any" value="' + esc(d['Follow-up']) + '">' +
         '</div>' +
-        field('The note', '<textarea data-e="Body">' + esc(n.Body) + '</textarea>') +
-        field('Follow-up', '<input type="text" data-e="Follow-up" value="' + esc(n['Follow-up']) + '">') +
-        '<div class="row"><button class="btn" data-save="notes|' + esc(n.ID) + '">Save</button>' +
-        '<button class="btn quiet" data-act="cancel-edit">Cancel</button></div>' +
+        '<div class="row composer-foot">' +
+        '<span class="savestate" data-savestatus="composer">' + (d.id ? 'Saved' : '') + '</span>' +
+        '<span class="push"></span>' +
+        '<button class="btn quiet" data-note-act="discard">' + (d.id ? 'Archive' : 'Discard') + '</button>' +
+        '<button class="btn" data-note-act="done">Done</button>' +
+        '</div></div>'
+      );
+    }
+
+    function noteEntryHtml(n) {
+      if (state.noteEdits && state.noteEdits[n.ID]) return noteEditHtml(n);
+      return (
+        '<div class="entry note" data-entry="notes|' + esc(n.ID) + '">' +
+        '<div class="head"><span class="chip mono">' + esc(n.ID) + '</span>' +
+        '<span class="chip blue">' + esc(n.Kind) + '</span>' +
+        (n.Project ? '<span class="chip">' + esc(n.Project) + '</span>' : '') +
+        '<span style="color:var(--ink-3);font-size:12px">' + esc(n.Date) + '</span>' +
+        '<div class="push row tight">' +
+        '<button class="btn quiet small" data-note-act="edit" data-id="' + esc(n.ID) + '">Edit</button>' +
+        '<button class="btn quiet small" data-note-act="archive" data-id="' + esc(n.ID) + '">Archive</button>' +
+        '</div></div>' +
+        '<div class="q">' + esc(noteHeadline(n)) + '</div>' +
+        (n.Who ? '<p class="who">' + esc(n.Who) + '</p>' : '') +
+        (n.Body ? '<div class="md notebody-md">' + renderMarkdown(n.Body, { index: state.index }) + '</div>' : '') +
+        (n['Follow-up']
+          ? '<div class="row followup"><span class="chip amber">follow-up</span>' +
+            '<span style="flex:1">' + esc(n['Follow-up']) + '</span>' +
+            '<select data-note-done="' + esc(n.ID) + '" style="max-width:110px">' +
+            options(state.data.lists.YesNo, n.Done) + '</select></div>'
+          : '') +
         '</div>'
       );
+    }
+
+    function noteEditHtml(n) {
+      var e = state.noteEdits[n.ID];
+      return (
+        '<div class="entry note editing" data-entry="notes|' + esc(n.ID) + '">' +
+        '<div class="head"><span class="chip mono">' + esc(n.ID) + '</span><b>Editing</b>' +
+        '<span class="savestate" data-savestatus="note:' + esc(n.ID) + '"></span></div>' +
+        '<textarea class="grow notebody" data-edit-note="' + esc(n.ID) + '" data-f="Body">' + esc(e.Body) + '</textarea>' +
+        '<div class="filing"><span class="filing-label">Filing</span>' +
+        '<select data-edit-note="' + esc(n.ID) + '" data-f="Kind">' + options(state.data.lists.NoteKind, e.Kind) + '</select>' +
+        '<input type="text" data-edit-note="' + esc(n.ID) + '" data-f="Title" placeholder="Title" value="' + esc(e.Title) + '">' +
+        '<input type="text" data-edit-note="' + esc(n.ID) + '" data-f="Who" placeholder="Who" value="' + esc(e.Who) + '">' +
+        projectSelect(null, e.Project, null, 'data-edit-note="' + esc(n.ID) + '" data-f="Project"') +
+        '<input type="text" data-edit-note="' + esc(n.ID) + '" data-f="Follow-up" placeholder="Follow-up" value="' + esc(e['Follow-up']) + '">' +
+        '</div>' +
+        '<div class="row composer-foot"><span class="push"></span>' +
+        '<button class="btn" data-note-act="edit-done" data-id="' + esc(n.ID) + '">Done</button></div>' +
+        '</div>'
+      );
+    }
+
+    function archivedEntryHtml(n) {
+      return (
+        '<div class="entry note archived-note" data-entry="notes|' + esc(n.ID) + '">' +
+        '<div class="head"><span class="chip mono">' + esc(n.ID) + '</span>' +
+        '<span style="color:var(--ink-3);font-size:12px">' + esc(n.Date) + '</span>' +
+        '<div class="push"><button class="btn quiet small" data-note-act="restore" data-id="' + esc(n.ID) + '">Restore</button></div></div>' +
+        '<div class="q">' + esc(noteHeadline(n)) + '</div>' +
+        (n.Body ? '<p class="preview">' + esc(firstLine(n.Body) === noteHeadline(n) ? String(n.Body).split('\n').slice(1).join(' ').slice(0, 160) : String(n.Body).slice(0, 160)) + '</p>' : '') +
+        '</div>'
+      );
+    }
+
+    function noteById(id) {
+      return state.data.notes.filter(function (n) { return n.ID === id; })[0];
+    }
+
+    /** Replace one entry's node in place. The page does not move. */
+    function patchNote(id) {
+      var node = document.querySelector('[data-entry="notes|' + id + '"]');
+      var n = noteById(id);
+      if (!node) return;
+      if (!n || n.Archived === 'Yes') { node.parentNode.removeChild(node); return; }
+      var tmp = document.createElement('div');
+      tmp.innerHTML = noteEntryHtml(n);
+      node.parentNode.replaceChild(tmp.firstChild, node);
+      growAll(document.querySelector('[data-entry="notes|' + id + '"]'));
+    }
+
+    function rerenderComposer() {
+      var node = document.querySelector('.composer');
+      if (!node) return;
+      var tmp = document.createElement('div');
+      tmp.innerHTML = composerHtml();
+      node.parentNode.replaceChild(tmp.firstChild, node);
+      growAll(document.getElementById('composer'));
+    }
+
+    function refreshArchivedSection() {
+      var gone = archivedNotes();
+      var node = document.getElementById('archivedNotes');
+      var html = gone.length
+        ? '<details class="archived" id="archivedNotes"' + (state.showArchived ? ' open' : '') + '>' +
+          '<summary>Archived <span class="chip mono">' + gone.length + '</span></summary>' +
+          gone.map(archivedEntryHtml).join('') + '</details>'
+        : '';
+      if (node) {
+        if (!html) node.parentNode.removeChild(node);
+        else { var tmp = document.createElement('div'); tmp.innerHTML = html; node.parentNode.replaceChild(tmp.firstChild, node); }
+      } else if (html) {
+        var list = document.getElementById('notelist');
+        if (list) list.insertAdjacentHTML('afterend', html);
+      }
+    }
+
+    /** What the composer writes to the server. Title falls back to the first line so a note
+     *  she never named still has a headline in the list, in search and on the Sheet. */
+    function draftPayload(d) {
+      return {
+        Kind: d.Kind || 'Capture',
+        Title: (d.Title || '').trim() || firstLine(d.Body),
+        Who: (d.Who || '').trim(),
+        Project: d.Project || '',
+        Body: d.Body || '',
+        'Follow-up': (d['Follow-up'] || '').trim()
+      };
+    }
+
+    function saveComposer() {
+      var d = state.noteDraft;
+      if (!d || !(d.Body || '').trim()) return Promise.resolve();
+      var payload = draftPayload(d);
+      if (!d.id) {
+        return call('apiCreate', 'notes', payload).then(function (row) {
+          if (!row || !row.ID) throw new Error('The server did not return the new note.');
+          d.id = row.ID;
+          storeNoteDraft(d);
+          state.data.notes.push(row);
+          var list = document.getElementById('notelist');
+          if (list) list.insertAdjacentHTML('afterbegin', noteEntryHtml(row));
+          else {
+            // First note ever: the empty state is on screen. Give it a list to live in.
+            var empty = document.querySelector('.main .empty');
+            if (empty) empty.outerHTML = '<div id="notelist">' + noteEntryHtml(row) + '</div>';
+          }
+          renderNav();
+          var arch = document.querySelector('.composer [data-note-act="discard"]');
+          if (arch) arch.textContent = 'Archive';
+        });
+      }
+      return call('apiUpdate', 'notes', d.id, payload).then(function (row) {
+        replaceRow(state.data.notes, row, 'ID');
+        patchNote(row.ID);
+      });
+    }
+
+    function saveNoteEdit(id) {
+      return function () {
+        var e = state.noteEdits[id];
+        if (!e) return Promise.resolve();
+        return call('apiUpdate', 'notes', id, draftPayload(e)).then(function (row) {
+          replaceRow(state.data.notes, row, 'ID');
+        });
+      };
+    }
+
+    function noteAction(action, id) {
+      var d;
+      if (action === 'open') {
+        state.noteComposerOpen = true;
+        state.noteDraft = state.noteDraft || blankDraft();
+        rerenderComposer();
+        var box = el('nBody');
+        if (box) box.focus();
+        return;
+      }
+
+      if (action === 'done') {
+        flushSave('composer').then(function () {
+          d = state.noteDraft;
+          var job = saves.composer;
+          if (d && (d.Body || '').trim() && !d.id) {
+            // It never reached the server. Keep it open rather than lose it.
+            toast(job && job.dirty ? 'Not saved yet - kept as a draft here.' : 'Saving…', true);
+            return;
+          }
+          state.noteComposerOpen = false;
+          state.noteDraft = null;
+          storeNoteDraft(null);
+          rerenderComposer();
+        });
+        return;
+      }
+
+      if (action === 'discard') {
+        d = state.noteDraft;
+        if (d && d.id) { archiveNote(d.id); state.noteDraft = null; storeNoteDraft(null); state.noteComposerOpen = false; rerenderComposer(); return; }
+        if (d && (d.Body || '').trim() && !window.confirm('Discard this draft? It has not been saved anywhere.')) return;
+        state.noteDraft = null;
+        storeNoteDraft(null);
+        state.noteComposerOpen = false;
+        rerenderComposer();
+        return;
+      }
+
+      if (action === 'edit') {
+        var n = noteById(id);
+        if (!n) return;
+        state.noteEdits[id] = { Kind: n.Kind, Title: n.Title, Who: n.Who, Project: n.Project, Body: n.Body, 'Follow-up': n['Follow-up'] };
+        patchNote(id);
+        var ta = document.querySelector('[data-edit-note="' + id + '"][data-f="Body"]');
+        if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+        return;
+      }
+
+      if (action === 'edit-done') {
+        flushSave('note:' + id).then(function () {
+          delete state.noteEdits[id];
+          patchNote(id);
+        });
+        return;
+      }
+
+      if (action === 'archive') { archiveNote(id); return; }
+
+      if (action === 'restore') { restoreNote(id); return; }
+    }
+
+    function archiveNote(id) {
+      var n = noteById(id);
+      if (!n) return;
+      n.Archived = 'Yes';
+      delete state.noteEdits[id];
+      patchNote(id);
+      refreshArchivedSection();
+      renderNav();
+      call('apiDelete', 'notes', id)
+        .then(function () { toastAction('Archived ' + id + '.', 'Undo', function () { restoreNote(id); }); })
+        .catch(function (err) { n.Archived = 'No'; refreshArchivedSection(); toast(err, true); });
+    }
+
+    function restoreNote(id) {
+      var n = noteById(id);
+      if (!n) return;
+      n.Archived = 'No';
+      refreshArchivedSection();
+      var list = document.getElementById('notelist');
+      if (list && !document.querySelector('[data-entry="notes|' + id + '"]')) {
+        // Put it back where it belongs by date order: newest first.
+        var ordered = activeNotes();
+        var idx = ordered.map(function (x) { return x.ID; }).indexOf(id);
+        var next = ordered[idx + 1];
+        var nextNode = next ? document.querySelector('[data-entry="notes|' + next.ID + '"]') : null;
+        if (nextNode) nextNode.insertAdjacentHTML('beforebegin', noteEntryHtml(n));
+        else list.insertAdjacentHTML('beforeend', noteEntryHtml(n));
+      } else if (!list) {
+        var empty = document.querySelector('.main .empty');
+        if (empty) empty.outerHTML = '<div id="notelist">' + noteEntryHtml(n) + '</div>';
+      }
+      renderNav();
+      call('apiUpdate', 'notes', id, { Archived: 'No' })
+        .then(function (row) { replaceRow(state.data.notes, row, 'ID'); toast('Restored ' + id); })
+        .catch(function (err) { toast(err, true); });
     }
 
     function viewDaily() {
@@ -2190,9 +2593,9 @@
 
     /* ============================== helpers ============================== */
 
-    function projectSelect(id, selected, dataE) {
+    function projectSelect(id, selected, dataE, attrs) {
       var list = state.data.projects.filter(function (p) { return !p['Same as']; });
-      return '<select' + (id ? ' id="' + id + '"' : '') + (dataE ? ' data-e="' + dataE + '"' : '') + '>' +
+      return '<select' + (id ? ' id="' + id + '"' : '') + (dataE ? ' data-e="' + dataE + '"' : '') + (attrs ? ' ' + attrs : '') + '>' +
         '<option value="">No project</option>' +
         list.map(function (p) {
           return '<option value="' + esc(p.ID) + '"' + (p.ID === selected ? ' selected' : '') + '>' +
@@ -2235,6 +2638,7 @@
       if (!split) main.scrollTop = 0;
       if (split) setLibListTop(listTop);
       restoreScroll();
+      growAll(main);
     }
 
     function refreshDoc(id) {
@@ -2647,6 +3051,19 @@
         return;
       }
 
+      var noteAct = t.closest('[data-note-act]');
+      if (noteAct) {
+        noteAction(noteAct.getAttribute('data-note-act'), noteAct.getAttribute('data-id'));
+        return;
+      }
+      if (t.closest('[data-act="toast-action"]')) {
+        var fn = toastActionFn;
+        toastActionFn = null;
+        el('toast').className = 'toast';
+        if (fn) fn();
+        return;
+      }
+
       var edit = t.closest('[data-edit]');
       if (edit) {
         state.editing = edit.getAttribute('data-edit');
@@ -2872,8 +3289,18 @@
         saveDoc({ Status: t.value });
         return;
       }
-      if (t.id === 'docNotes') {
-        saveDoc({ 'My notes': t.value });
+      if (t.tagName === 'SELECT' && (t.id === 'nKind' || t.id === 'nProject' || t.hasAttribute('data-draft') || t.hasAttribute('data-edit-note'))) {
+        t.dispatchEvent(new Event('input', { bubbles: true }));
+        return;
+      }
+
+      var doneFor = t.getAttribute('data-note-done');
+      if (doneFor) {
+        var noteRow = noteById(doneFor);
+        if (noteRow) noteRow.Done = t.value;
+        call('apiUpdate', 'notes', doneFor, { Done: t.value })
+          .then(function (row) { replaceRow(state.data.notes, row, 'ID'); toast('Saved'); })
+          .catch(function (err) { toast(err, true); });
         return;
       }
 
@@ -2942,6 +3369,25 @@
       }
     });
 
+    /** What the document-notes box should show: a local draft newer than the saved copy wins,
+     *  which is how a note typed just before a reload is still there afterwards. */
+    function docNotesText(docId, meta) {
+      var saved = (meta && meta['My notes']) || '';
+      var draft = readStore('local', 'ramp.doc.draft.' + docId);
+      return (draft !== undefined && draft !== null && draft !== '' && draft !== saved) ? draft : saved;
+    }
+
+    function saveDocNotes(docId, text) {
+      return function () {
+        return call('apiSaveDoc', docId, { 'My notes': text }).then(function (row) {
+          var light = {};
+          Object.keys(row).forEach(function (k) { if (k !== 'Body') light[k] = row[k]; });
+          if (light.ID) { replaceRow(state.data.docs, light, 'ID'); state.index[docId] = light; }
+          try { window.localStorage.removeItem('ramp.doc.draft.' + docId); } catch (err) { /* memory only */ }
+        });
+      };
+    }
+
     function saveDoc(patch) {
       var id = state.openDoc;
       call('apiSaveDoc', id, patch)
@@ -2971,6 +3417,33 @@
     }, true);
 
     document.addEventListener('input', function (e) {
+      if (e.target.classList && e.target.classList.contains('grow')) growTextarea(e.target);
+
+      // The composer. Every keystroke lands in the local draft first - that is what survives
+      // a reload - and the server copy follows a beat later.
+      if (e.target.id === 'nBody' || e.target.hasAttribute('data-draft') || e.target.id === 'nProject') {
+        var d = state.noteDraft = state.noteDraft || blankDraft();
+        var f = e.target.id === 'nBody' ? 'Body' : (e.target.id === 'nProject' ? 'Project' : e.target.getAttribute('data-draft'));
+        d[f] = e.target.value;
+        storeNoteDraft(d);
+        scheduleSave('composer', saveComposer);
+        return;
+      }
+
+      var editNote = e.target.getAttribute && e.target.getAttribute('data-edit-note');
+      if (editNote && state.noteEdits && state.noteEdits[editNote]) {
+        state.noteEdits[editNote][e.target.getAttribute('data-f')] = e.target.value;
+        scheduleSave('note:' + editNote, saveNoteEdit(editNote));
+        return;
+      }
+
+      if (e.target.id === 'docNotes' && state.openDoc) {
+        var docId = state.openDoc;
+        writeStore('local', 'ramp.doc.draft.' + docId, e.target.value);
+        scheduleSave('doc:' + docId, saveDocNotes(docId, e.target.value));
+        return;
+      }
+
       if (e.target.id === 'libSearch') {
         state.libraryFilter = e.target.value;
         refreshLibraryList(true);
@@ -2980,6 +3453,12 @@
     });
 
     document.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        var box = e.target;
+        if (box && box.id === 'nBody') { e.preventDefault(); noteAction('done'); return; }
+        var editing = box && box.getAttribute && box.getAttribute('data-edit-note');
+        if (editing) { e.preventDefault(); noteAction('edit-done', editing); return; }
+      }
       var key = e.key;
 
       if ((e.metaKey || e.ctrlKey) && (key === 'k' || key === 'K')) {

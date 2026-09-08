@@ -647,6 +647,50 @@
 
   /* ============================== entries ============================== */
 
+  /* ---- Notes: the composer, in-place editing, archive ---- */
+  .composer.closed { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .composer .hint { color: var(--ink-3); font-size: 12.5px; }
+  textarea.notebody { min-height: 180px; font-size: 14.5px; line-height: 1.65; padding: 12px 14px; }
+  textarea.docnotes { min-height: 120px; line-height: 1.6; }
+  textarea.grow { overflow: hidden; resize: none; }
+  .filing {
+    display: grid; grid-template-columns: max-content minmax(120px, .8fr) minmax(160px, 1.4fr)
+      minmax(120px, 1fr) minmax(160px, 1.2fr) minmax(160px, 1.4fr);
+    gap: 8px; align-items: center; margin-top: 10px;
+  }
+  .filing-label { font-size: 10px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .085em; padding-right: 4px; }
+  .filing input, .filing select { padding: 6px 9px; font-size: 13px; }
+  @media (max-width: 900px) { .filing { grid-template-columns: 1fr 1fr; } .filing-label { grid-column: 1 / -1; } }
+  .composer-foot { margin-top: 12px; align-items: center; }
+  .savestate { font-size: 12px; color: var(--ink-3); min-width: 90px; transition: color .2s var(--ease); }
+  .savestate.typing { color: var(--ink-3); }
+  .savestate.saving { color: var(--navy); }
+  .savestate.saved  { color: var(--green); }
+  .savestate.failed { color: var(--red); font-weight: 600; }
+  .entry.note .who { color: var(--ink-3); font-size: 12.5px; margin: 4px 0 0; }
+  .entry.note .notebody-md { margin-top: 10px; font-size: 14px; }
+  .entry.note .notebody-md > :first-child { margin-top: 0; }
+  .entry.note .notebody-md > :last-child { margin-bottom: 0; }
+  .entry.note .followup { margin-top: 12px; }
+  .entry.note.editing { border-color: var(--navy-600); box-shadow: 0 0 0 3px var(--navy-50); }
+  .entry.note.editing .head { margin-bottom: 8px; }
+  .entry.note.editing .savestate { margin-left: auto; }
+  details.archived { margin-top: 26px; }
+  details.archived > summary {
+    cursor: pointer; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--ink-3); display: flex; align-items: center; gap: 10px; margin-bottom: 12px; list-style: none;
+  }
+  details.archived > summary::-webkit-details-marker { display: none; }
+  details.archived > summary::before { content: '\25B8'; font-size: 12px; transition: transform .15s var(--ease); }
+  details.archived[open] > summary::before { transform: rotate(90deg); }
+  .entry.archived-note { opacity: .72; }
+  .entry.archived-note .preview { color: var(--ink-3); font-size: 13px; margin: 6px 0 0; }
+  .toast .toastact {
+    background: transparent; border: 1px solid rgba(255,255,255,.5); color: #fff; border-radius: 6px;
+    padding: 3px 10px; margin-left: 10px; font-weight: 700; font-size: 12.5px; cursor: pointer;
+  }
+  .toast .toastact:hover { background: rgba(255,255,255,.14); }
+
   .entry {
     border: 1px solid var(--hairline); border-radius: var(--r);
     background: var(--paper); padding: 16px 18px; margin-bottom: 10px;
