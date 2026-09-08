@@ -16,3 +16,7 @@ follow.
 
 Then go to [`05-self-assessment/baseline.md`](../05-self-assessment/baseline.md) and rate
 yourself before any training starts.
+
+**Both of the fill-in-yourself ones — this folder's `about-how-you-work.md` and the baseline
+— also come as one spreadsheet** if you'd rather type into cells than edit Markdown tables:
+[`05-self-assessment/first-day-questionnaires.xlsx`](../05-self-assessment/README.md).

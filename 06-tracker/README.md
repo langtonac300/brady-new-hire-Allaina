@@ -157,6 +157,21 @@ Twenty megabytes of source PNG becomes about a megabyte of payload across the tw
 > set for that size, and the library list column is 336 px. Squeezed in there they scale to a
 > quarter and stop being readable, so they run in the reader instead, where there is room.
 
+When either of the two fill-in-yourself questionnaires changes:
+
+```
+python3 06-tracker/tools/build-questionnaires.py     # needs: pip install openpyxl
+```
+
+That rewrites `05-self-assessment/first-day-questionnaires.xlsx` — the 31-skill baseline and
+the `about-how-you-work.md` intake as one workbook with dropdowns, for anyone who'd rather
+type into cells than edit a Markdown table. The Markdown stays the source; the workbook is
+generated from it.
+
+> ⚠️ **It overwrites the file, answers and all.** It's a blank form, not a place to keep a
+> filled-in one. A completed copy belongs in `04-my-work/` under its own name, if it belongs
+> in the repo at all.
+
 ### Checking it still works
 
 ```
