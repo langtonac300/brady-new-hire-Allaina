@@ -6,6 +6,11 @@ sheet again at **Day 90** and put them side by side.
 **This is yours.** It isn't a test, it isn't scored by anyone else, and it doesn't go into
 any review. Its only job is to show you how far you moved.
 
+> **Rather not edit a Markdown table?** `first-day-questionnaires.xlsx` in this folder has
+> all of this as a spreadsheet with dropdowns, plus the intake from
+> [`../01-start-here/about-how-you-work.md`](../01-start-here/about-how-you-work.md) on a
+> second tab. Same questions, easier to fill in. See [`README.md`](./README.md).
+
 ---
 
 ## ⚠️ Read this before you rate yourself — it will save you a bad week

@@ -14,6 +14,12 @@ things blank. Bring it to your first conversation with Alex.
 > It pairs with [`../05-self-assessment/baseline.md`](../05-self-assessment/baseline.md),
 > which covers *what you can do*. This one is about *how you like to work*.
 
+> **There's a spreadsheet version.**
+> [`../05-self-assessment/first-day-questionnaires.xlsx`](../05-self-assessment/README.md)
+> has both questionnaires in one file — this one on the **How I work** tab, dropdowns
+> instead of tick tables, and the lever table below on its own tab. Use whichever you'd
+> actually fill in.
+
 **The levers are real.** One answer in section 1 gets your BigQuery access requested in week
 one, long before anyone thinks you need it — that one has a lead time measured in weeks and it
 is the access that most often bites. One answer in section 2 can replace a week of reading

@@ -17,7 +17,7 @@ copy you can annotate. If the source changes, you re-import and your notes survi
 | Sheet | What it holds |
 |-------|---------------|
 | `Dashboard` | Which day and phase you're on, ladder progress by tier, everything counted. Live formulas |
-| `Library` | All 67 documents — orientation, learning material, every project brief. One row each, body included |
+| `Library` | All 68 documents — orientation, learning material, every project brief. One row each, body included |
 | `Ladder` | The 33 projects: your prediction, status, dates, hours, whether the timebox held, where the deliverable went |
 | `Questions` | Your running list, with the answer and the date you got it |
 | `What I got wrong` | Predicted / actually / why / the habit behind it |
@@ -35,7 +35,7 @@ copy you can annotate. If the source changes, you re-import and your notes survi
 | | |
 |---|---|
 | **Ctrl/Cmd + K** | Jump to any document, project or page by typing a few letters |
-| **Search** | Full text, across all 67 documents *and* everything you have written |
+| **Search** | Full text, across all 68 documents *and* everything you have written |
 | **Where you are** | A breadcrumb in the top bar - `Library > Learning > PPC fundamentals`, or `The ladder > T1-3` - so a document opened from three clicks away still says where it sits |
 | **Where you were** | Your last stops as chips next to it. The orange one is where you just came from, one click back. **History** opens the last eight, newest first |
 | **Pick up where you left off** | Leave a document half-read and a banner offers it back, with how far in you were and the heading you had reached. Clicking it returns you to that scroll position |
@@ -149,13 +149,28 @@ way to serve a file, so each one has to travel as text either way.
 Twenty megabytes of source PNG becomes about a megabyte of payload across the two.
 
 > The diagrams are held back deliberately. Each one is a full slide and each belongs to one or
-> two of the 67 documents, so inlining all twelve would put 840 KB on every screen to show at
+> two of the 68 documents, so inlining all twelve would put 840 KB on every screen to show at
 > most one of them. They're fetched the way document bodies already are, and kept for the rest
 > of the session once fetched. They're WebP, which every browser released since 2020 reads.
 
 > One image in the kit isn't used as supplied: the folder banners are 1386 px wide with type
 > set for that size, and the library list column is 336 px. Squeezed in there they scale to a
 > quarter and stop being readable, so they run in the reader instead, where there is room.
+
+When either of the two fill-in-yourself questionnaires changes:
+
+```
+python3 06-tracker/tools/build-questionnaires.py     # needs: pip install openpyxl
+```
+
+That rewrites `05-self-assessment/first-day-questionnaires.xlsx` — the 31-skill baseline and
+the `about-how-you-work.md` intake as one workbook with dropdowns, for anyone who'd rather
+type into cells than edit a Markdown table. The Markdown stays the source; the workbook is
+generated from it.
+
+> ⚠️ **It overwrites the file, answers and all.** It's a blank form, not a place to keep a
+> filled-in one. A completed copy belongs in `04-my-work/` under its own name, if it belongs
+> in the repo at all.
 
 ### Checking it still works
 
@@ -164,7 +179,7 @@ node 06-tracker/tools/test.mjs
 ```
 
 Builds the workbook against a stand-in for Google's runtime, drives every call the browser can
-make, checks setup and re-import are idempotent, then renders all 67 documents and verifies the
+make, checks setup and re-import are idempotent, then renders all 68 documents and verifies the
 output is well formed, that every internal link resolves, and that nothing rendered as
 `undefined`. It also drives the trail — what gets remembered and what gets offered back — and
 checks every graphic is built into the right payload and pinned to a document that exists.
