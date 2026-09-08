@@ -87,6 +87,10 @@ function apiBootstrap() {
       docs: dbSelect(T.DOCS),
       projects: dbSelect(T.PROJECTS),
       skills: dbSelect(T.SKILLS),
+      intake: intakeRows(),
+      // The question list itself travels with the answers. DATA_INTAKE() lives in the script,
+      // and the client only ever has what the bootstrap hands it.
+      intakeQuestions: DATA_INTAKE(),
       questions: dbSelect(T.QUESTIONS),
       wrong: dbSelect(T.WRONG),
       notes: dbSelect(T.NOTES),
@@ -200,6 +204,49 @@ function apiSaveSkill(id, patch) {
       if (patch[f] !== undefined) clean[f] = patch[f];
     });
     return ok(dbUpdate(T.SKILLS, id, clean));
+  } catch (err) {
+    return fail(err);
+  }
+}
+
+/**
+ * The intake rows, seeding whatever is missing first.
+ *
+ * Seeded here rather than only at setup because repairWorkbook() rebuilds headers and never
+ * seeds, so a workbook set up before this sheet existed would otherwise show an empty
+ * screen until someone ran setup again. Keyed by question, so a question added to
+ * DataIntake.gs later appears without disturbing the answers already given.
+ */
+function intakeRows() {
+  var def = tableDef(T.INTAKE);
+  if (!ss().getSheetByName(T.INTAKE)) ensureSheet(def);
+
+  var have = {};
+  var rows = dbSelect(T.INTAKE);
+  rows.forEach(function (r) { have[r.Key] = true; });
+
+  var wanted = [];
+  var order = 0;
+  DATA_INTAKE().sections.forEach(function (sec) {
+    sec.questions.forEach(function (q) {
+      if (q.type === 'note') return;
+      order++;
+      if (!have[q.key]) {
+        wanted.push({ Key: q.key, Order: order, Section: sec.id + ' - ' + sec.title, Question: q.text, Type: q.type, Answer: '' });
+      }
+    });
+  });
+
+  if (!wanted.length) return rows;
+  if (!rows.length) dbWriteAll(T.INTAKE, wanted);
+  else wanted.forEach(function (r) { dbInsert(T.INTAKE, r); });
+  return dbSelect(T.INTAKE);
+}
+
+/** One answer on the intake. The only column that is hers. */
+function apiSaveIntake(key, answer) {
+  try {
+    return ok(dbUpdate(T.INTAKE, key, { Answer: answer === undefined || answer === null ? '' : String(answer) }));
   } catch (err) {
     return fail(err);
   }

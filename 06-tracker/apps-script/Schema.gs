@@ -19,6 +19,7 @@ var T = {
   NOTES: 'Notes',
   DAILY: 'Daily lines',
   SKILLS: 'Self-assessment',
+  INTAKE: 'How I work',
   SYSTEMS: 'Systems',
   SCRIPTS: 'Scripts',
   LISTS: 'Lists',
@@ -213,6 +214,26 @@ function SCHEMA() {
         { name: 'Day 30', w: 120, list: 'Score' },
         { name: 'Day 90', w: 120, list: 'Score' },
         { name: 'Evidence', w: 360, wrap: true },
+        { name: 'Updated', w: 140, type: 'date' }
+      ]
+    },
+
+    {
+      // The intake questionnaire from about-how-you-work.md - how she learns and likes to
+      // work. One row per question, keyed to the question list in DataIntake.gs; only the
+      // Answer column is hers. Rows are seeded on first load rather than at setup, so a
+      // workbook built before this sheet existed gets it without a rebuild.
+      name: T.INTAKE,
+      title: 'How I work',
+      colour: '#002D72',
+      key: 'Key',
+      columns: [
+        { name: 'Key', w: 260 },
+        { name: 'Order', w: 60, type: 'number' },
+        { name: 'Section', w: 260 },
+        { name: 'Question', w: 460, wrap: true },
+        { name: 'Type', w: 70 },
+        { name: 'Answer', w: 420, wrap: true },
         { name: 'Updated', w: 140, type: 'date' }
       ]
     },

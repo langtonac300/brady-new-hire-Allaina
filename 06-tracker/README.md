@@ -24,6 +24,7 @@ copy you can annotate. If the source changes, you re-import and your notes survi
 | `Notes` | Meetings, capture sessions, and what you owe someone |
 | `Daily lines` | The three lines you post in chat each evening, one row per day |
 | `Self-assessment` | The 31 skills at Day 1, Day 30 and Day 90, side by side |
+| `How I work` | The intake questionnaire from `about-how-you-work.md` — 43 answers, one row each, saved as she types on the app's How I work screen |
 | `Systems` | Which tool owns which number, its one gotcha, and where your access request has got to |
 | `Scripts` | The Google Ads scripts, what they feed, and when they last ran |
 | `Settings` · `Lists` | Your start date; the dropdown options |
@@ -172,6 +173,20 @@ generated from it.
 > filled-in one. A completed copy belongs in `04-my-work/` under its own name, if it belongs
 > in the repo at all.
 
+When the intake questions themselves change:
+
+```
+node 06-tracker/tools/build-intake.mjs                # -> apps-script/DataIntake.gs
+python3 06-tracker/tools/build-questionnaires.py      # -> the Excel workbook
+```
+
+Both are built from **`06-tracker/intake/questions.json`** — the one list the app's How I work
+screen and the Excel workbook share, so they cannot disagree. The Markdown in
+`01-start-here/about-how-you-work.md` is still the wording's source of truth: change it
+there first, then the JSON, then run both builds and paste `DataIntake.gs` back in. The
+sheet seeds its rows by question key on the app's first load, so a new question appears
+without disturbing the answers already given.
+
 ### Checking it still works
 
 ```
@@ -228,6 +243,7 @@ workbook at all:
 | `Api.gs` | The only functions the browser is allowed to call |
 | `Data01…Data06.gs` | The document text. **Generated — don't edit by hand** |
 | `DataDiagrams.gs` | The concept diagrams, handed over one at a time. **Generated — don't edit by hand** |
+| `DataIntake.gs` | **Generated** — the 43 intake questions as data, from `intake/questions.json`. Rebuild with `tools/build-intake.mjs` |
 | `Images.html` | The rest of the graphics, inlined. **Generated — don't edit by hand** |
 | `Index.html` · `Stylesheet.html` · `JavaScript.html` | The interface |
 
