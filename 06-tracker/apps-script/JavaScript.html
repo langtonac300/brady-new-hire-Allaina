@@ -1349,9 +1349,36 @@
       return html;
     }
 
-    function refreshLibraryList() {
+    /** Where the library list is scrolled to, or null if it is not on screen.
+     *
+     *  The list is an `overflow-y: auto` pane of its own. Anything that rewrites its
+     *  innerHTML - or rebuilds `main` around it - empties it first, which drops scrollTop to
+     *  zero and leaves it there once the new rows go in. Without this the list jumps back to
+     *  the top every time a document is opened, which on a 68-row list means scrolling back
+     *  down to where you were after every single click.
+     */
+    function libListTop() {
       var node = el('liblist');
-      if (node) node.innerHTML = libraryListHtml();
+      return node ? node.scrollTop : null;
+    }
+
+    function setLibListTop(top) {
+      if (top === null || top === undefined) return;
+      var node = el('liblist');
+      if (node) node.scrollTop = top;
+    }
+
+    /** Redraw the list rows. Pass `reset` when the filter changed, since the list is then a
+     *  different list and holding the old offset would land the reader somewhere arbitrary. */
+    function refreshLibraryList(reset) {
+      var node = el('liblist');
+      if (!node) return;
+      var top = node.scrollTop;
+      node.innerHTML = libraryListHtml();
+      // Set it either way. Leaving it alone is not the same as resetting it - the browser's
+      // own scroll anchoring puts the pane back part of the way on its own, which lands a
+      // filtered list somewhere arbitrary rather than at its first row.
+      node.scrollTop = reset ? 0 : top;
     }
 
     function viewLibrary() {
@@ -1995,6 +2022,9 @@
 
       var main = el('main');
       var split = state.view === 'library';
+      // Read before the rebuild below throws the old list away. Null when arriving from
+      // another view, and setLibListTop ignores that.
+      var listTop = libListTop();
       main.className = 'main' + (split ? ' split' : '');
       var body = (VIEW_FNS[state.view] || viewToday)();
       main.innerHTML = split ? body : '<div class="wrap">' + body + '</div>';
@@ -2004,6 +2034,7 @@
       renderTrail();
       renderResume();
       if (!split) main.scrollTop = 0;
+      if (split) setLibListTop(listTop);
       restoreScroll();
     }
 
@@ -2635,7 +2666,7 @@
 
       if (t.id === 'libFolder') {
         state.libraryFolder = t.value;
-        refreshLibraryList();
+        refreshLibraryList(true);
         return;
       }
       if (t.id === 'docStatus') {
@@ -2743,7 +2774,7 @@
     document.addEventListener('input', function (e) {
       if (e.target.id === 'libSearch') {
         state.libraryFilter = e.target.value;
-        refreshLibraryList();
+        refreshLibraryList(true);
         return;
       }
       if (e.target.id === 'paletteInput') updatePalette(e.target.value);
