@@ -89,6 +89,10 @@ why the two reports never reconcile line-for-line. The gap between them is where
 lives, and it's the entire reason the daily Keep/Kill review exists (Part 8).
 
 ### Negative keywords — and the gotcha that costs traffic
+
+> **The deep dive is [`negative-keywords.md`](./negative-keywords.md)** — the three negative
+> match types and what each actually blocks, the four levels, how they behave per campaign
+> type, and the ways it goes wrong.
 Negatives stop your ads on searches you don't want. Two things beginners get wrong, and both
 cost money:
 
@@ -114,6 +118,10 @@ powerful *and* dangerous in one sentence. → [T1-3](../03-projects/t1-03-keywor
 ---
 
 ## Part 3 — Campaign types you'll see at Brady
+
+> **The deep dive is [`campaign-types.md`](./campaign-types.md)** — every type in full: what
+> feeds it, where the ads actually show, what creative it takes, and how each one fails. This
+> part is the summary.
 
 Each type is a different machine with a different failure mode. Learn them by *what they run
 on* and *how they break*:
