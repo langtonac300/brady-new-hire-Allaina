@@ -22,6 +22,8 @@ Reference you'll come back to.
 | `the-l10-huddle.md` | The team's weekly meeting in depth — the seven segments, the rules that aren't obvious, and what's expected of you | Skim before your first huddle; read properly week 2 |
 | `how-to-run-a-project.md` | The wrapper around every brief — what to sort out before you start, and what happens after the deliverable exists | Day 4, before T1-1 |
 | `what-a-deliverable-looks-like.md` | A finished project write-up, annotated — plus the weak version of the same thing for contrast | Day 5, before you write up T1-1 |
+| `campaign-types.md` | Every Google Ads campaign type in depth — Search, DSA, Shopping, PMax, Demand Gen, Display, Video, App: what feeds each one, where the ads actually show, and how each one fails | Day 3, straight after `ppc-fundamentals.md` |
+| `negative-keywords.md` | The mechanics — the three negative match types and what they really block, the four levels, behaviour by campaign type, and the ways it goes wrong | Week 3–4, before T2-3 |
 | `campaign-architecture.md` | How we split campaign > ad group > keyword, the naming convention, and a full worked non-brand build for PDC Healthcare | Before you build anything new — and before T2-3 |
 | `ad-copy-and-assets.md` | Writing RSAs, B2B ad copy principles, copy testing, PMax asset groups and ad extensions | Before T2-6 |
 | `landing-pages.md` | What makes a landing page good or bad, message match, Quality Score connection and how to audit a page | Before T4-1 and T4-3 |

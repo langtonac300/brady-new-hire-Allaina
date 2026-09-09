@@ -62,6 +62,8 @@ const ORDER = [
   '02-learning/ppc-fundamentals.md',
   '02-learning/cheat-sheet.md',
   '02-learning/how-brady-measures.md',
+  '02-learning/campaign-types.md',
+  '02-learning/negative-keywords.md',
   '02-learning/pdc-primer.md',
   '02-learning/seton-emedco-primer.md',
   '02-learning/how-to-run-a-project.md',
