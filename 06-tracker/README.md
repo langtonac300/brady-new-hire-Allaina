@@ -221,6 +221,7 @@ workbook at all:
 | [`apps-script/`](./apps-script/) | The workbook itself — everything above this line |
 | [`sheets-practice/`](./sheets-practice/README.md) | **The guided Sheets workbook** — a fake account, 940 search terms and nine tasks covering pivots, `FILTER`, `QUERY` and the per-business-day math T2-4 runs on. Paired with `02-learning/sheets-for-paid-search.md` |
 | [`simulation/`](./simulation/README.md) | The campaign simulator — build and optimize a search campaign for a fictional company over 12 simulated weeks |
+| [`starter-scripts/`](./starter-scripts/README.md) | **Ten learn-by-running scripts** — five Google Ads, five Apps Script. One new feature each, heavily commented, all read-only. Paired with `02-learning/scripting-for-paid-search.md` |
 | [`google-ads-scripts/`](./google-ads-scripts/) | The three Google Ads scripts, documented below |
 
 > ⚠️ **`sheets-practice/` regenerates as one artifact.** `generate.mjs` writes `data/` **and**

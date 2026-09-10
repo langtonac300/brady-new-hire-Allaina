@@ -29,6 +29,7 @@ Reference you'll come back to.
 | `landing-pages.md` | What makes a landing page good or bad, message match, Quality Score connection and how to audit a page | Before T4-1 and T4-3 |
 | `who-else-is-searching.md` | The groups that bad search terms fall into, the ones that look bad and aren't, and the B2B gray zone (not junk, just not your buyer) | Week 4, before your first search-terms round |
 | `sheets-for-paid-search.md` | The five spreadsheet skills the ladder assumes — pivots, `FILTER`, `QUERY`, per-business-day math — and the four ways a spreadsheet quietly lies to you | Weeks 3–5, before T2-4 |
+| `scripting-for-paid-search.md` | What Google Ads scripts and Apps Script are each for, when to reach for which, and the read-only rule. Paired with the ten starter scripts | Weeks 4–6, when a manual export starts repeating |
 | `before-it-ships.md` | The checklist to run on your own work before you post a change for review | Week 4 onward — every time you change something |
 | `running-a-real-test.md` | Control vs treatment, the three test modes and what they're worth, and the rules that void a result | Before you propose your first experiment (Phase 2) |
 

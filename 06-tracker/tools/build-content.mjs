@@ -74,6 +74,7 @@ const ORDER = [
   '02-learning/ad-copy-and-assets.md',
   '02-learning/landing-pages.md',
   '02-learning/sheets-for-paid-search.md',
+  '02-learning/scripting-for-paid-search.md',
   '02-learning/before-it-ships.md',
   '02-learning/running-a-real-test.md',
 
