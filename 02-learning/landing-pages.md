@@ -17,7 +17,7 @@ keyword strategy and strong ad copy that send someone to a bad page is money spe
 people to a place that loses them.
 
 Google also cares. **Landing-page experience** is one of the three components of Quality
-Score (alongside expected CTR and ad relevance). A Below Average rating on landing-page
+Score (alongside expected CTR — click-through rate — and ad relevance). A Below Average rating on landing-page
 experience across a cluster of keywords means Google is docking your Ad Rank — you're paying
 more per click for the same position, or showing in a worse position for the same bid.
 
@@ -34,7 +34,7 @@ it's violated constantly.
 | The ad says | The page shows | Problem |
 |------------|---------------|---------|
 | "Custom Arc Flash Labels" | The homepage, with a search bar | The visitor has to start over. They searched, they clicked, they landed — and now they're searching again |
-| "OSHA Compliant Safety Signs" | A category page with 200 signs, none pre-filtered for OSHA | Close, but the burden is on the visitor to find what they already told you they wanted |
+| "OSHA Compliant Safety Signs" | A category page with 200 signs, none pre-filtered for OSHA (Occupational Safety and Health Administration) | Close, but the burden is on the visitor to find what they already told you they wanted |
 | "Request a Quote - Ships in 24h" | A page with no quote form visible without scrolling | The action the ad promised is hidden |
 
 **The fix is specific landing pages for specific ad groups.** In practice, Brady doesn't
@@ -73,7 +73,7 @@ A page that takes 5 seconds to load on mobile has already lost a meaningful shar
 visitors. They clicked, the page didn't load, they hit back — and you paid for that click.
 
 **You don't need to be a developer to check this.** Search "PageSpeed Insights" and paste
-the URL. The score doesn't need to be perfect, but if the mobile score is below 50, that's
+the URL — uniform resource locator. The score doesn't need to be perfect, but if the mobile score is below 50, that's
 a real problem worth raising — and if it's below 30, it's actively costing conversions.
 
 Common culprits on B2B sites: oversized product images that aren't compressed, third-party
@@ -89,7 +89,7 @@ paid traffic to it is mobile") and let the people who own the site prioritize it
 Pull up the landing page on your phone — not a resized browser window, your actual phone.
 
 - Can you read the text without zooming?
-- Can you tap the CTA button without accidentally hitting something else?
+- Can you tap the CTA (call to action) button without accidentally hitting something else?
 - Does the form work? Are the fields sized for a thumb, not a mouse?
 - Is the most important content still above the fold, or did a desktop-first design push it
   below a giant hero image?
@@ -122,7 +122,7 @@ clicking an ad for lockout/tagout equipment needs to trust the vendor before the
 out a form or start a purchase.
 
 Things that build trust on a B2B landing page:
-- Compliance certifications and standards met (ISO, OSHA, NFPA, UL)
+- Compliance certifications and standards met — ISO (International Organization for Standardization), OSHA (Occupational Safety and Health Administration), NFPA (National Fire Protection Association), UL (Underwriters Laboratories)
 - Customer logos or industry references (if permitted)
 - Clear return/warranty information
 - A real phone number and physical address
@@ -169,7 +169,7 @@ As a paid search analyst, you own:
 - **Flagging a message-match gap** and proposing which existing page would be a better fit.
 
 You generally don't own:
-- Redesigning pages (that's web/UX).
+- Redesigning pages (that's web / UX — user experience).
 - Fixing page speed (that's dev).
 - Creating new landing pages from scratch (that's a cross-functional project).
 

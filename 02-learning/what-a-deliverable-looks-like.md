@@ -33,6 +33,8 @@ what it's doing.
 | NW-GGL-US-PMax-Retail | PMax (retail, feed) | tROAS, target 400% | Online purchase (primary) | Mixed |
 | NW-GGL-US-[NB]-DSA | DSA | Max clicks | Online purchase (primary) | Non-brand |
 
+*Names decoded: `NW` = the account, `GGL` = Google, `[B]`/`[NB]` = brand / non-brand, `LOTO` = lockout/tagout, `DSA` = dynamic search ads, `PMax` = Performance Max.*
+
 **How I told brand from non-brand:** the `[B]`/`[NB]` tag in the campaign name, checked
 against the keywords — the brand campaign is all variations of the company name, and the
 non-brand ones don't contain it anywhere. The PMax campaign is marked mixed because it has

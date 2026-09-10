@@ -1,4 +1,4 @@
-# PPC Fundamentals — crash course for a new paid search analyst
+# PPC (pay-per-click) Fundamentals — crash course for a new paid search analyst
 
 For someone **new to paid search.** This teaches the concepts you need to be useful at
 Brady, in the order you'll need them, and — critically — **how Brady's own conventions differ
@@ -129,7 +129,7 @@ on* and *how they break*:
 | Type | Runs on | The beginner trap | Where at Brady |
 |------|---------|-------------------|----------------|
 | **Search** | Keywords → text ads | Assuming the keyword and the search term are the same thing | Everywhere |
-| **Shopping / PLA** | A **product feed** (image + price) | "No products showing" is usually a *feed* problem, not a bid problem | Brady, Seton. **PDC's listings serve *inside PMax*, not as standalone Shopping** |
+| **Shopping / PLA** (product listing ads) | A **product feed** (image + price) | "No products showing" is usually a *feed* problem, not a bid problem | Brady, Seton. **PDC's listings serve *inside PMax*, not as standalone Shopping** |
 | **Performance Max** | Depends — **two flavours** (below) | Diagnosing every PMax problem as "feed broken" | **Wristbands** = retail PMax; **PDC Healthcare** = lead-gen PMax |
 | **DemandGen** | Audiences + visual assets (no keywords) | Judging it on last-click revenue — it's upper-funnel | PDC Healthcare |
 | **DSA** (Dynamic Search Ads) | Your **site content** — Google generates the targeting and headlines | Letting it roam the whole site with no page feed to steer it | Seton US (category coverage) |
@@ -142,7 +142,7 @@ on* and *how they break*:
   is this shape.
 - **Lead-gen PMax** has **no feed at all.** It runs on **asset groups** (headlines, images,
   video), **audience signals** (hints to speed up learning — *not* hard targeting), and
-  **final-URL expansion** (Google picks landing pages from your site unless you turn it off).
+  **final-URL expansion** — URL being uniform resource locator, the web address (Google picks landing pages from your site unless you turn it off).
   PDC Healthcare is this shape. There are no products to point at — so when it misbehaves, you
   look at assets, signals and URLs, not a feed. Drilled in
   [T1-9](../03-projects/t1-09-pmax-with-no-feed.md).
@@ -190,7 +190,7 @@ establish whether the campaign is retail (feed-driven) or lead-gen (no feed).
 
 **A blank or wrong feed value fails silently.** The product doesn't error — it just quietly
 doesn't land in the campaign that was supposed to have it, and that campaign quietly
-underdelivers. Nothing turns red. This is why feed QA is real work, not housekeeping (see
+underdelivers. Nothing turns red. This is why feed QA (quality assurance) is real work, not housekeeping (see
 [T2-5](../03-projects/t2-05-feed-label-qa.md)).
 
 **Custom labels** (Google allows five: `custom_label_0`–`4`) are the lever for segmenting
@@ -208,7 +208,7 @@ does *not* use a feed. → [T2-5](../03-projects/t2-05-feed-label-qa.md).
 **The question every bidding strategy answers:** *how much do I bid in this specific auction?*
 You either answer it by hand (manual) or hand it to Google's model (smart).
 
-- **Manual CPC** — you set max bids per keyword. Total control, doesn't scale, can't use
+- **Manual CPC** (cost per click) — you set max bids per keyword. Total control, doesn't scale, can't use
   per-auction signals.
 - **Smart bidding** — Google sets a bid **per auction** toward a goal, using signals you
   cannot set by hand: device, location, time, the exact query, browsing context, remarketing
@@ -216,8 +216,8 @@ You either answer it by hand (manual) or hand it to Google's model (smart).
 
   | Strategy | Optimizes for | Rough minimum to work | Best for |
   |---|---|---|---|
-  | **tCPA** (Target CPA) | Conversion volume at a target cost | ~30 conversions/mo | Lead gen, equal-value conversions |
-  | **tROAS** (Target ROAS) | Conversion *value* at a target return | ~50 conversions/mo | E-commerce, varying order values |
+  | **tCPA** (target cost per acquisition) | Conversion volume at a target cost | ~30 conversions/mo | Lead gen, equal-value conversions |
+  | **tROAS** (target return on ad spend) | Conversion *value* at a target return | ~50 conversions/mo | E-commerce, varying order values |
   | **Maximize Conversions / Value** | As many conversions / as much value as the budget buys | — | When you don't yet have a firm target |
 
 **Two mechanics that make smart bidding fragile — know both:**
@@ -306,7 +306,7 @@ Brady reports on. → [T1-4](../03-projects/t1-04-conversion-action-inventory.md
 | **AOV** | Average order value | A budget-model lever |
 | **CAC / NCA** | Cost of acquisition / New Customer Acquisition | The team tracks *new*-customer growth, not just repeat revenue |
 | **per-BD** | Per business day | **Frame numbers this way when reporting up** — it's how the team normalizes month-to-month, and it's the first thing Stuart converts to in his head |
-| **IS** (Impression Share) | % of eligible auctions you showed in | **⚠️ Directional only** — don't build KPIs on it. **IS lost (budget)** vs **IS lost (rank)** is the useful split: budget-lost means *give it money*, rank-lost means *fix relevance or bid* |
+| **IS** (Impression Share) | % of eligible auctions you showed in | **⚠️ Directional only** — don't build KPIs (key performance indicators) on it. **IS lost (budget)** vs **IS lost (rank)** is the useful split: budget-lost means *give it money*, rank-lost means *fix relevance or bid* |
 | **CPL / CPDL** | Cost per lead / per download-install | App / new-channel KPI |
 
 **Worked read:** "A/S is 38% against a 40% ceiling and we're behind pace" is **not** a
@@ -361,11 +361,11 @@ The starter set — keep [`cheat-sheet.md`](./cheat-sheet.md) open for the plain
 of each:
 
 **Attribution/metrics:** A/S · ROAS · FT (First Touch) · IP (180day OD) · CVR · AOV · CAC ·
-NCA · per-BD · IS · CPC · CPL/CPDL · GCLID · DDA (data-driven attribution)
-**Structure:** MCC · Brand/Non-brand ([B]/[NB]) · PLA (Shopping) · PMax · DSA · RSA · Budget_Key ·
+NCA (new customer acquisition) · per-BD (per business day) · IS (impression share) · CPC (cost per click) · CPL/CPDL (cost per lead / per download-install) · GCLID (Google click identifier) · DDA (data-driven attribution)
+**Structure:** MCC (my client center) · Brand/Non-brand ([B]/[NB]) · PLA (product listing ad — Shopping) · PMax (Performance Max) · DSA (dynamic search ads) · RSA (responsive search ad) · Budget_Key ·
 listing group · custom label
 **Bidding:** tROAS · tCPA · Max Conversions/Value · Quality Score · Ad Rank · pLTV
-**Process/meetings:** SQR · L10 · IDS · EOS · Rocks · Scorecard · GTM
+**Process/meetings:** SQR (search query report) · L10 (Level 10) · IDS (identify, discuss, solve) · EOS (Entrepreneurial Operating System) · Rocks · Scorecard · GTM (Google Tag Manager)
 
 **Don't-mix-these-up traps:** three **Alexes** (Langton is your manager; two others share the
 name) · a few people named **Matt**, **Courtney** and **CJ** across the wider team — ask if a
@@ -382,12 +382,12 @@ Conversions"** (an action can be one without the other).
   expected**, not a sign you're behind.
 - **⚠️ Gemini is the sanctioned AI**, not other tools. **Never reference AI tooling, this repo,
   or non-sanctioned tools in corporate systems** — Google Ads scripts, GTM, shared docs,
-  BigQuery SQL comments included. Using it *for real workflows* rather than as a question box is
+  BigQuery SQL (structured query language) comments included. Using it *for real workflows* rather than as a question box is
   its own thread — see [the AI thread](../03-projects/the-ai-thread.md).
 - **Jira exists** and the department uses it — but day-to-day work with Alex runs through Google
   Chat and 1:1s, not a ticket queue. **1:1s are analyst-led:** you bring the agenda.
 - **Brand standards** are binding for anything customer-facing: Brady Blue `#002D72`,
-  Montserrat, **AP style (no Oxford comma)**, no emojis/slang, WCAG AA. These are rules, not
+  Montserrat, **AP (Associated Press) style (no Oxford comma)**, no emojis/slang, WCAG (Web Content Accessibility Guidelines) AA. These are rules, not
   preferences — they matter in [T2-6](../03-projects/t2-06-ad-copy-audit.md).
 
 **Check yourself:** name the sanctioned AI tool; say where a corporate-system comment must
@@ -510,7 +510,7 @@ days. *Then* decide if a bid adjustment is worth it.
 
 | Audience type | What it is | B2B use case |
 |---------------|-----------|--------------|
-| **Remarketing lists (RLSA)** | People who've visited your site before | The strongest B2B Search audience. Someone who visited Brady's pipe markers page last week and is now searching "pipe markers" is far more likely to convert than a cold searcher. Bid up on them |
+| **Remarketing lists (RLSA — remarketing lists for search ads)** | People who've visited your site before | The strongest B2B Search audience. Someone who visited Brady's pipe markers page last week and is now searching "pipe markers" is far more likely to convert than a cold searcher. Bid up on them |
 | **Customer match** | Upload a list of customer emails; Google matches them | Re-engage existing customers searching for products they've bought before. Also useful as an *exclusion* — stop paying for clicks from people who are already customers if the goal is new acquisition |
 | **In-market audiences** | Google's signals that someone is actively researching a product category | Google has B2B-relevant segments like "Business & Industrial" and sub-segments for specific categories. Hit rate is lower than remarketing, but reach is much wider |
 | **Similar audiences** | People who behave like your existing converters | ⚠️ Google has been sunsetting these in favor of AI-driven targeting. Check current availability before building around them |
@@ -575,7 +575,7 @@ When you lose impression share, Google tells you *why*. This distinction matters
 | Lost to | What it means | What to do |
 |---------|---------------|-----------|
 | **Budget** | You ran out of daily budget before the day ended. Eligible auctions happened; you weren't in them because the money was gone | If efficiency is inside guardrails and pacing is behind → give it more budget. This is the "push spend" instinct from Part 7 |
-| **Rank** | You were eligible but your Ad Rank wasn't high enough to show. Budget was available; the competitor outbid you or had better Quality Score | Fix the Quality Score components (ad relevance, landing page, expected CTR) or raise bids — but raising bids on a rank problem without fixing quality is just paying more for the same slot |
+| **Rank** | You were eligible but your Ad Rank (which factors in your CTR — click-through rate) wasn't high enough to show. Budget was available; the competitor outbid you or had better Quality Score | Fix the Quality Score components (ad relevance, landing page, expected CTR) or raise bids — but raising bids on a rank problem without fixing quality is just paying more for the same slot |
 
 ### What *not* to do with competitive data
 

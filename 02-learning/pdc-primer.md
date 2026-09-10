@@ -26,31 +26,31 @@ everything else at Brady, and the landmines to know about before you touch anyth
 
 **PDC = the Healthcare arm of Brady** — one of the company's revenue pillars alongside
 industrial and safety products. In marketing it shows up as the **"HPS"** group — a
-deck section, a data segment, an org/creative grouping, and its own SEO lane (Phil covers
+deck section, a data segment, an org/creative grouping, and its own SEO (search engine optimization) lane (Phil covers
 Healthcare — see [`../01-start-here/how-the-ramp-works.md`](../01-start-here/how-the-ramp-works.md)).
 
 Three brands sit under the same PDC cost center:
 
 | Brand | Site | What it sells | Notes |
 |-------|------|---------------|-------|
-| **PDC Healthcare** | pdchealthcare.com | Clinical/hospital ID & safety products (incl. an **RFID** line) | Brand CVR high (10–12%). Search + PMax + DemandGen + a dedicated LinkedIn program |
-| **PDC Wristbands** | Wristbands.com ("WBC") | Patient-ID / event wristbands e-commerce | PMax-led, lead-gen heavy, low direct ROAS by design |
+| **PDC Healthcare** | pdchealthcare.com | Clinical/hospital ID & safety products (incl. an **RFID** — radio-frequency identification — line) | Brand CVR (conversion rate) high (10–12%). Search + PMax + DemandGen + a dedicated LinkedIn program |
+| **PDC Wristbands** | Wristbands.com ("WBC") | Patient-ID / event wristbands e-commerce | PMax-led, lead-gen heavy, low direct ROAS (return on ad spend) by design |
 | **Identicard** | (US + CA) | ID card / credential products | Small; recently started |
 
 **PDC Healthcare's audience is genuinely different from industrial Brady** — think
-nursing & clinical leadership, IT, supply chain/procurement, and informatics/EHR buyers.
+nursing & clinical leadership, IT, supply chain/procurement, and informatics / EHR (electronic health record) buyers.
 You're marketing to hospitals, not factories.
 
 ---
 
 ## The two Google Ads accounts (ground truth)
 
-Both live in the **Brady Global MCC** — **not** the confusingly-named "Brady US - MCC
+Both live in the **Brady Global MCC** (my client center — a manager account) — **not** the confusingly-named "Brady US - MCC
 (Seton/Emed)."
 
 | Account | Currency / TZ | Shape |
 |---------|---------------|-------|
-| **PDC: Healthcare** | USD / **Los Angeles** | Search + PMax + DemandGen |
+| **PDC: Healthcare** | USD (US dollars) / **Los Angeles** | Search + PMax + DemandGen |
 | **PDC: Wristbands** | USD / **Los Angeles** | PMax-led |
 
 Quirks that will trip you up:
@@ -58,7 +58,7 @@ Quirks that will trip you up:
   Brady accounts. Watch this when comparing day-over-day numbers.
 - **Wristbands is its own standalone account**, not a sub-account of Healthcare.
 - **PDC uses HubSpot** for marketing automation — the rest of Brady uses different systems.
-  If you see `hsa_*` in a URL template, that's PDC.
+  If you see `hsa_*` in a URL (uniform resource locator) template, that's PDC.
 - **Named-competitor bidding (Wristbands only):** the account explicitly bids to outrank
   two specific competitors by name. You won't see this tactic anywhere else on the team —
   and *how* it's implemented isn't obvious (you'll work that out in
@@ -74,12 +74,12 @@ Quirks that will trip you up:
 | Dimension | Rest of Brady | **PDC** |
 |-----------|---------------|---------|
 | Shopping feed | Managed by the internal dev team (Brady) / Feedonomics (Seton) | HC = managed by the internal dev team; **WB = Shopify + Analyzify** (unique) |
-| Website CMS | A shared platform for bradyid.com | **pdchealthcare.com**; **Wristbands.com on Shopify** |
+| Website CMS (content management system) | A shared platform for bradyid.com | **pdchealthcare.com**; **Wristbands.com on Shopify** |
 | Marketing automation | A different platform for the rest of the team | **HubSpot** |
 | Bidding maturity | Brady mid-migration to smart bidding | **Already fully on smart bidding** — PDC is the team's finished proof case |
 | Purchase tracking | Standard analytics / upload feeds | HC = standard tracking; **WB = Analyzify (Shopify) purchase events** |
 
-**Bidding takeaway:** unlike Brady US (mid-migration from manual CPC to tROAS), **PDC is
+**Bidding takeaway:** unlike Brady US (mid-migration from manual CPC (cost per click) to tROAS), **PDC is
 already fully on smart bidding (tROAS/PMax).** There's no manual-bidding legacy to unwind.
 
 ---

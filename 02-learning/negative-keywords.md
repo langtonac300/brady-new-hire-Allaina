@@ -124,7 +124,7 @@ the types themselves.)
 |---|---|
 | **Search** | Straightforward — block the query |
 | **Shopping** | Work on queries, same as Search. Often your **only** targeting control, since there are no positive keywords |
-| **DSA** | Negative keywords block queries — but to exclude **pages** you need **negative dynamic ad targets**, which are a different control. A negative keyword will not stop DSA crawling a page |
+| **DSA** (dynamic search ads) | Negative keywords block queries — but to exclude **pages** you need **negative dynamic ad targets**, which are a different control. A negative keyword will not stop DSA crawling a page |
 | **Performance Max** | Historically limited to account-level negatives plus **brand exclusions**; campaign-level negative keywords were added later. ⚠️ **Check what's actually available in the account today** — this is one of the fastest-moving parts of the platform |
 | **Display / Video** | A "negative keyword" is a **content exclusion** — it excludes pages and videos *about* that topic. Nobody searched anything. Different mechanism, same name |
 

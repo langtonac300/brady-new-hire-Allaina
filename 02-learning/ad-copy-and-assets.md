@@ -35,7 +35,7 @@ use different themes? It is **not** measuring whether your ad is good. An Excell
 ad with weak messaging will still underperform a Good-strength ad that says the right things.
 
 **Use it as a completeness check, not a quality score.** If strength is Poor, you probably
-haven't given Google enough parts to work with. If it's Excellent but CTR is bad, the
+haven't given Google enough parts to work with. If it's Excellent but CTR (click-through rate) is bad, the
 problem is what you wrote, not how many you wrote.
 
 ### Pinning
@@ -53,7 +53,7 @@ knew? The second one is accumulated habit, not strategy.
 
 ## Writing B2B ad copy (not the same game as B2C)
 
-Generic PPC advice says "create urgency" and "use emotional triggers." That advice is
+Generic PPC (pay-per-click) advice says "create urgency" and "use emotional triggers." That advice is
 written for consumer retail. **B2B buying — especially Brady's industrial and healthcare
 products — works differently:**
 
@@ -67,7 +67,7 @@ products — works differently:**
 ### What works in B2B headlines
 
 **Be specific about the product, not clever about the emotion.** A facility manager
-searching for `arc flash labels` wants to know you sell arc flash labels that meet NFPA 70E.
+searching for `arc flash labels` wants to know you sell arc flash labels that meet NFPA (National Fire Protection Association) 70E.
 They don't want wordplay.
 
 | Weak | Better | Why |
@@ -75,13 +75,13 @@ They don't want wordplay.
 | `Protect Your Team Today` | `NFPA 70E Arc Flash Labels` | The searcher typed the standard. Reflect it back |
 | `Premium Safety Solutions` | `Custom Safety Signs & Labels` | "Premium solutions" describes nothing. The specific product category matches the search |
 | `Shop Now - Free Shipping!` | `Custom Sizes - Ships in 24h` | The B2B buyer cares about lead time and fit, not a retail call to action |
-| `We're #1 in Safety` | `ISO & OSHA Compliant Labels` | Unverifiable claims vs. standards the buyer is already evaluating against |
+| `We're #1 in Safety` | `ISO & OSHA Compliant Labels` | Unverifiable claims vs. standards the buyer is already evaluating against. ISO = International Organization for Standardization; OSHA = Occupational Safety and Health Administration |
 
 ### The Brady rules (non-negotiable)
 
 These come from brand standards and they apply to every ad:
 
-- **AP style, no Oxford comma.** "Signs, labels and tags" — not "signs, labels, and tags."
+- **AP (Associated Press) style, no Oxford comma.** "Signs, labels and tags" — not "signs, labels, and tags."
 - **No emoji, no slang, no exclamation points in headlines.** The tone is authoritative and
   professional, not excited.
 - **Never invent a product claim.** If you're not certain Brady makes it, sells it, or can
@@ -160,7 +160,7 @@ creative that Google assembles across Search, Display, YouTube, Discover, Gmail 
 | **Logos** | Up to 5 | Square (1200×1200), landscape (1200×300) |
 | **Videos** | Up to 5 | YouTube-hosted, ideally 10s+ |
 | **Business name** | 1 | 25 characters |
-| **Final URL** | 1 per asset group | Where you're sending people |
+| **Final URL** (uniform resource locator) | 1 per asset group | Where you're sending people |
 
 **Key differences from RSAs:**
 
@@ -181,7 +181,7 @@ the entire ad. Everything above applies directly. See
 
 ---
 
-## Ad extensions (now called "assets" in Google's UI)
+## Ad extensions (now called "assets" in Google's UI — its user interface)
 
 Extensions are the extra lines that appear below or beside your ad — site links, callouts,
 phone numbers. **They're not optional extras.** Extensions expand your ad's footprint on the

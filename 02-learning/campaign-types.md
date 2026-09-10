@@ -19,7 +19,7 @@ from confusing the two.
 | | **Pull (intent-based)** | **Push (audience-based)** |
 |---|---|---|
 | **Triggered by** | Something the person typed | Something Google knows about the person |
-| **Types** | Search, Shopping, DSA | Display, Demand Gen, Video |
+| **Types** | Search, Shopping, DSA (dynamic search ads) | Display, Demand Gen, Video |
 | **The person is** | Actively looking, right now | Not looking. You interrupted them |
 | **Judge it on** | Conversions, close to the click | Assisted conversions, view-through, brand lift, longer windows |
 | **The classic error** | — | **Judging it on last-click revenue** and killing it |
@@ -54,7 +54,7 @@ partner sites — it's one on/off switch and one reporting row. Look at it befor
 | **Shows on** | Google Search results, plus the rest of the Search Network above |
 | **Creative** | **Responsive Search Ads (RSAs)** — you supply up to 15 headlines and 4 descriptions, Google assembles combinations. Usually 3 headlines and 2 descriptions show |
 | **Plus** | Assets (formerly "extensions"): sitelinks, callouts, structured snippets, call, lead form, image, price, promotion, location |
-| **Bidding** | Everything — manual CPC through to tCPA/tROAS |
+| **Bidding** | Everything — manual CPC (cost per click) through to tCPA / tROAS (target cost per acquisition / target return on ad spend) |
 | **Reports** | The **search terms report** — what people actually typed |
 | **Fails by** | Matching queries you never intended, silently, until someone reads the search terms report |
 
@@ -74,7 +74,7 @@ campaign, it's a survivor, not a template.
 | **Runs on** | **Your website's content.** No keywords at all — Google crawls your site (or a page feed you supply) and matches pages to queries |
 | **Shows on** | Search results, same as Search |
 | **Creative** | Google **generates the headline** from the page and the query. You write only the description |
-| **Targeted by** | Categories, specific URLs, page feeds, or "all web pages" |
+| **Targeted by** | Categories, specific URLs (uniform resource locators), page feeds, or "all web pages" |
 | **Fails by** | Roaming the whole site — serving on your careers page, your blog, out-of-stock products |
 
 **Where it earns its place:** catalogue coverage. When you sell thousands of SKUs, DSA finds
@@ -87,7 +87,7 @@ are a separate control from negative keywords, and blocking a page needs the pag
 
 ---
 
-## Shopping (PLA)
+## Shopping (PLA — product listing ads)
 
 | | |
 |---|---|
@@ -212,7 +212,7 @@ The formats, because "a video ad" isn't one thing:
 | Format | Length / behaviour | Charged when |
 |---|---|---|
 | **Skippable in-stream** | Skippable after 5 seconds | Someone watches 30s (or the whole thing if shorter), or interacts |
-| **Non-skippable in-stream** | Up to 15 seconds, no skip | Impressions (CPM) |
+| **Non-skippable in-stream** | Up to 15 seconds, no skip | Impressions (CPM — cost per mille, i.e. per thousand impressions) |
 | **Bumper** | 6 seconds, no skip | Impressions (CPM) |
 | **In-feed** | A thumbnail in search/watch-next/home | Someone clicks to watch |
 | **Shorts** | Vertical, in the Shorts feed | Varies by objective |

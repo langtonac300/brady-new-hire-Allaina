@@ -4,13 +4,13 @@ The team's weekly meeting, in depth — because it's the one meeting where your 
 visible to everyone, and because it runs on rules that aren't obvious from the outside.
 
 > **Tuesday, 10:00.** Alex facilitates. Courtney, Scott, CJ and you. It runs inside the
-> **L10 Huddle app**, which lives in the MTD Spend workbook — Alex will show you where.
+> **L10 Huddle app**, which lives in the MTD (month-to-date) Spend workbook — Alex will show you where.
 
 ---
 
 ## What "L10" means
 
-It's short for **Level 10**, from a management system called EOS. The idea is blunt: most
+It's short for **Level 10**, from a management system called EOS — the Entrepreneurial Operating System. The idea is blunt: most
 recurring team meetings are bad, so you fix them by running the *same agenda in the same
 order every single week* and then asking everyone to rate the meeting 1–10 on the way out.
 The name is the target. A meeting that consistently earns an 8 or better is doing its job.
@@ -34,7 +34,7 @@ becoming an hour of the loudest topic.
 | 1 | **Segue** | 5 | One personal good-news item and one work one, each. Kudos. **No work talk yet** — that's deliberate, not filler |
 | 2 | **Scorecard** | 5 | The weekly numbers get read. Each is **on track or off track**. Nothing else |
 | 3 | **Rock review** | 5 | Each rock owner says on track or off track. Same rule |
-| 4 | **Headlines** | 5 | One-liners — customer news, people news, FYIs. Old news gets killed |
+| 4 | **Headlines** | 5 | One-liners — customer news, people news, FYIs (for your information). Old news gets killed |
 | 5 | **To-dos** | 5 | Last week's list, read out: done or not done |
 | 6 | **IDS** | 60 | The actual meeting. Identify, Discuss, Solve |
 | 7 | **Conclude** | 5 | New to-dos recapped, recap posted to team chat, everyone rates the meeting |

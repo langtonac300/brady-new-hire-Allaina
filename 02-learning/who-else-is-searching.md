@@ -113,7 +113,7 @@ Someone types `safety signs`. That's a real product Brady sells. But who typed i
 
 | Who they might be | What they'd buy | Brady's fit |
 |---|---|---|
-| A facility manager outfitting a warehouse | 500 custom OSHA signs, $3,000+ order | **Exactly our buyer** |
+| A facility manager outfitting a warehouse | 500 custom OSHA (Occupational Safety and Health Administration) signs, $3,000+ order | **Exactly our buyer** |
 | A small business owner who needs one "Employees Only" sign | 1 sign, $8, from Amazon | **Not our buyer** — our minimum order, lead time and price point don't work for them |
 | A teacher making a classroom display | Nothing | **Not our buyer** |
 | A homeowner who wants a "No Trespassing" sign for their yard | 1 sign, hardware store | **Not our buyer** |

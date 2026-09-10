@@ -24,7 +24,7 @@ can see the rules applied end to end.
    disagree with it.
 3. **Confirm the product themes against the live site and the live account before you build.**
    The six themes below are drawn from what PDC Healthcare sells as described in
-   [`pdc-primer.md`](./pdc-primer.md) — clinical ID and safety products, including an RFID
+   [`pdc-primer.md`](./pdc-primer.md) — clinical ID and safety products, including an RFID (radio-frequency identification)
    line. **Open pdchealthcare.com and read the actual category navigation**, then open the
    account and list what already exists. Building a structure that duplicates live campaigns
    is worse than building nothing.
@@ -42,7 +42,7 @@ lists what each level owns. This is that table turned into a decision.
 | If this differs… | …you need a campaign, because | Example on PDC |
 |---|---|---|
 | **Budget you need to protect** | Budget is a campaign setting. Two themes in one campaign compete for the same pot, and the higher-volume one wins by default | RFID is a slow burn; put it with wristbands and wristbands eats it |
-| **Bidding target** | The strategy and its tCPA/tROAS are campaign settings | A box of wristbands and an RFID system are orders of magnitude apart in value — they can't share a target CPA |
+| **Bidding target** | The strategy and its tCPA / tROAS (target cost per acquisition / target return on ad spend) are campaign settings | A box of wristbands and an RFID system are orders of magnitude apart in value — they can't share a target CPA |
 | **The conversion that counts** | Which conversions a campaign optimizes to is set at campaign level | Wristbands = a purchase; RFID = a lead form |
 | **Geo, schedule, network, language** | All campaign settings | — |
 | **You need it as its own reporting line** | Anything you'll be asked "how did X do?" about should be a campaign, or you'll be rebuilding it in a pivot every month | — |
@@ -78,7 +78,7 @@ all matter at Brady:
 |---|---|
 | **Close variants broke the premise.** Since exact match started catching same-meaning rewordings ([`ppc-fundamentals.md`](./ppc-fundamentals.md) Part 2), two SKAGs routinely become eligible for the *same* query. Google then picks between them on Ad Rank — so you didn't actually control which ad served, you just thought you did | The isolation SKAGs promised isn't real any more |
 | **Smart bidding needs pooled data.** Part 12 of `ppc-fundamentals.md` uses **15–20 conversions a month** as the illustrative scale for PDC Healthcare non-brand — ⚠️ **check the real figure in the account before you lean on it.** At anything like that order, slice it across 40 ad groups and every one is statistically empty | Fragmenting a thin account starves the thing that's supposed to be optimizing it |
-| **Maintenance cost is real** | 40 ad groups is 40 sets of RSAs to keep current, and you are one person |
+| **Maintenance cost is real** | 40 ad groups is 40 sets of RSAs (responsive search ads) to keep current, and you are one person |
 
 **What we do instead: single-*theme* ad groups.** Five to fifteen keywords that share one
 intent, one promise and one page.
@@ -106,7 +106,7 @@ Brady US names Search campaigns like this:
 ```
 
 Five tokens, ` - ` between them. `[B]`/`[NB]` = brand / non-brand · `GGL`/`BNG` = Google /
-Microsoft. Shopping carries a `[PLA]` token instead. Applied to PDC Healthcare:
+Microsoft. Shopping carries a `[PLA]` (product listing ad) token instead. Applied to PDC Healthcare:
 
 ```
 [NB] - GGL - US - Patient ID & Safety Bands - Phrase
@@ -238,7 +238,7 @@ Campaign 1 more than anything else.
 | `Patient Tracking Systems` | patient tracking system hospital · rtls patient tracking · hospital patient flow tracking | A system, not a product — demo/consultation intent |
 | `Asset & Staff Tracking` | hospital asset tracking rfid · rtls hospital asset tracking · equipment tracking hospital | Adjacent use case, different page |
 
-⚠️ **Campaign 3 will look terrible on last-click ROAS and that may be correct.** It's lead-gen
+⚠️ **Campaign 3 will look terrible on last-click ROAS (return on ad spend) and that may be correct.** It's lead-gen
 with a long cycle — judge it on the first-touch reporting the team actually uses, and read
 [`how-brady-measures.md`](./how-brady-measures.md) before you form a view. This is the same
 mistake as reflex-cutting Wristbands, which [`pdc-primer.md`](./pdc-primer.md) walks through.
@@ -292,7 +292,7 @@ Structure is only half of a build. The rest:
 |---|---|
 | **Ads** | 2 RSAs minimum per ad group, and every headline true for every keyword in that group — [`ad-copy-and-assets.md`](./ad-copy-and-assets.md) |
 | **Landing pages** | One page per ad group, message-matched to the promise — [`landing-pages.md`](./landing-pages.md) |
-| **Tracking** | Paid search tracking runs `Channel \| Country \| Strategy \| Source \| Sub-Strategy \| Campaign \| Ad Group \| Keyword`. ⚠️ **PDC uses HubSpot and has its own templates** — confirm PDC's tab in the tracking-code workbook before you build final URLs, and check whether `hsa_*` parameters are expected |
+| **Tracking** | Paid search tracking (every URL — uniform resource locator — carries it) runs `Channel \| Country \| Strategy \| Source \| Sub-Strategy \| Campaign \| Ad Group \| Keyword`. ⚠️ **PDC uses HubSpot and has its own templates** — confirm PDC's tab in the tracking-code workbook before you build final URLs, and check whether `hsa_*` parameters are expected |
 | **Conversions** | ⚠️ **Do not build to PDC's current conversion setup without reading the landmines in [`pdc-primer.md`](./pdc-primer.md).** The real purchase action being set secondary is a known issue — a new campaign inherits that problem |
 | **Time zone** | PDC is **Los Angeles**, not Chicago. It'll catch you on your first day-over-day comparison — [T1-8](../03-projects/t1-08-the-timezone-trap.md) |
 | **The rest** | Run [`before-it-ships.md`](./before-it-ships.md) over the whole thing before you post it for review |

@@ -29,7 +29,7 @@ Google Ads accounts, run together under the same manager account alongside Seton
 | Size | The larger account | Smaller |
 | Channel mix | A real two-engine account — Search and Shopping run at comparable scale | Shopping-first, with a small brand/search layer on top |
 | Timezone | Eastern | Central |
-| What that means for you | More search structure to learn (match-type splits, DSA coverage) | Simpler shape, but don't mistake "simpler" for "smaller effort" — Shopping tuning still matters a lot here |
+| What that means for you | More search structure to learn (match-type splits, DSA (dynamic search ads) coverage) | Simpler shape, but don't mistake "simpler" for "smaller effort" — Shopping tuning still matters a lot here |
 
 **Timezone mismatch matters:** Seton reports on Eastern time, EMEDCO on Central. If you're
 comparing "yesterday's" numbers across the two, or scheduling anything, account for the
@@ -40,7 +40,7 @@ gap — it's a real source of confusing day-over-day comparisons for a newcomer.
 ## ⚠️ Before you trust a number on this account group
 
 The same rule from [`how-brady-measures.md`](./how-brady-measures.md) applies here, with
-an extra wrinkle: **platform ROAS on Seton/EMEDCO is not a clean revenue signal.** These
+an extra wrinkle: **platform ROAS (return on ad spend) on Seton/EMEDCO is not a clean revenue signal.** These
 two accounts bid on a blended mix that includes actual purchases *and* placeholder values
 for leads (quote requests, catalog requests, phone calls) *and* an offline-value import.
 That mix inflates and complicates the platform ROAS number well beyond the usual
@@ -79,7 +79,7 @@ contributing, not something to memorize up front. When you're ready to go deeper
 
 - Ask **Alex** or your account lead for a walkthrough of the live campaign list — the
   campaigns that actually spend meaningfully are a small fraction of what's in the account.
-- **Ben** (SEO) has worked on both PDC and Seton/EMEDCO and is worth an early conversation
+- **Ben** (SEO — search engine optimization) has worked on both PDC and Seton/EMEDCO and is worth an early conversation
   about the business side (see
   [`../01-start-here/how-the-ramp-works.md`](../01-start-here/how-the-ramp-works.md)).
 - Bring specific questions to your 1:1s rather than trying to absorb the whole account

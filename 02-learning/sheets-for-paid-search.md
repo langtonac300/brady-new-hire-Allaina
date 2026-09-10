@@ -2,7 +2,7 @@
 
 Most of the analysis in this job happens in a spreadsheet. Not because Sheets is the best tool
 for it, but because it's where the data lands, where the team already works, and where a
-number can be checked by someone who doesn't write SQL.
+number can be checked by someone who doesn't write SQL (structured query language).
 
 You do not need to be a spreadsheet expert. You need **five specific things**, and you need to
 know **four ways they lie to you.**
@@ -31,7 +31,7 @@ A pivot answers *"what's the total, broken down by category?"* — cost by campa
 by ad group, spend by month.
 
 If you can build a pivot and add a calculated field, you can answer most of the questions
-you'll be asked in your first three months. **CPA** (cost ÷ conversions) and **ROAS**
+you'll be asked in your first three months. **CPA** — cost per acquisition (cost ÷ conversions) — and **ROAS** (return on ad spend)
 (conv. value ÷ cost) as calculated fields are the two that come up constantly.
 
 ### 3 · `FILTER`
@@ -73,7 +73,7 @@ day, and the gap. See [T2-4](../03-projects/t2-04-the-pacing-note.md).
 
 These are not beginner mistakes. Experienced people ship all four.
 
-### ⚠️ 1 · A pasted CSV can be silently truncated
+### ⚠️ 1 · A pasted CSV (comma-separated values file) can be silently truncated
 
 It doesn't error. It just stops. The sheet looks completely normal, your pivot builds fine, and
 the number is wrong.
