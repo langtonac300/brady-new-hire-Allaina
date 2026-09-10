@@ -77,7 +77,7 @@ sculpting.
 | ☐ | **Location targeting: you know whether it's set to presence or to presence-or-interest**, and why. This is one of the classic quiet leaks |
 | ☐ | **Negative lists are attached** — and you confirmed it after saving, not before |
 | ☐ | **You can name the conversion actions this campaign optimizes to.** "It exists in the account" is not the same as "it's the one bidding reacts to" |
-| ☐ | **Tracking is on it** — the same final URL suffix or tracking template the rest of the account uses. A missing one is how a campaign disappears from reporting while still spending |
+| ☐ | **Tracking is on it** — the same final URL (uniform resource locator) suffix or tracking template the rest of the account uses. A missing one is how a campaign disappears from reporting while still spending |
 | ☐ | **Budget and bid strategy are what you meant, in the units you meant** — daily and monthly are easy to confuse and expensive to confuse |
 | ☐ | **At least two ads**, and you chose whether automatically created assets are on |
 

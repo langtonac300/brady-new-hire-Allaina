@@ -77,7 +77,7 @@ The wizard asks for these. Deciding them properly *is* the design work.
 
 **1 · The mode.** Above.
 
-**2 · The primary metric.** The one number the test is judged on — CVR, CPA, ROAS, CTR.
+**2 · The primary metric.** The one number the test is judged on — CVR (conversion rate), CPA (cost per acquisition), ROAS (return on ad spend), CTR (click-through rate).
 **Pick it before launch.** Changing the metric after you've looked at results is how people
 fool themselves without ever intending to.
 
